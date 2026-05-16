@@ -9,8 +9,8 @@ body {
     background-color: #000;
     background: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop') center/cover no-repeat fixed;
     color: white;
-    overflow: hidden;
-    height: 100vh;
+    overflow-x: hidden;
+    min-height: 100vh;
 }
 
 body::before {
@@ -25,7 +25,7 @@ body::before {
 }
 
 .page {
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     display: none; 
     flex-direction: column;
@@ -34,6 +34,7 @@ body::before {
     text-align: center;
     position: relative;
     z-index: 1;
+    padding: 20px;
 }
 
 .page.active { display: flex; }
@@ -65,7 +66,12 @@ body::before {
 
 .selection-title { font-size: 2rem; letter-spacing: 2px; margin-bottom: 30px; }
 
-.game-grid { display: flex; gap: 20px; }
+.game-grid { 
+    display: flex; 
+    gap: 20px; 
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
 .game-card {
     width: 200px;
@@ -80,6 +86,8 @@ body::before {
 
 .ff-card { border-color: #ff6600; }
 .pubg-card { border-color: #00a2ff; }
+.cod-card { border-color: #e5c158; }
+
 .game-card:hover { transform: translateY(-10px); }
 
 .card-bg {
@@ -87,8 +95,12 @@ body::before {
     height: 100%;
     background-size: cover;
     background-position: center;
-    background-image: url('https://placehold.co/200x280/orange/white?text=Game+Image');
+    background-image: url('https://placehold.co/200x280/222222/ffffff?text=Game+Poster');
 }
+
+.ff-card .card-bg { background-image: url('https://placehold.co/200x280/ff6600/white?text=FREE+FIRE'); }
+.pubg-card .card-bg { background-image: url('https://placehold.co/200x280/00a2ff/white?text=PUBG+MOBILE'); }
+.cod-card .card-bg { background-image: url('https://placehold.co/200x280/e5c158/000000?text=CALL+OF+DUTY'); }
 
 .game-label {
     position: absolute;
@@ -96,8 +108,10 @@ body::before {
     width: 100%;
     text-align: center;
     font-weight: bold;
-    background: rgba(0,0,0,0.7);
-    padding: 10px 0;
+    background: rgba(0,0,0,0.8);
+    padding: 12px 0;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
 }
 
 /* Modals */
@@ -110,14 +124,23 @@ body::before {
     justify-content: center;
     align-items: center;
     z-index: 100;
+    padding: 20px;
 }
 
 .modal-overlay.active { display: flex; }
 
 .modal-box {
-    width: 90%;
+    width: 100%;
     max-width: 400px;
     padding: 20px;
+    background: #0d0d0d;
+    border-radius: 20px;
+    border: 1px solid #222;
+}
+
+.recharge-box {
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
 .back-btn {
@@ -127,11 +150,12 @@ body::before {
     font-weight: bold;
     cursor: pointer;
     margin-bottom: 15px;
+    font-size: 1rem;
 }
 
 .game-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-.game-icon { width: 50px; height: 50px; border-radius: 10px; border: 1px solid #ff6600; }
-#modal-game-title { color: #ff6600; }
+.game-icon { width: 50px; height: 50px; border-radius: 10px; border: 1px solid #ff6600; object-fit: cover; }
+#modal-game-title { color: #ff6600; font-size: 1.5rem; }
 
 .toggle-container { display: flex; gap: 10px; margin-bottom: 20px; }
 .toggle-btn {
@@ -142,6 +166,8 @@ body::before {
     padding: 10px;
     border-radius: 8px;
     cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s ease;
 }
 
 .toggle-btn.active {
@@ -156,7 +182,7 @@ body::before {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.input-header { display: flex; align-items: center; gap: 10px; color: #ff6600; margin-bottom: 15px; font-size: 0.9rem; }
+.input-header { display: flex; align-items: center; gap: 10px; color: #ff6600; margin-bottom: 15px; font-size: 0.9rem; font-weight: bold; }
 
 .game-input {
     width: 100%;
@@ -166,6 +192,12 @@ body::before {
     padding: 12px;
     color: white;
     margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.game-input:focus {
+    outline: none;
+    border-color: #ff6600;
 }
 
 .confirm-btn {
@@ -178,6 +210,8 @@ body::before {
     font-weight: bold;
     cursor: not-allowed;
     transition: 0.3s;
+    font-size: 1rem;
+    margin-top: 5px;
 }
 
 .confirm-btn.active-style {
@@ -187,24 +221,100 @@ body::before {
     box-shadow: 0 0 15px rgba(255, 102, 0, 0.4);
 }
 
+.recharge-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
 .recharge-list { display: flex; flex-direction: column; gap: 10px; }
 .recharge-item {
     display: flex;
     justify-content: space-between;
-    padding: 12px 20px;
+    align-items: center;
+    padding: 14px 20px;
     border: 1.5px solid #ff6600;
     border-radius: 30px;
     cursor: pointer;
+    transition: 0.2s;
+    background: rgba(0,0,0,0.4);
 }
-.recharge-item:hover { background: rgba(255,102,0,0.2); }
-.item-price { color: #ffcc80; font-weight: bold; }
+.recharge-item:hover { background: rgba(255,102,0,0.15); transform: scale(1.02); }
+.item-name { font-weight: 500; font-size: 0.95rem; }
+.item-price { color: #ffcc80; font-weight: bold; font-size: 0.95rem; }
 
-/* Add this to your style.css */
 .recharge-item.membership {
-    border-color: #ffcc00; /* Gold border */
-    background: rgba(255, 204, 0, 0.05);
+    border-color: #ffcc00; 
+    background: rgba(255, 204, 0, 0.03);
 }
 
 .recharge-item.membership .item-name {
-    color: #ffcc00; /* Gold text */
+    color: #ffcc00; 
+}
+
+/* Custom Additions for Checkout Styling */
+.order-summary-section {
+    border-color: #00a2ff;
+    background: rgba(0, 162, 255, 0.05);
+}
+
+.summary-header {
+    color: #00a2ff;
+    justify-content: center;
+}
+
+#order-details {
+    margin: 15px 0;
+    line-height: 1.9;
+    color: #eee;
+    text-align: left;
+    font-size: 0.95rem;
+    background: rgba(255,255,255,0.03);
+    padding: 15px;
+    border-radius: 10px;
+    word-break: break-word;
+}
+
+.arabic-notice {
+    margin: 15px 0;
+    direction: rtl;
+    color: #00ffcc;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: center;
+    border: 1px dashed #00ffcc;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0, 255, 210, 0.05);
+}
+
+.blue-rect-btn {
+    background: #007acc;
+    color: white;
+    border: 2px solid #00a2ff;
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(0, 122, 204, 0.5);
+    text-align: center;
+}
+
+.blue-rect-btn:hover { background: #008ae6; }
+
+.done-status-block {
+    display: block;
+    width: 100%;
+    background: #00cc66;
+    color: white;
+    padding: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 204, 102, 0.4);
 }

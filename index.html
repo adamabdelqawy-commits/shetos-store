@@ -28,6 +28,10 @@
                     <div class="card-bg"></div>
                     <span class="game-label">PUBG MOBILE</span>
                 </div>
+                <div class="game-card cod-card">
+                    <div class="card-bg"></div>
+                    <span class="game-label">CALL OF DUTY</span>
+                </div>
             </div>
         </div>
     </section>
@@ -36,10 +40,10 @@
         <div class="modal-box">
             <button id="close-modal" class="back-btn">← Back</button>
             <div class="game-header">
-                <img src="https://placehold.co/50x50/orange/white?text=FF" alt="FF Icon" class="game-icon">
+                <img src="https://placehold.co/50x50/orange/white?text=GAME" alt="Game Icon" class="game-icon" id="modal-game-icon">
                 <h2 id="modal-game-title">FREE FIRE</h2>
             </div>
-            <div class="toggle-container">
+            <div class="toggle-container" id="modal-toggle-container">
                 <button class="toggle-btn active" id="btn-id">[ID]</button>
                 <button class="toggle-btn" id="btn-acc">[ACC.]</button>
             </div>
@@ -71,31 +75,28 @@
         <div class="modal-box recharge-box">
             <button id="back-to-id" class="back-btn">← Back</button>
             <h3 class="recharge-title">SELECT PRODUCT</h3>
-            <div class="recharge-list">
-                <div class="recharge-item"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
-                <div class="recharge-item"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
-                <div class="recharge-item"><span class="item-name">◇ 310 Diamond</span><span class="item-price">155 EGP</span></div>
-                <div class="recharge-item"><span class="item-name">◇ 420 Diamond</span><span class="item-price">205 EGP</span></div>
-                <div class="recharge-item"><span class="item-name">◇ 520 Diamond</span><span class="item-price">255 EGP</span></div>
-                <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">110 EGP</span></div>
-                <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>
-            </div>
+            <div class="recharge-list"></div>
         </div>
     </div>
 
     <div id="checkout-modal" class="modal-overlay">
         <div class="modal-box">
             <button id="back-to-recharge" class="back-btn">← Back</button>
-            <div class="input-section" style="border-color: #25D366; background: rgba(37, 211, 102, 0.05);">
-                <div class="input-header" style="color: #25D366; justify-content: center;">
-                    <span class="user-icon">💬</span>
+            <div class="input-section order-summary-section">
+                <div class="input-header summary-header">
+                    <span class="user-icon">📋</span>
                     <p>ORDER SUMMARY</p>
                 </div>
-                <div id="order-details" style="margin: 15px 0; line-height: 1.8; color: #eee; text-align: left; font-size: 0.9rem;">
-                    </div>
-                <button id="whatsapp-send-btn" class="rect-btn" style="background: #25D366; border-color: #128C7E; width: 100%; box-shadow: 0 0 15px rgba(37, 211, 102, 0.4);">
-                    اشحن
-                </button>
+                
+                <div id="order-details"></div>
+
+                <div id="success-notification" class="arabic-notice" style="display: none;">
+                    تم استلام رسالتك , و سيتم الشحن تلقاءيا خلال 20 دقيقه بعد استلام المبلغ المختار 01096170744
+                </div>
+
+                <div id="checkout-action-container">
+                    <button id="checkout-btn" class="blue-rect-btn">CHECKOUT</button>
+                </div>
             </div>
         </div>
     </div>
