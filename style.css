@@ -137,6 +137,11 @@ body::before {
     cursor: pointer;
     transition: 0.3s;
     border: 3px solid transparent;
+
+    /* --- ADD THESE LINES TO CENTER THE CONTENT --- */
+    display: flex;
+    align-items: center;     /* Centers vertically */
+    justify-content: center;  /* Centers horizontally */
 }
 
 .ff-card { border-color: #ff6600; }
@@ -181,16 +186,17 @@ body::before {
 .fifa-card:hover .icon-badge { border-color: #00ffcc; box-shadow: 0 0 15px #00ffcc; }
 
 .game-label {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
+    position: relative;       /* Changed from absolute to play nice with Flexbox */
+    width: auto;              /* Changed from 100% so the box wraps cleanly around the text */
+    max-width: 90%;           /* Prevents text from touching the card borders on small scales */
     text-align: center;
     font-weight: bold;
-    background: rgba(0,0,0,0.8);
-    padding: 12px 0;
-    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    background: rgba(0, 0, 0, 0.75); /* Slight opacity tweak for modern styling */
+    padding: 8px 16px;        /* Better padding balance for a centered badge look */
+    font-size: clamp(0.85rem, 2vw, 1.05rem); /* Slightly bumped up for center prominence */
     letter-spacing: 1px;
     z-index: 3;
+    border-radius: 8px;       /* Adds smooth corners to the centered label box */
 }
 
 /* Modals Refactored for small views */
