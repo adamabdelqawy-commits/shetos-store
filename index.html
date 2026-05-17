@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shetos Store</title>
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,21 +18,81 @@
     </section>
 
     <section id="store-page" class="page">
-        <div class="store-container">
+        <nav class="nav">
+            <ul>
+                <li class="active"><a href="#home" id="home" class="nav-link">Home</a></li>
+                <li><a href="#search" id="search" class="nav-link">search</a></li>
+                <li><a href="#about" id="about" class="nav-link">About</a></li>
+                <li><a href="#support" id="support" class="nav-link">support</a></li>
+            </ul>
+        </nav>
+
+        <div id="home-content-section" class="store-container tab-content-view active-view">
             <h2 class="selection-title">CHOOSE YOUR GAME</h2>
             <div class="game-grid">
-                <div class="game-card ff-card">
-                    <div class="card-bg"></div>
+                <div class="game-card ff-card" data-game-search-title="free fire">
+                    <div class="card-bg ff-bg"></div>
+                    <div class="icon-badge">
+                        <img src="c:\Users\quant\Downloads\WhatsApp Image 2026-05-01 at 1.31.47 AM.jpeg" onerror="this.src='https://placehold.co/60x60/ff6600/white?text=FF'" alt="Free Fire Icon">
+                    </div>
                     <span class="game-label">FREE FIRE</span>
                 </div>
-                <div class="game-card pubg-card">
-                    <div class="card-bg"></div>
+                <div class="game-card pubg-card" data-game-search-title="pubg mobile">
+                    <div class="card-bg pubg-bg"></div>
+                    <div class="icon-badge">
+                        <img src="https://www.pubgmobile.com/common/images/icon_logo.jpg" onerror="this.src='https://placehold.co/60x60/00a2ff/white?text=PUBG'" alt="PUBG Mobile Icon">
+                    </div>
                     <span class="game-label">PUBG MOBILE</span>
                 </div>
-                <div class="game-card cod-card">
-                    <div class="card-bg"></div>
+                <div class="game-card cod-card" data-game-search-title="call of duty">
+                    <div class="card-bg cod-bg"></div>
+                    <div class="icon-badge">
+                        <img src="c:\Users\quant\Downloads\images.jfif" onerror="this.src='https://placehold.co/60x60/e5c158/000000?text=COD'" alt="Call Of Duty Icon">
+                    </div>
                     <span class="game-label">CALL OF DUTY</span>
                 </div>
+                <div class="game-card fifa-card" data-game-search-title="fifa fc mobile">
+                    <div class="card-bg fifa-bg"></div>
+                    <div class="icon-badge">
+                        <img src="c:\Users\quant\Downloads\download.jfif" onerror="this.src='https://placehold.co/60x60/00ffcc/000000?text=FIFA'" alt="FIFA Icon">
+                    </div>
+                    <span class="game-label">FIFA MOBILE</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="search-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="neon-border-box">
+                <div class="search-bar-header">
+                    <input type="text" id="store-search-input" class="search-input-field" placeholder="Search a game...">
+                </div>
+                <div id="search-results-viewport" class="search-results-wrapper"></div>
+            </div>
+        </div>
+
+        <div id="about-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="plain-modal-box signature-container">
+                <h2 class="about-main-title">Why Choose Shetos Store?</h2>
+                
+                <div class="about-text-content">
+                    <p><strong>All Your Games in One Place:</strong> From mobile battle royales to major console and PC titles, we provide fast and reliable charging services for all your favorite games.</p>
+                    
+                    <p><strong>Player-First Behavior:</strong> We don’t just process transactions; we build a community. Our team is dedicated to treating every gamer with the respect, honesty, and friendly support you deserve.</p>
+                    
+                    <p><strong>Top-Tier Deals:</strong> Through smart marketing and exciting promotions, we make sure you get the best value for your money. Keep an eye out for our exclusive offers and community rewards!</p>
+                    
+                    <hr class="about-divider">
+                    
+                    <h3>Our Mission</h3>
+                    <p class="mission-text">To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="support-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="plain-modal-box contact-container">
+                <a href="https://wa.me/201096170744" target="_blank" class="support-phone-row">01096170744</a>
+                <a href="https://wa.me/201227395613" target="_blank" class="support-phone-row">01227395613</a>
             </div>
         </div>
     </section>
@@ -103,4 +164,4 @@
 
     <script src="script.js"></script>
 </body>
-</html>
+</html>a
