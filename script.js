@@ -56,9 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleTabClick(event) {
         const navNode = document.querySelector('.nav');
-        const targetLi = event.target.parentNode;
+        const targetLi = event.target.closest('li');
+        if (!targetLi) return;
+
         const width = targetLi.offsetWidth;
-        const { left } = targetLi.getBoundingClientRect();
+        const left = targetLi.getBoundingClientRect().left;
         const offsetLeft = left - navNode.getBoundingClientRect().left;
 
         document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
@@ -89,9 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function syncInitialNavbarLayout() {
         if (!storePage.classList.contains('active')) return;
-        const firstLi = premiumNav.querySelector('ul li');
-        const width = firstLi.offsetWidth;
-        const { left } = firstLi.getBoundingClientRect();
+        const activeLi = premiumNav.querySelector('ul li.active') || premiumNav.querySelector('ul li');
+        if (!activeLi) return;
+        
+        const width = activeLi.offsetWidth;
+        const left = activeLi.getBoundingClientRect().left;
         const offsetLeft = left - premiumNav.getBoundingClientRect().left;
 
         premiumNav.style.setProperty('--after-bg-position', offsetLeft);
@@ -107,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             syncInitialNavbarLayout();
             routeTabView("#home");
-        }, 50);
+        }, 100);
     });
 
     function routeTabView(hashTarget) {
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsViewport.innerHTML = "";
 
         if (cleanedQuery === "") {
-            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem;">Type a game title to filter...</div>`;
+            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem; grid-column: 1/-1; text-align:center;">Type a game title to filter...</div>`;
             return;
         }
 
