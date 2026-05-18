@@ -137,17 +137,17 @@ body::before {
     cursor: pointer;
     transition: 0.3s;
     border: 3px solid transparent;
-
-    /* --- ADD THESE LINES TO CENTER THE CONTENT --- */
     display: flex;
-    align-items: center;     /* Centers vertically */
-    justify-content: center;  /* Centers horizontally */
+    align-items: center;     
+    justify-content: center;  
 }
 
 .ff-card { border-color: #ff6600; }
 .pubg-card { border-color: #00a2ff; }
 .cod-card { border-color: #e5c158; }
 .fifa-card { border-color: #00ffcc; }
+.pes-card { border-color: #00cc44; }
+.bs-card { border-color: #ff3333; }
 
 .game-card:hover { transform: translateY(-8px); }
 
@@ -158,7 +158,7 @@ body::before {
     background-position: center;
 }
 
-.ff-bg, .pubg-bg, .cod-bg, .fifa-bg { 
+.ff-bg, .pubg-bg, .cod-bg, .fifa-bg, .pes-bg, .bs-bg { 
     background-image: url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop') !important; 
 }
 
@@ -184,19 +184,21 @@ body::before {
 .pubg-card:hover .icon-badge { border-color: #00a2ff; box-shadow: 0 0 15px #00a2ff; }
 .cod-card:hover .icon-badge { border-color: #e5c158; box-shadow: 0 0 15px #e5c158; }
 .fifa-card:hover .icon-badge { border-color: #00ffcc; box-shadow: 0 0 15px #00ffcc; }
+.pes-card:hover .icon-badge { border-color: #00cc44; box-shadow: 0 0 15px #00cc44; }
+.bs-card:hover .icon-badge { border-color: #ff3333; box-shadow: 0 0 15px #ff3333; }
 
 .game-label {
-    position: relative;       /* Changed from absolute to play nice with Flexbox */
-    width: auto;              /* Changed from 100% so the box wraps cleanly around the text */
-    max-width: 90%;           /* Prevents text from touching the card borders on small scales */
+    position: relative;       
+    width: auto;              
+    max-width: 90%;           
     text-align: center;
     font-weight: bold;
-    background: rgba(0, 0, 0, 0.75); /* Slight opacity tweak for modern styling */
-    padding: 8px 16px;        /* Better padding balance for a centered badge look */
-    font-size: clamp(0.85rem, 2vw, 1.05rem); /* Slightly bumped up for center prominence */
+    background: rgba(0, 0, 0, 0.75); 
+    padding: 8px 16px;        
+    font-size: clamp(0.85rem, 2vw, 1.05rem); 
     letter-spacing: 1px;
     z-index: 3;
-    border-radius: 8px;       /* Adds smooth corners to the centered label box */
+    border-radius: 8px;       
 }
 
 /* Modals Refactored for small views */
@@ -634,3 +636,87 @@ body::before {
 }
 
 .mission-text { font-style: italic; color: #a1a1aa; }
+
+/* New Dynamic Feedback Box Form Aesthetics */
+.feedback-form-box {
+    width: 100%;
+    max-width: 320px;
+    background: #111113;
+    border: 2px solid #27272a;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feedback-small-text {
+    font-size: 0.82rem;
+    color: #a1a1aa;
+    direction: rtl;
+    text-align: center;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.feedback-input-rectangle {
+    width: 100%;
+    height: 85px;
+    background: #09090b;
+    border: 1px solid #3f3f46;
+    border-radius: 10px;
+    color: #fff;
+    padding: 10px;
+    font-size: 0.95rem;
+    resize: none;
+    direction: rtl;
+    outline: none;
+    transition: border-color 0.25s;
+}
+
+.feedback-input-rectangle:focus {
+    border-color: #ff6600;
+}
+
+.feedback-submit-button {
+    width: 100%;
+    background: #e64a19;
+    color: white;
+    border: none;
+    padding: 11px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    letter-spacing: 0.5px;
+}
+
+.feedback-submit-button:hover:not(:disabled) {
+    background: #ff5722;
+    transform: scale(1.02);
+}
+
+.feedback-submit-button:disabled {
+    background: #333;
+    color: #777;
+    cursor: not-allowed;
+}
+
+.feedback-cooperation-box {
+    width: 100%;
+    max-width: 320px;
+    background: rgba(0, 204, 102, 0.08);
+    border: 2px dashed #00cc66;
+    border-radius: 16px;
+    padding: 22px;
+    margin-top: 10px;
+    color: #00cc66;
+    font-weight: bold;
+    font-size: 1.05rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 15px rgba(0, 204, 102, 0.15);
+}

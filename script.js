@@ -36,10 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let orderData = { user: "", rawId: "", email: "", password: "", product: "", price: "" };
 
     const themes = {
-        "FREE FIRE": { color: "#ff6600", accent: "#ff8a00", icon: "https://garena-a.akamaihd.net/garena_cms/live/static/images/ff/favicon.ico" },
+        "FREE FIRE": { color: "#ff6600", accent: "#ff8a00", icon: "https://static.wikia.nocookie.net/garena-freefire/images/f/f2/Free_Fire_App_Icon.png/revision/latest/smart/width/250/height/250?cb=20240517153409" },
         "PUBG": { color: "#00a2ff", accent: "#007acc", icon: "https://www.pubgmobile.com/common/images/icon_logo.jpg" },
-        "CALL OF DUTY": { color: "#e5c158", accent: "#c29d38", icon: "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/wzm/home/WZM_AppIcon.jpg" },
-        "FIFA MOBILE": { color: "#00ffcc", accent: "#00ccaa", icon: "https://placehold.co/60x60/00ffcc/000000?text=FC" }
+        "CALL OF DUTY": { color: "#e5c158", accent: "#c29d38", icon: "https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png/revision/latest/scale-to-width-down/250?cb=20241105161610" },
+        "FIFA MOBILE": { color: "#00ffcc", accent: "#00ccaa", icon: "https://cdn-www.bluestacks.com/bs-images/70042468c0d43639228178f9e61aec7f.png" },
+        "PES MOBILE": { color: "#00cc44", accent: "#009933", icon: "https://cdn-offer-photos.zeusx.com/b12a0ebf-889c-4053-9c53-3f756e8602d1.png" },
+        "BLOOD STRIKE": { color: "#ff3333", accent: "#cc0000", icon: "https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" }
     };
 
     // --- Interactive Link Mouse Position Tracker ---
@@ -161,6 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (indexName.includes("pubg")) configureModalTheme("PUBG");
                     if (indexName.includes("call of duty")) configureModalTheme("CALL OF DUTY");
                     if (indexName.includes("fifa")) configureModalTheme("FIFA MOBILE");
+                    if (indexName.includes("pes")) configureModalTheme("PES MOBILE");
+                    if (indexName.includes("blood strike")) configureModalTheme("BLOOD STRIKE");
                 });
 
                 searchResultsViewport.appendChild(clonedCard);
@@ -200,6 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item"><span class="item-name">◇ 310 Diamond</span><span class="item-price">140 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 400 Diamond</span><span class="item-price">180 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 500 Diamond</span><span class="item-price">225 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 600 Diamond</span><span class="item-price">305 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 700 Diamond</span><span class="item-price">355 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">75 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
     `;
@@ -228,6 +234,23 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item"><span class="item-name">◇ 100 FC Points</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 520 FC Points</span><span class="item-price">255 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 1070 FC Points</span><span class="item-price">505 EGP</span></div>
+    `;
+
+    const pesProducts = `
+        <div class="recharge-item"><span class="item-name">◇ 137 Coins</span><span class="item-price">70 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 315 Coins</span><span class="item-price">155 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 578 Coins</span><span class="item-price">265 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 788 Coins</span><span class="item-price">355 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1092 Coins</span><span class="item-price">485 EGP</span></div>
+         <div class="recharge-item membership"><span class="item-name">★ heroic Pass </span><span class="item-price">260 EGP</span></div>
+    `;
+
+    const bsProducts = `
+        <div class="recharge-item"><span class="item-name">◇ 51 Gold</span><span class="item-price">30 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 105 Gold</span><span class="item-price">55 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 320 Gold</span><span class="item-price">150 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 540 Gold</span><span class="item-price">250 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1100 Gold</span><span class="item-price">495 EGP</span></div>
     `;
 
     function configureModalTheme(gameKey) {
@@ -264,6 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#home-content-section .pubg-card').addEventListener('click', () => configureModalTheme("PUBG"));
     document.querySelector('#home-content-section .cod-card').addEventListener('click', () => configureModalTheme("CALL OF DUTY"));
     document.querySelector('#home-content-section .fifa-card').addEventListener('click', () => configureModalTheme("FIFA MOBILE"));
+    document.querySelector('#home-content-section .pes-card').addEventListener('click', () => configureModalTheme("PES MOBILE"));
+    document.querySelector('#home-content-section .bs-card').addEventListener('click', () => configureModalTheme("BLOOD STRIKE"));
 
     function switchToID() {
         currentMethod = 'ID';
@@ -338,6 +363,10 @@ document.addEventListener('DOMContentLoaded', () => {
             rechargeList.innerHTML = codProducts;
         } else if (currentGame === "FIFA MOBILE") {
             rechargeList.innerHTML = fifaProducts;
+        } else if (currentGame === "PES MOBILE") {
+            rechargeList.innerHTML = pesProducts;
+        } else if (currentGame === "BLOOD STRIKE") {
+            rechargeList.innerHTML = bsProducts;
         } else {
             if (currentMethod === 'ACC') {
                 rechargeList.innerHTML = ffAccProducts;
@@ -443,6 +472,58 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(res => console.log("Order submitted to Telegram successfully."))
         .catch(err => console.error("Telegram endpoint issue:", err));
+    }
+
+    // --- Dynamic Support Feedback Module Functionality ---
+    const feedbackSubmitBtn = document.getElementById('feedback-submit-btn');
+    const feedbackTextareaField = document.getElementById('feedback-textarea-field');
+    const feedbackInputBox = document.getElementById('feedback-input-box');
+    const feedbackThanksBox = document.getElementById('feedback-thanks-box');
+
+    if (feedbackSubmitBtn && feedbackTextareaField) {
+        feedbackSubmitBtn.addEventListener('click', () => {
+            const userFeedbackContent = feedbackTextareaField.value.trim();
+
+            if (userFeedbackContent === "") {
+                alert("من فضلك اكتب تعديلك أو المشكلة أولاً.");
+                return;
+            }
+
+            // Lock input controls
+            feedbackSubmitBtn.disabled = true;
+            feedbackTextareaField.disabled = true;
+
+            // 3-Seconds Loading Logic
+            let feedbackTimeLeft = 3; 
+            feedbackSubmitBtn.innerText = "processing.";
+
+            const feedbackTimerLoop = setInterval(() => {
+                feedbackTimeLeft--;
+                if (feedbackTimeLeft > 0) {
+                    let dotsCount = ((3 - feedbackTimeLeft) % 3) + 1;
+                    feedbackSubmitBtn.innerText = "processing" + ".".repeat(dotsCount);
+                } else {
+                    clearInterval(feedbackTimerLoop);
+                    feedbackInputBox.style.display = "none";
+                    feedbackThanksBox.style.display = "block";
+                }
+            }, 1000);
+
+            // Forward the message text to your Telegram Endpoint
+            const botFeedbackPayload = `📝 New Website Review / Bug Report\n\n💭 Feedback:\n${userFeedbackContent}`;
+            const feedbackTelegramUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+
+            fetch(feedbackTelegramUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: botFeedbackPayload
+                })
+            })
+            .then(res => console.log("Feedback dispatched successfully."))
+            .catch(err => console.error("Feedback endpoint failed:", err));
+        });
     }
 
     window.addEventListener('click', (e) => {
