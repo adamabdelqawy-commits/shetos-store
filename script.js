@@ -218,8 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
  <h3 class="selection-title">another sales 🔔</h3>
 
  <div class="recharge-item"><span class="item-name">◇ 750 Diamond[اسبوعي +300</span><span class="item-price">220 EGP</span></div>
-        <div class="recharge-item"><span class="item-name">◇ 1050 Diamond</span><span class="item-price">330 EGP</span></div>
-        <div class="recharge-item"><span class="item-name">◇ 1450 Diamond</span><span class="item-price">430 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1050 Diamond[اسبوعي +600</span><span class="item-price">330 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1450 Diamond[اسبوعي +1000</span><span class="item-price">430 EGP</span></div>
     `;
 
     const pubgProducts = `
