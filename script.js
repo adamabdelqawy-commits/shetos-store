@@ -195,7 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item"><span class="item-name">◇ 420 Diamond</span><span class="item-price">205 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 520 Diamond</span><span class="item-price">255 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">105 EGP</span></div>
-        <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>
+        <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>     
+            <hr class="about-divider">
+             <h3 class="selection-title">another sales 🔔</h3>
+      
+             <div class="recharge-item"><span class="item-name">◇ 750 Diamond[اسبوعي +300]</span><span class="item-price">265 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1050 Diamond[اسبوعي +600</span><span class="item-price">420 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1450 Diamond[اسبوعي +1000</span><span class="item-price">660 EGP</span></div
     `;
 
     const ffAccProducts = `
@@ -208,6 +214,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item"><span class="item-name">◇ 700 Diamond</span><span class="item-price">355 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Weekly Membership</span><span class="item-price">75 EGP</span></div>
         <div class="recharge-item membership"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
+            <hr class="about-divider">
+ <h3 class="selection-title">another sales 🔔</h3>
+
+ <div class="recharge-item"><span class="item-name">◇ 750 Diamond[اسبوعي +300</span><span class="item-price">220 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1050 Diamond</span><span class="item-price">330 EGP</span></div>
+        <div class="recharge-item"><span class="item-name">◇ 1450 Diamond</span><span class="item-price">430 EGP</span></div>
     `;
 
     const pubgProducts = `

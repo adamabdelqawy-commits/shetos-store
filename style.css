@@ -7,13 +7,31 @@
 
 body {
     background-color: #000;
-    background: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop') center/cover no-repeat fixed;
     color: white;
     overflow-x: hidden;
     min-height: 100vh;
+    position: relative;
 }
 
+/* --- LIVE F1 RACE BACKGROUND ADDITION --- */
 body::before {
+    content: '';
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    /* High-quality cinematic F1 racing night track background */
+    background: url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+    z-index: -2;
+    
+    /* Dynamic tracking panning/zoom effect to mimic a broadcast camera following cars */
+    animation: f1RaceTracking 28s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+/* Original dark layout overlay tint safely layered above the live image movement */
+body::after {
     content: '';
     position: fixed;
     top: 0;
@@ -21,8 +39,23 @@ body::before {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
-    z-index: 0;
+    z-index: -1; 
+    pointer-events: none;
 }
+
+/* High-speed cinematic tracking keyframes */
+@keyframes f1RaceTracking {
+    0% {
+        transform: scale(1.02) translate(0, 0);
+    }
+    50% {
+        transform: scale(1.07) translate(-2%, 1%);
+    }
+    100% {
+        transform: scale(1.12) translate(1%, -1%);
+    }
+}
+/* ---------------------------------------- */
 
 .page {
     min-height: 100vh;
