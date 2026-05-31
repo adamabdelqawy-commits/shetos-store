@@ -3,195 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHETOS — Premium Game Store</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Shetos Store | Ultimate Gaming Services</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;800&family=Cairo:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ══ CURSOR ══ -->
-    <div id="cursor-dot"></div>
-    <div id="cursor-ring"></div>
+    <div class="bg-overlay"></div>
 
-    <!-- ══ PAGE TRANSITION OVERLAY ══ -->
-    <div id="page-transition">
-        <div class="pt-content">
-            <div class="pt-logo">SHETOS</div>
-            <div class="pt-bar"><div class="pt-fill"></div></div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════
-         LANDING PAGE
-    ══════════════════════════════════════ -->
     <section id="landing-page" class="page active">
+        <div class="landing-card animate-fade-in">
+            <div class="cyber-glow-circle"></div>
+            <h1 class="main-title">Shetos Store</h1>
+            <p class="sub-title-en">ALL THE GAMES YOU NEED</p>
+            <button id="enter-btn" class="glow-btn-primary">ENTER TO STORE</button>
+            <p class="arabic-text">بيع وشراء حسابات • شحن جميع الألعاب<br><span class="highlight">جميع خدماتك بأقل الأسعار في مصر</span></p>
+        </div>
+    </section>
 
-        <!-- Animated background particles -->
-        <canvas id="particle-canvas"></canvas>
+    <section id="store-page" class="page">
+        <nav class="nav">
+            <ul>
+                <li class="active"><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#search" class="nav-link">Search</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#support" class="nav-link">Support</a></li>
+            </ul>
+        </nav>
 
-        <!-- Floating game icons in background -->
-        <div class="bg-icons" aria-hidden="true">
-            <div class="bg-icon bi-1"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRajrChmCmo3a8iH0c_xnQfL7J5BWAbUg9X2A&s" alt=""></div>
-            <div class="bg-icon bi-2"><img src="https://www.pubgmobile.com/common/images/icon_logo.jpg" alt=""></div>
-            <div class="bg-icon bi-3"><img src="https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png/revision/latest/scale-to-width-down/250?cb=20241105161610" alt=""></div>
-            <div class="bg-icon bi-4"><img src="https://cdn-www.bluestacks.com/bs-images/70042468c0d43639228178f9e61aec7f.png" alt=""></div>
-            <div class="bg-icon bi-5"><img src="https://cdn-offer-photos.zeusx.com/b12a0ebf-889c-4053-9c53-3f756e8602d1.png" alt=""></div>
-            <div class="bg-icon bi-6"><img src="https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" alt=""></div>
+        <div id="home-content-section" class="store-container tab-content-view active-view">
+            <h2 class="selection-title">CHOOSE YOUR GAME</h2>
+            <div class="game-grid">
+                <div class="game-card ff-card" data-game-search-title="free fire">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://static.wikia.nocookie.net/garena-freefire/images/f/f2/Free_Fire_App_Icon.png" onerror="this.src='https://placehold.co/100x100/ff6600/white?text=FF'" alt="Free Fire">
+                    </div>
+                    <span class="game-label">FREE FIRE</span>
+                </div>
+                <div class="game-card pubg-card" data-game-search-title="pubg mobile">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://www.pubgmobile.com/common/images/icon_logo.jpg" onerror="this.src='https://placehold.co/100x100/00a2ff/white?text=PUBG'" alt="PUBG">
+                    </div>
+                    <span class="game-label">PUBG MOBILE</span>
+                </div>
+                <div class="game-card cod-card" data-game-search-title="call of duty">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png" onerror="this.src='https://placehold.co/100x100/e5c158/000000?text=COD'" alt="COD">
+                    </div>
+                    <span class="game-label">CALL OF DUTY</span>
+                </div>
+                <div class="game-card fifa-card" data-game-search-title="fifa fc mobile">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://cdn-www.bluestacks.com/bs-images/70042468c0d43639228178f9e61aec7f.png" onerror="this.src='https://placehold.co/100x100/00ffcc/000000?text=FIFA'" alt="FIFA">
+                    </div>
+                    <span class="game-label">FIFA MOBILE</span>
+                </div>
+                <div class="game-card pes-card" data-game-search-title="pes efootball mobile">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://cdn-offer-photos.zeusx.com/b12a0ebf-889c-4053-9c53-3f756e8602d1.png" onerror="this.src='https://placehold.co/100x100/00cc44/ffffff?text=PES'" alt="PES">
+                    </div>
+                    <span class="game-label">PES MOBILE</span>
+                </div>
+                <div class="game-card bs-card" data-game-search-title="blood strike">
+                    <div class="card-glow"></div>
+                    <div class="icon-badge">
+                        <img src="https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" onerror="this.src='https://placehold.co/100x100/ff3333/ffffff?text=BS'" alt="Blood Strike">
+                    </div>
+                    <span class="game-label">BLOOD STRIKE</span>
+                </div>
+            </div>
         </div>
 
-        <div class="landing-content">
-            <!-- Status badge -->
-            <div class="status-badge">
-                <span class="pulse-dot"></span>
-                <span>LIVE — INSTANT RECHARGE</span>
+        <div id="search-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="neon-border-box animate-scale-in">
+                <div class="search-bar-header">
+                    <input type="text" id="store-search-input" class="search-input-field" placeholder="Search your game title here...">
+                </div>
+                <div id="search-results-viewport" class="search-results-wrapper"></div>
             </div>
+        </div>
 
-            <!-- Main headline -->
-            <div class="hero-headline">
-                <div class="hero-line-wrap">
-                    <span class="hero-line hl-1">ALL GAMES</span>
-                </div>
-                <div class="hero-line-wrap">
-                    <span class="hero-line hl-2 gradient-text">YOU NEED</span>
-                </div>
-            </div>
-
-            <!-- Arabic subtext -->
-            <p class="hero-arabic">بيع وشراء حسابات — تزويد جميع الخدمات بأقل الأسعار</p>
-
-            <!-- Stats row -->
-            <div class="stats-row">
-                <div class="stat-item">
-                    <span class="stat-num">6+</span>
-                    <span class="stat-label">Games</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-num">20 MIN</span>
-                    <span class="stat-label">Delivery</span>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                    <span class="stat-num">24/7</span>
-                    <span class="stat-label">Support</span>
+        <div id="about-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="plain-modal-box signature-container animate-scale-in">
+                <h2 class="about-main-title">Why Shetos Store?</h2>
+                <div class="about-text-content">
+                    <p><strong>◇ All Your Games In One Dashboard:</strong> نضمن لك توفير أسرع وأرقى خدمات الشحن لجميع ألعاب الهواتف والمنصات العالمية بأعلى كفاءة وأمان.</p>
+                    <p><strong>◇ Elite Community Care:</strong> نحن هنا ليس فقط لتقديم خدمة، بل لبناء مجتمع متكامل للاعبين يعتمد على الدعم الفني المباشر والسريع والأمان التام.</p>
+                    <p><strong>◇ Unbeatable Pricing:</strong> عروض حصرية ومستمرة صُممت خصيصاً لتناسب احتياجاتك دون تكاليف إضافية.</p>
+                    <hr class="about-divider">
+                    <h3>OUR CORE MISSION</h3>
+                    <p class="mission-text">تسهيل حصولك على موارد ألعابك المفضلة بدون تعقيد، وبأعلى معايير السرعة والأمان التنافسية.</p>
                 </div>
             </div>
+        </div>
 
-            <!-- CTA -->
-            <button id="enter-btn" class="enter-cta">
-                <span class="cta-text">ENTER STORE</span>
-                <span class="cta-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                </span>
-                <span class="cta-shine"></span>
-            </button>
+        <div id="support-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="plain-modal-box contact-container animate-scale-in">
+                <h3 class="support-header-title">CONTACT OUR LIVE SUPPORT</h3>
+                <div class="phone-buttons-group">
+                    <a href="https://wa.me/201096170744" target="_blank" class="support-phone-row">WhatsApp Support 1</a>
+                    <a href="https://wa.me/201227395613" target="_blank" class="support-phone-row">WhatsApp Support 2</a>
+                </div>
 
-            <!-- Scroll hint -->
-            <div class="scroll-cue">
-                <div class="sc-line"></div>
-                <span>SCROLL</span>
+                <div id="feedback-input-box" class="feedback-form-box">
+                    <span class="feedback-small-text">شاركنا رأيك أو اقتراحاتك لتطوير المتجر أو الإبلاغ عن مشكلة</span>
+                    <textarea id="feedback-textarea-field" class="feedback-input-rectangle" placeholder="اكتب اقتراحك أو مشكلتك هنا..."></textarea>
+                    <button id="feedback-submit-btn" class="feedback-submit-button">SEND FEEDBACK</button>
+                </div>
+
+                <div id="feedback-thanks-box" class="feedback-cooperation-box" style="display: none;">
+                    ✨ Thank you for making Shetos Store better!
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- ══════════════════════════════════════
-         STORE PAGE
-    ══════════════════════════════════════ -->
-    <section id="store-page" class="page">
-
-        <!-- ── NAVBAR ── -->
-        <nav class="navbar" id="navbar">
-            <div class="nb-left">
-                <div class="nb-logo">SHETOS</div>
-                <div class="nb-tag">STORE</div>
+    <div id="game-modal" class="modal-overlay">
+        <div class="modal-box animate-scale-in">
+            <button id="close-modal" class="back-btn">← Back</button>
+            <div class="game-header">
+                <img src="" alt="Game Icon" class="game-icon" id="modal-game-icon">
+                <h2 id="modal-game-title">GAME</h2>
             </div>
-            <ul class="nb-links">
-                <li class="active"><a href="#home" class="nb-link">Home</a></li>
-                <li><a href="#search" class="nb-link">Search</a></li>
-                <li><a href="#about" class="nb-link">About</a></li>
-                <li><a href="#support" class="nb-link">Support</a></li>
-            </ul>
-            <!-- Animated underline slider -->
-            <div class="nb-slider" id="nb-slider"></div>
-        </nav>
-
-        <!-- ── TAB CONTENTS ── -->
-        <div class="store-main">
-
-            <!-- HOME -->
-            <div id="home-content-section" class="tab-view active-view">
-                <div class="section-header">
-                    <div class="sh-eyebrow">— SELECT —</div>
-                    <h2 class="sh-title">CHOOSE YOUR GAME</h2>
+            <div class="toggle-container" id="modal-toggle-container">
+                <button class="toggle-btn active" id="btn-id">[ LOGIN WITH ID ]</button>
+                <button class="toggle-btn" id="btn-acc">[ LOGIN WITH GMAIL ]</button>
+            </div>
+            
+            <div class="input-section">
+                <div id="id-input-group">
+                    <div class="input-header">
+                        <span class="user-icon">👤</span>
+                        <p>ENTER YOUR GAME ID</p>
+                    </div>
+                    <input type="text" id="game-id-field" placeholder="أدخل الآيدي الخاص بك هنا" class="game-input">
                 </div>
-                <div class="game-grid">
 
-                    <div class="game-card" data-game="FREE FIRE" data-color="#ff6a00" style="--c:#ff6a00">
-                        <div class="gc-bg" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNnEH9hPhJUMX_BruAe4uTyGkXBbhFDU1b_Q&s')"></div>
-                        <div class="gc-overlay"></div>
-                        <div class="gc-glow"></div>
-                        <div class="gc-body">
-                            <div class="gc-icon">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRajrChmCmo3a8iH0c_xnQfL7J5BWAbUg9X2A&s"
-                                     onerror="this.src='https://placehold.co/56x56/ff6a00/fff?text=FF'" alt="FF">
-                            </div>
-                            <div class="gc-info">
-                                <span class="gc-name">FREE FIRE</span>
-                                <span class="gc-tag">Diamonds · Membership</span>
-                            </div>
-                        </div>
-                        <div class="gc-arrow">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </div>
-                        <div class="gc-scan-line"></div>
+                <div id="acc-input-group" style="display: none;">
+                    <div class="input-header">
+                        <span class="user-icon">🔑</span>
+                        <p>ACCOUNT CREDENTIALS</p>
                     </div>
+                    <input type="text" id="acc-email-field" placeholder="Email / Phone" class="game-input">
+                    <input type="password" id="acc-pass-field" placeholder="Password" class="game-input">
+                </div>
 
-                    <div class="game-card" data-game="PUBG" data-color="#00b4ff" style="--c:#00b4ff">
-                        <div class="gc-bg" style="background-image:url('https://images2.alphacoders.com/108/1088002.jpg')"></div>
-                        <div class="gc-overlay"></div>
-                        <div class="gc-glow"></div>
-                        <div class="gc-body">
-                            <div class="gc-icon">
-                                <img src="https://www.pubgmobile.com/common/images/icon_logo.jpg"
-                                     onerror="this.src='https://placehold.co/56x56/00b4ff/fff?text=PUBG'" alt="PUBG">
-                            </div>
-                            <div class="gc-info">
-                                <span class="gc-name">PUBG MOBILE</span>
-                                <span class="gc-tag">UC · Level Pass</span>
-                            </div>
-                        </div>
-                        <div class="gc-arrow">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </div>
-                        <div class="gc-scan-line"></div>
-                    </div>
+                <button id="confirm-btn" class="confirm-btn" disabled>CONFIRM INFO</button>
+            </div>
+        </div>
+    </div>
 
-                    <div class="game-card" data-game="CALL OF DUTY" data-color="#e5c158" style="--c:#e5c158">
-                        <div class="gc-bg" style="background-image:url('https://static.wikia.nocookie.net/callofduty/images/5/5b/CODM_Season_10_2024_KeyArt.jpg/revision/latest/scale-to-width-down/1200?cb=20241017134501')"></div>
-                        <div class="gc-overlay"></div>
-                        <div class="gc-glow"></div>
-                        <div class="gc-body">
-                            <div class="gc-icon">
-                                <img src="https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png/revision/latest/scale-to-width-down/250?cb=20241105161610"
-                                     onerror="this.src='https://placehold.co/56x56/e5c158/000?text=COD'" alt="COD">
-                            </div>
-                            <div class="gc-info">
-                                <span class="gc-name">CALL OF DUTY</span>
-                                <span class="gc-tag">CP · Battle Pass</span>
-                            </div>
-                        </div>
-                        <div class="gc-arrow">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </div>
-                        <div class="gc-scan-line"></div>
-                    </div>
+    <div id="recharge-modal" class="modal-overlay">
+        <div class="modal-box recharge-box animate-scale-in">
+            <button id="back-to-id" class="back-btn">← Back</button>
+            <h3 class="recharge-title">SELECT PRODUCTION PACK</h3>
+            <div class="recharge-list"></div>
+        </div>
+    </div>
 
-                    <div class="game-card" data-game="FIFA MOBILE" data-color="#00e5a0" style="--c:#00e5a0">
-                        <div class="gc-bg" style="background-image:url('https://cdn-www.bluestacks.com/bs-images/70042468c0d43639228178f9e61aec7f.png')"></div>
+    <div id="checkout-modal" class="modal-overlay">
+        <div class="modal-box animate-scale-in">
+            <button id="back-to-recharge" class="back-btn">← Back</button>
+            <div class="input-section order-summary-section">
+                <div class="input-header summary-header">
+                    <span class="user-icon">📋</span>
+                    <p>ORDER SUMMARY RECEIPT</p>
+                </div>
+                
+                <div id="order-details"></div>
+
+                <div id="success-notification" class="arabic-notice" style="display: none;">
+                    🚀 تم استلام طلبك بنجاح! سيتم الشحن تلقائياً خلال 10 إلى 20 دقيقة فور تأكيد تحويل المبلغ إلى الرقم الموضح: <br><strong style="font-size:1.15rem; color:#fff;">01096170744</strong>
+                </div>
+
+                <div id="checkout-action-container">
+                    <button id="checkout-btn" class="blue-rect-btn">CONFIRM & ORDER NOW</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+8c0d43639228178f9e61aec7f.png')"></div>
                         <div class="gc-overlay"></div>
                         <div class="gc-glow"></div>
                         <div class="gc-body">
