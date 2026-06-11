@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
-    // AUTOMATIC INTRO REMOVAL LOGIC
+    // INTRO ANIMATION TIMING ENGINE
     // ==========================================
     const introOverlayNode = document.getElementById("animation-container");
     if (introOverlayNode) {
@@ -12,15 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.overflow = "auto";
                 document.body.style.overflowX = "hidden";
                 
-                // تفعيل تهيئة القائمة العلوية مباشرة بعد الأنيميشن
+                // تهيئة القائمة العلوية والتوجيه الافتراضي للـ Home
                 syncInitialNavbarLayout();
                 routeTabView("#home");
-            }, 600); 
-        }, 2200);
+            }, 800); 
+        }, 3200); 
     }
 
     // ==========================================
-    // CONFIG SETUP
+    // CONFIG TELEGRAM INTEGRATION SETUP
     // ==========================================
     const TELEGRAM_TOKEN = "8648161617:AAFVxx7syurke1Pl7BGAbyqAaM2NnBPKB5I"; 
     const TELEGRAM_CHAT_ID = "8851363543"; 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // View Pages
     const storePage = document.getElementById('store-page');
 
-    // Modals
+    // Modals Elements
     const gameModal = document.getElementById('game-modal');
     const rechargeModal = document.getElementById('recharge-modal');
     const checkoutModal = document.getElementById('checkout-modal');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnId = document.getElementById('btn-id');
     const btnAcc = document.getElementById('btn-acc');
 
-    // Controls Configuration Inputs
+    // Inputs Controls Configuration
     const idGroup = document.getElementById('id-input-group');
     const accGroup = document.getElementById('acc-input-group');
     const idField = document.getElementById('game-id-field');
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "BLOOD STRIKE": { color: "#ff3333", accent: "#cc0000", icon: "https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" }
     };
 
-    // --- Interactive Link Mouse Position Tracker ---
+    // --- Dynamic Link Mouse Positions Tracking Logic ---
     function inverseMousePosition(element, event) {
         const rect = element.getBoundingClientRect();
         const x = event.clientX - rect.left;
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Live Search Filters Engine ---
+    // --- Live Filtering Search Algorithm ---
     const searchInput = document.getElementById('store-search-input');
     const searchResultsViewport = document.getElementById('search-results-viewport');
 
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // MODAL NAVIGATION BUTTONS FIXES
+    // INTERACTIVE APPLICATION MATRIX MODALS
     // ==========================================
     document.getElementById('close-modal').addEventListener('click', () => {
         gameModal.classList.remove('active');
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameModal.classList.add('active');
     });
 
-    // --- Product Price Matrix Data Sets ---
+    // Products Datasets
     const ffIdProducts = `
         <div class="recharge-item"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("Telegram endpoint issue:", err));
     }
 
-    // --- Dynamic Support Feedback Module Functionality ---
+    // --- Dynamic Review Feedbacks Mechanism ---
     const feedbackSubmitBtn = document.getElementById('feedback-submit-btn');
     const feedbackTextareaField = document.getElementById('feedback-textarea-field');
     const feedbackInputBox = document.getElementById('feedback-input-box');
