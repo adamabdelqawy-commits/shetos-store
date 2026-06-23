@@ -1,4 +1,4 @@
-   /* ==========================================
+/* ==========================================
    AUTOMATIC INTRO ANIMATION STYLES (ADDED)
    ========================================== */
 #animation-container {
@@ -1026,4 +1026,160 @@ body::after {
 #basket-total-price-sum {
     color: #ff6600;
     text-shadow: 0 0 10px rgba(255,102,0,0.3);
+}
+
+/* Method Filter Selection Modal UI */
+.method-selection-box {
+    text-align: center;
+    max-width: 420px !important;
+    padding: 30px !important;
+}
+
+.method-selection-box h2 {
+    color: #ff6600;
+    margin-bottom: 10px;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+}
+
+.method-selection-box p {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.method-btn-row {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.method-choice-btn {
+    flex: 1;
+    background: #09090b;
+    color: #fff;
+    border: 2px solid #27272a;
+    padding: 15px 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.method-choice-btn:hover {
+    background: #ff6600;
+    border-color: #ff8a00;
+    transform: scale(1.03);
+    box-shadow: 0 0 15px rgba(255, 102, 0, 0.4);
+}
+
+/* Selected Active Product Highlight */
+.recharge-item.selected-product-active {
+    border-color: #ff6600 !important;
+    background: rgba(255, 102, 0, 0.08) !important;
+}
+
+/* =====================================================
+   FREE FIRE TYPE SELECTION MODAL - NEW STYLES
+   ===================================================== */
+
+.ff-type-box {
+    max-width: 420px;
+    text-align: center;
+}
+
+.ff-type-subtitle {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    margin-top: -10px;
+}
+
+.ff-type-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* The two big rectangles */
+.ff-type-rect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 22px 16px;
+    background: #0d0d0d;
+    border: 2px solid #ff6600;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25,1,0.5,1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ff-type-rect::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,102,0,0.07), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.ff-type-rect:hover {
+    transform: translateY(-3px);
+    background: rgba(255,102,0,0.08);
+    box-shadow: 0 0 25px rgba(255,102,0,0.3);
+    border-color: #ff8a00;
+}
+
+.ff-type-rect:hover::before {
+    opacity: 1;
+}
+
+.ff-type-rect:active {
+    transform: scale(0.98);
+}
+
+.ff-type-icon {
+    font-size: 2rem;
+    display: block;
+}
+
+.ff-type-label {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #ff6600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.ff-type-desc {
+    font-size: 0.82rem;
+    color: #a1a1aa;
+    font-weight: 400;
+}
+
+/* Blue confirm button variant */
+.blue-btn {
+    width: 100%;
+    background: linear-gradient(to bottom, #007acc, #005fa3);
+    border: none;
+    padding: 13px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(0,122,204,0.3);
+    margin-top: 5px;
+}
+
+.blue-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #008ae6, #006dba);
+    box-shadow: 0 0 20px rgba(0,122,204,0.5);
 }
