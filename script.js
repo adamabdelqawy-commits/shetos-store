@@ -24,6 +24,376 @@ document.addEventListener('DOMContentLoaded', () => {
     const TELEGRAM_CHAT_ID = "8851363543"; 
 
     // ==========================================
+    // CURRENCY SYSTEM
+    // ==========================================
+    // Exchange rates relative to EGP (1 EGP = X of currency)
+    const CURRENCY_RATES = {
+        EGP: { rate: 1,        symbol: "EGP",  name: "Egyptian Pound",  label: "Egyptian Pound (EGP)" },
+        USD: { rate: 0.020,    symbol: "$",    name: "US Dollar",       label: "US Dollar ($)" },
+        TND: { rate: 0.063,    symbol: "TND",  name: "Tunisian Dinar",  label: "Tunisian Dinar (TND)" },
+        SAR: { rate: 0.075,    symbol: "SAR",  name: "Saudi Riyal",     label: "Saudi Riyal (SAR)" }
+    };
+
+    // Load saved currency from localStorage or default to EGP
+    let activeCurrency = localStorage.getItem('shetos_currency') || 'EGP';
+
+    function saveCurrency(code) {
+        activeCurrency = code;
+        localStorage.setItem('shetos_currency', code);
+    }
+
+    function convertPrice(egpPrice) {
+        const rate = CURRENCY_RATES[activeCurrency].rate;
+        const converted = egpPrice * rate;
+        // Round to 2 decimal places; if whole number show no decimals
+        return converted % 1 === 0 ? converted.toFixed(0) : converted.toFixed(2);
+    }
+
+    function formatPrice(egpPrice) {
+        const sym = CURRENCY_RATES[activeCurrency].symbol;
+        const val = convertPrice(egpPrice);
+        if (activeCurrency === 'EGP') return `${val} EGP`;
+        if (activeCurrency === 'USD') return `$${val}`;
+        return `${val} ${sym}`;
+    }
+
+    function updateCurrencyLabel() {
+        const labelEl = document.getElementById('current-currency-label');
+        if (labelEl) labelEl.textContent = `Current: ${CURRENCY_RATES[activeCurrency].label}`;
+    }
+
+    // Updates all .item-price spans inside the product list using their parent's data-price
+    function refreshProductListPrices() {
+        if (!rechargeList) return;
+        rechargeList.querySelectorAll('.recharge-item[data-price]').forEach(item => {
+            const egpPrice = parseFloat(item.getAttribute('data-price'));
+            const priceEl = item.querySelector('.item-price');
+            if (priceEl) priceEl.textContent = formatPrice(egpPrice);
+        });
+    }
+
+    // ==========================================
+    // CURRENCY MODAL LOGIC
+    // ==========================================
+    const currencyModal       = document.getElementById('currency-modal');
+    const openCurrencyBtn     = document.getElementById('open-currency-modal-btn');
+    const closeCurrencyModal  = document.getElementById('close-currency-modal');
+    const currencyChoiceBtns  = document.querySelectorAll('.currency-choice-btn');
+
+    function markActiveCurrencyBtn() {
+        currencyChoiceBtns.forEach(btn => {
+            if (btn.getAttribute('data-currency') === activeCurrency) {
+                btn.classList.add('currency-active');
+            } else {
+                btn.classList.remove('currency-active');
+            }
+        });
+    }
+
+    if (openCurrencyBtn) {
+        openCurrencyBtn.addEventListener('click', () => {
+            markActiveCurrencyBtn();
+            if (currencyModal) currencyModal.classList.add('active');
+        });
+    }
+
+    if (closeCurrencyModal) {
+        closeCurrencyModal.addEventListener('click', () => {
+            if (currencyModal) currencyModal.classList.remove('active');
+        });
+    }
+
+    currencyChoiceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const chosen = btn.getAttribute('data-currency');
+            saveCurrency(chosen);
+            markActiveCurrencyBtn();
+            updateCurrencyLabel();
+            // If product list is open, refresh its prices
+            refreshProductListPrices();
+            // Close after short delay so user sees the checkmark
+            setTimeout(() => {
+                if (currencyModal) currencyModal.classList.remove('active');
+            }, 380);
+        });
+    });
+
+    // Init label on load
+    updateCurrencyLabel();
+
+    // ==========================================
+    // LANGUAGE SYSTEM (NEW)
+    // ==========================================
+    const TRANSLATIONS = {
+        default: {
+            navHome: "Home",
+            navSearch: "search",
+            navAbout: "About",
+            navSetting: "setting",
+            chooseGame: "CHOOSE YOUR GAME",
+            searchPlaceholder: "Search a game...",
+            settingsTitle: "Settings",
+            changeCurrency: "CHANGE CURRENCY",
+            changeLanguage: "CHANGE LANGUAGE",
+            currentLang: "Current: Default",
+            chooseLanguage: "Choose Your Language",
+            whyChoose: "Why Choose Shetos Store?",
+            allGames: "All Your Games in One Place:",
+            allGamesText: "From mobile battle royales to major console and PC titles, we provide fast and reliable charging services for all your favorite games.",
+            playerFirst: "Player-First Behavior:",
+            playerFirstText: "We don't just process transactions; we build a community. Our team is dedicated to treating every gamer with the respect, honesty, and friendly support you deserve.",
+            topDeals: "Top-Tier Deals:",
+            topDealsText: "Through smart marketing and exciting promotions, we make sure you get the best value for your money. Keep an eye out for our exclusive offers and community rewards!",
+            ourMission: "Our Mission",
+            missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
+            selectProducts: "SELECT PRODUCTS",
+            basket: "Basket",
+            basketMarket: "SHOPPING BASKET MARKET",
+            totalAmount: "TOTAL AMOUNT:",
+            confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
+            enterGameId: "ENTER YOUR GAME ID",
+            enterIdPlaceholder: "اكتب الاي دي - enter your id",
+            confirmOrder: "CONFIRM ORDER",
+            enterCredentials: "ENTER ACCOUNT CREDENTIALS",
+            emailPlaceholder: "Gmail / Email",
+            passPlaceholder: "Password",
+            chooseMethod: "Choose your recharge method",
+            idRecharge: "ID RECHARGE",
+            idDesc: "شحن من خلال اي دي",
+            loginAccount: "LOGIN ACCOUNT",
+            loginDesc: "شحن من خلال الحساب",
+            basketEmpty: "Your basket is empty! Add products first.",
+            successMsg: "تم استلام رسالتك , و سيتم الشحن تلقاءيا خلال 20 دقيقه بعد استلام المبلغ المختار 01096170744",
+        },
+        en: {
+            navHome: "Home",
+            navSearch: "Search",
+            navAbout: "About",
+            navSetting: "Settings",
+            chooseGame: "CHOOSE YOUR GAME",
+            searchPlaceholder: "Search a game...",
+            settingsTitle: "Settings",
+            changeCurrency: "CHANGE CURRENCY",
+            changeLanguage: "CHANGE LANGUAGE",
+            currentLang: "Current: English",
+            chooseLanguage: "Choose Your Language",
+            whyChoose: "Why Choose Shetos Store?",
+            allGames: "All Your Games in One Place:",
+            allGamesText: "From mobile battle royales to major console and PC titles, we provide fast and reliable charging services for all your favorite games.",
+            playerFirst: "Player-First Behavior:",
+            playerFirstText: "We don't just process transactions; we build a community. Our team is dedicated to treating every gamer with the respect, honesty, and friendly support you deserve.",
+            topDeals: "Top-Tier Deals:",
+            topDealsText: "Through smart marketing and exciting promotions, we make sure you get the best value for your money. Keep an eye out for our exclusive offers and community rewards!",
+            ourMission: "Our Mission",
+            missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
+            selectProducts: "SELECT PRODUCTS",
+            basket: "Basket",
+            basketMarket: "SHOPPING BASKET",
+            totalAmount: "TOTAL AMOUNT:",
+            confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
+            enterGameId: "ENTER YOUR GAME ID",
+            enterIdPlaceholder: "Enter your Game ID",
+            confirmOrder: "CONFIRM ORDER",
+            enterCredentials: "ENTER ACCOUNT CREDENTIALS",
+            emailPlaceholder: "Gmail / Email",
+            passPlaceholder: "Password",
+            chooseMethod: "Choose your recharge method",
+            idRecharge: "ID RECHARGE",
+            idDesc: "Recharge via ID",
+            loginAccount: "LOGIN ACCOUNT",
+            loginDesc: "Recharge via account login",
+            basketEmpty: "Your basket is empty! Please add products first.",
+            successMsg: "Your order has been received. Recharge will be processed within 20 minutes after payment. Contact: 01096170744",
+        },
+        ar: {
+            navHome: "الرئيسية",
+            navSearch: "بحث",
+            navAbout: "عن المتجر",
+            navSetting: "الإعدادات",
+            chooseGame: "اختر لعبتك",
+            searchPlaceholder: "ابحث عن لعبة...",
+            settingsTitle: "الإعدادات",
+            changeCurrency: "تغيير العملة",
+            changeLanguage: "تغيير اللغة",
+            currentLang: "الحالية: العربية",
+            chooseLanguage: "اختر لغتك",
+            whyChoose: "لماذا تختار شيتوس ستور؟",
+            allGames: "جميع ألعابك في مكان واحد:",
+            allGamesText: "من ألعاب البقاء على المحمول إلى الألعاب الكبرى، نوفر خدمات شحن سريعة وموثوقة لجميع ألعابك المفضلة.",
+            playerFirst: "اللاعب أولاً:",
+            playerFirstText: "لا نعالج المعاملات فحسب، بل نبني مجتمعاً. فريقنا ملتزم بمعاملة كل لاعب باحترام وأمانة ودعم ودي.",
+            topDeals: "أفضل العروض:",
+            topDealsText: "من خلال التسويق الذكي والعروض المثيرة، نضمن لك أفضل قيمة لأموالك. تابع عروضنا الحصرية!",
+            ourMission: "مهمتنا",
+            missionText: "إبقائك في اللعبة بدون متاعب. في شيتوس ستور، نجمع الخدمة السلسة وأفضل الصفقات والشغف الحقيقي بالألعاب لمنحك أفضل تجربة.",
+            selectProducts: "اختر المنتجات",
+            basket: "السلة",
+            basketMarket: "سلة التسوق",
+            totalAmount: "الإجمالي:",
+            confirmCheckout: "تأكيد وإتمام الطلب",
+            enterGameId: "أدخل معرف اللعبة",
+            enterIdPlaceholder: "اكتب الاي دي - enter your id",
+            confirmOrder: "تأكيد الطلب",
+            enterCredentials: "أدخل بيانات الحساب",
+            emailPlaceholder: "Gmail / البريد الإلكتروني",
+            passPlaceholder: "كلمة المرور",
+            chooseMethod: "اختر طريقة الشحن",
+            idRecharge: "شحن بالاي دي",
+            idDesc: "شحن من خلال اي دي",
+            loginAccount: "تسجيل الدخول",
+            loginDesc: "شحن من خلال الحساب",
+            basketEmpty: "سلتك فارغة! أضف منتجات أولاً.",
+            successMsg: "تم استلام رسالتك , و سيتم الشحن تلقاءيا خلال 20 دقيقه بعد استلام المبلغ المختار 01096170744",
+        }
+    };
+
+    // Load saved language from localStorage or default
+    let activeLang = localStorage.getItem('shetos_language') || 'default';
+
+    function t(key) {
+        return (TRANSLATIONS[activeLang] && TRANSLATIONS[activeLang][key]) 
+            ? TRANSLATIONS[activeLang][key] 
+            : TRANSLATIONS['default'][key] || key;
+    }
+
+    function applyLanguage() {
+        const lang = activeLang;
+        // Set direction
+        document.body.classList.remove('lang-ar', 'lang-en', 'lang-default');
+        document.body.classList.add('lang-' + lang);
+
+        // Translate all data-i18n elements
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+                el.textContent = TRANSLATIONS[lang][key];
+            } else {
+                el.textContent = TRANSLATIONS['default'][key] || el.textContent;
+            }
+        });
+
+        // Translate placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            el.placeholder = t(key);
+        });
+
+        // Update current language label
+        const langLabel = document.getElementById('current-language-label');
+        if (langLabel) langLabel.textContent = t('currentLang');
+
+        // Update dynamic UI text
+        const rechargeTitle = document.querySelector('.recharge-title');
+        if (rechargeTitle) rechargeTitle.textContent = t('selectProducts');
+
+        const basketMarketEl = document.querySelector('.summary-header p');
+        if (basketMarketEl) basketMarketEl.textContent = t('basketMarket');
+
+        const totalLabel = document.querySelector('.basket-total-row span:first-child');
+        if (totalLabel) totalLabel.textContent = t('totalAmount');
+
+        const checkoutBtn2 = document.getElementById('checkout-btn');
+        if (checkoutBtn2 && !checkoutBtn2.disabled) checkoutBtn2.textContent = t('confirmCheckout');
+
+        const idHeader = document.querySelector('#id-input-section-box .input-header p');
+        if (idHeader) idHeader.textContent = t('enterGameId');
+
+        const idFieldEl = document.getElementById('game-id-field');
+        if (idFieldEl) idFieldEl.placeholder = t('enterIdPlaceholder');
+
+        const confirmIdEl = document.getElementById('confirm-id-btn');
+        if (confirmIdEl && !confirmIdEl.disabled) confirmIdEl.textContent = t('confirmOrder');
+
+        const accHeader = document.querySelector('#acc-input-section-box .input-header p');
+        if (accHeader) accHeader.textContent = t('enterCredentials');
+
+        const emailEl = document.getElementById('acc-email-field');
+        if (emailEl) emailEl.placeholder = t('emailPlaceholder');
+
+        const passEl = document.getElementById('acc-pass-field');
+        if (passEl) passEl.placeholder = t('passPlaceholder');
+
+        const ffSubtitle = document.querySelector('.ff-type-subtitle');
+        if (ffSubtitle) ffSubtitle.textContent = t('chooseMethod');
+
+        const ffIdLabel = document.querySelector('#ff-choose-id .ff-type-label');
+        if (ffIdLabel) ffIdLabel.textContent = t('idRecharge');
+        const ffIdDesc = document.querySelector('#ff-choose-id .ff-type-desc');
+        if (ffIdDesc) ffIdDesc.textContent = t('idDesc');
+
+        const ffAccLabel = document.querySelector('#ff-choose-acc .ff-type-label');
+        if (ffAccLabel) ffAccLabel.textContent = t('loginAccount');
+        const ffAccDesc = document.querySelector('#ff-choose-acc .ff-type-desc');
+        if (ffAccDesc) ffAccDesc.textContent = t('loginDesc');
+
+        const openBasketBtn = document.getElementById('open-basket-from-products');
+        if (openBasketBtn) {
+            const count = openBasketBtn.querySelector('span') ? openBasketBtn.querySelector('span').textContent : '0';
+            openBasketBtn.innerHTML = `${t('basket')} (<span>${count}</span>) 🛒`;
+        }
+
+        // Update search placeholder live
+        const searchInp = document.getElementById('store-search-input');
+        if (searchInp) searchInp.placeholder = t('searchPlaceholder');
+    }
+
+    function saveLanguage(code) {
+        activeLang = code;
+        localStorage.setItem('shetos_language', code);
+        applyLanguage();
+    }
+
+    function updateLanguageLabel() {
+        const labelEl = document.getElementById('current-language-label');
+        if (labelEl) labelEl.textContent = t('currentLang');
+    }
+
+    // ==========================================
+    // LANGUAGE MODAL LOGIC (NEW)
+    // ==========================================
+    const languageModal       = document.getElementById('language-modal');
+    const openLanguageBtn     = document.getElementById('open-language-modal-btn');
+    const closeLanguageModal  = document.getElementById('close-language-modal');
+    const languageChoiceBtns  = document.querySelectorAll('.language-choice-btn');
+
+    function markActiveLangBtn() {
+        languageChoiceBtns.forEach(btn => {
+            if (btn.getAttribute('data-lang') === activeLang) {
+                btn.classList.add('lang-active');
+            } else {
+                btn.classList.remove('lang-active');
+            }
+        });
+    }
+
+    if (openLanguageBtn) {
+        openLanguageBtn.addEventListener('click', () => {
+            markActiveLangBtn();
+            if (languageModal) languageModal.classList.add('active');
+        });
+    }
+
+    if (closeLanguageModal) {
+        closeLanguageModal.addEventListener('click', () => {
+            if (languageModal) languageModal.classList.remove('active');
+        });
+    }
+
+    languageChoiceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const chosen = btn.getAttribute('data-lang');
+            saveLanguage(chosen);
+            markActiveLangBtn();
+            setTimeout(() => {
+                if (languageModal) languageModal.classList.remove('active');
+            }, 380);
+        });
+    });
+
+    // Apply language on load
+    applyLanguage();
+
+    // ==========================================
     // DOM REFERENCES
     // ==========================================
     const storePage = document.getElementById('store-page');
@@ -86,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
     // PRODUCTS DATA
+    // All data-price values are in EGP (base currency)
     // ==========================================
     const ffIdProducts = `
         <div class="recharge-item" data-id="ff_id_100" data-name="◇ 100 Diamond" data-price="55"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
@@ -93,8 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="ff_id_310" data-name="◇ 310 Diamond" data-price="155"><span class="item-name">◇ 310 Diamond</span><span class="item-price">155 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_420" data-name="◇ 420 Diamond" data-price="205"><span class="item-name">◇ 420 Diamond</span><span class="item-price">205 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_520" data-name="◇ 520 Diamond" data-price="255"><span class="item-name">◇ 520 Diamond</span><span class="item-price">255 EGP</span></div>
-        <div class="recharge-item membership" data-id="ff_id_w_mem" data-name="★ Weekly Membership" data-price="110"><span class="item-name">★ Weekly Membership</span><span class="item-price">105 EGP</span></div>
-        <div class="recharge-item membership" data-id="ff_id_m_mem" data-name="★ Monthly Membership" data-price="540"><span class="item-name">★ Monthly Membership</span><span class="item-price">520 EGP</span></div>
+        <div class="recharge-item membership" data-id="ff_id_w_mem" data-name="★ Weekly Membership" data-price="110"><span class="item-name">★ Weekly Membership</span><span class="item-price">110 EGP</span></div>
+        <div class="recharge-item membership" data-id="ff_id_m_mem" data-name="★ Monthly Membership" data-price="540"><span class="item-name">★ Monthly Membership</span><span class="item-price">540 EGP</span></div>
         <hr class="about-divider">
         <h3 class="selection-title" style="font-size:1rem; margin:10px 0 5px;">another sales 🔔</h3>
         <div class="recharge-item" data-id="ff_id_750" data-name="◇ 750 Diamond [اسبوعي +300]" data-price="265"><span class="item-name">◇ 750 Diamond [اسبوعي +300]</span><span class="item-price">265 EGP</span></div>
@@ -220,9 +591,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (hashTarget === "#about") {
             const aboutSec = document.getElementById('about-content-section');
             if (aboutSec) aboutSec.classList.add('active-view');
-        } else if (hashTarget === "#support") {
-            const supportSec = document.getElementById('support-content-section');
-            if (supportSec) supportSec.classList.add('active-view');
+        } else if (hashTarget === "#setting") {
+            const settingSec = document.getElementById('setting-content-section');
+            if (settingSec) settingSec.classList.add('active-view');
         }
     }
 
@@ -269,11 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
     // FLOW: FREE FIRE (3 steps)
-    // Step 1: FF Type Modal (ID or ACC)
-    // Step 2: Products
-    // Step 3: Credentials
     // ==========================================
-
     function openFFTypeModal() {
         if (ffTypeModal) ffTypeModal.classList.add('active');
     }
@@ -285,22 +652,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // User chose ID recharge for FF
     if (ffChooseId) {
         ffChooseId.addEventListener('click', () => {
             currentMethod = "ID";
             if (ffTypeModal) ffTypeModal.classList.remove('active');
-            // Show ID products
             openProductsForFF("ID");
         });
     }
 
-    // User chose Account login for FF
     if (ffChooseAcc) {
         ffChooseAcc.addEventListener('click', () => {
             currentMethod = "ACC";
             if (ffTypeModal) ffTypeModal.classList.remove('active');
-            // Show Account products
             openProductsForFF("ACC");
         });
     }
@@ -313,18 +676,16 @@ document.addEventListener('DOMContentLoaded', () => {
             rechargeList.innerHTML = ffAccProducts;
         }
         applyThemeColors();
+        refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
         injectReactiveQuantitySelectors();
     }
 
     // ==========================================
     // FLOW: OTHER GAMES (2 steps)
-    // Step 1: Products
-    // Step 2: Credentials (ID only for non-FF)
     // ==========================================
-
     function openProductsDirectly() {
-        currentMethod = "ID"; // non-FF games use ID
+        currentMethod = "ID";
         if (!rechargeList) return;
         if (currentGame === "PUBG")         rechargeList.innerHTML = pubgProducts;
         else if (currentGame === "CALL OF DUTY") rechargeList.innerHTML = codProducts;
@@ -332,6 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (currentGame === "PES MOBILE")   rechargeList.innerHTML = pesProducts;
         else if (currentGame === "BLOOD STRIKE") rechargeList.innerHTML = bsProducts;
         applyThemeColors();
+        refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
         injectReactiveQuantitySelectors();
     }
@@ -355,21 +717,12 @@ document.addEventListener('DOMContentLoaded', () => {
         backToId.addEventListener('click', () => {
             if (rechargeModal) rechargeModal.classList.remove('active');
             if (currentGame === "FREE FIRE") {
-                // Go back to FF type selection — basket keeps items until user fully exits
                 openFFTypeModal();
             } else {
-                // Non-FF games: going back = full exit, reset basket
                 resetBasket();
             }
         });
     }
-
-    // ==========================================
-    // PRODUCT SELECTED → Open Credentials Modal
-    // (triggered after choosing products via basket confirm)
-    // Actually: credentials asked AFTER selecting products
-    // The confirm button in credentials finalises the order
-    // ==========================================
 
     function openCredentialsModal() {
         if (!credentialsModal || !themes[currentGame]) return;
@@ -382,20 +735,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (idCredSection)  idCredSection.style.display  = "block";
             if (accCredSection) accCredSection.style.display = "none";
             if (idInputSectionBox)  idInputSectionBox.style.borderColor  = theme.color;
-            // Reset field
             if (idField) idField.value = "";
             validateIdInput();
         } else {
             if (idCredSection)  idCredSection.style.display  = "none";
             if (accCredSection) accCredSection.style.display = "block";
             if (accInputSectionBox) accInputSectionBox.style.borderColor = theme.color;
-            // Reset fields
             if (emailField) emailField.value = "";
             if (passField)  passField.value  = "";
             validateAccInput();
         }
 
-        // Style confirm buttons with theme
         if (confirmIdBtn && themes[currentGame]) {
             confirmIdBtn.style.background = `linear-gradient(to bottom, ${theme.color}, ${theme.accent})`;
         }
@@ -407,9 +757,6 @@ document.addEventListener('DOMContentLoaded', () => {
         credentialsModal.classList.add('active');
     }
 
-    // ==========================================
-    // BACK FROM CREDENTIALS → Products
-    // ==========================================
     if (backFromCreds) {
         backFromCreds.addEventListener('click', () => {
             if (credentialsModal) credentialsModal.classList.remove('active');
@@ -443,7 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (passField)  passField.addEventListener('input', validateAccInput);
 
     // ==========================================
-    // CONFIRM ID → proceed to checkout
+    // CONFIRM ID → checkout
     // ==========================================
     if (confirmIdBtn) {
         confirmIdBtn.addEventListener('click', () => {
@@ -457,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // CONFIRM ACC → proceed to checkout
+    // CONFIRM ACC → checkout
     // ==========================================
     if (confirmAccBtn) {
         confirmAccBtn.addEventListener('click', () => {
@@ -484,13 +831,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // RESET BASKET — called on any full exit
+    // RESET BASKET
     // ==========================================
     function resetBasket() {
         shoppingBasket = [];
         authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
         updateBasketDOMCounters();
-        // Also reset quantity selectors in the product list
         if (rechargeList) {
             rechargeList.querySelectorAll('.qty-current-val').forEach(el => { el.innerText = '0'; });
         }
@@ -501,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rechargeList.querySelectorAll('.recharge-item').forEach(itemNode => {
             const pId    = itemNode.getAttribute('data-id');
             const pName  = itemNode.getAttribute('data-name');
-            const pPrice = parseFloat(itemNode.getAttribute('data-price'));
+            const pPrice = parseFloat(itemNode.getAttribute('data-price')); // always EGP base
             if (!pId) return;
 
             const activeCartItem  = shoppingBasket.find(i => i.id === pId);
@@ -519,6 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="qty-current-val">${currentQuantity}</span>
                 <button class="qty-mod-btn increment-val">+</button>
             `;
+            // Cart always stores EGP price; display conversion happens at render time
             qtyContainer.querySelector('.increment-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, 1); };
             qtyContainer.querySelector('.decrement-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, -1); };
         });
@@ -536,13 +883,10 @@ document.addEventListener('DOMContentLoaded', () => {
         injectReactiveQuantitySelectors();
     }
 
-    // ==========================================
-    // "View Basket" button in products modal → go to credentials first
-    // ==========================================
     if (openBasketFromProducts) {
         openBasketFromProducts.onclick = () => {
             if (shoppingBasket.length === 0) {
-                alert("Your basket is empty! Add products first.");
+                alert(t('basketEmpty'));
                 return;
             }
             openCredentialsModal();
@@ -552,15 +896,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (floatingBasketTrigger) {
         floatingBasketTrigger.onclick = () => {
             if (shoppingBasket.length > 0) {
-                // Decide which modal to show: if credentials were already set, go to checkout
-                // Otherwise open credentials
                 openCredentialsModal();
             }
         };
     }
 
     // ==========================================
-    // CHECKOUT MODAL
+    // CHECKOUT MODAL — prices shown in active currency
     // ==========================================
     function compileAndOpenCheckoutModal() {
         const basketContainer    = document.getElementById('basket-items-wrapper');
@@ -572,11 +914,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (basketContainer) basketContainer.innerHTML = "";
-        let accumulatedSum = 0;
+        let accumulatedSumEGP = 0;
 
         shoppingBasket.forEach(item => {
-            const rowTotalCost = item.price * item.quantity;
-            accumulatedSum += rowTotalCost;
+            const rowTotalEGP = item.price * item.quantity; // item.price is always EGP
+            accumulatedSumEGP += rowTotalEGP;
             if (basketContainer) {
                 const rowEl = document.createElement('div');
                 rowEl.className = 'basket-summary-row';
@@ -585,13 +927,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="basket-item-title">${item.name} (x${item.quantity})</div>
                         <div class="basket-item-meta">Game: ${item.game}</div>
                     </div>
-                    <div class="basket-item-cost">${rowTotalCost} EGP</div>
+                    <div class="basket-item-cost">${formatPrice(rowTotalEGP)}</div>
                 `;
                 basketContainer.appendChild(rowEl);
             }
         });
 
-        if (totalPriceSumNode) totalPriceSumNode.innerText = `${accumulatedSum} EGP`;
+        if (totalPriceSumNode) totalPriceSumNode.innerText = formatPrice(accumulatedSumEGP);
         if (checkoutModal) checkoutModal.classList.add('active');
     }
 
@@ -630,6 +972,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (successNotification) successNotification.style.display = "block";
         if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
 
+        // Telegram message always sends EGP prices (base currency) for clarity
         let productsMessageList = shoppingBasket.map((item, idx) => {
             return `${idx + 1}. 🎮 [${item.game}] - ${item.name} x${item.quantity} -> (${item.price * item.quantity} EGP)`;
         }).join('\n');
@@ -674,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                     }
                 }
-            }, 5000);
+            }, 20000);
         })
         .catch(err => console.error("Transmission failed:", err));
     }
@@ -685,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ffCard = document.querySelector('#home-content-section .ff-card');
     if (ffCard) ffCard.addEventListener('click', () => {
         currentGame = "FREE FIRE";
-        openFFTypeModal(); // Free Fire always shows type selection first
+        openFFTypeModal();
     });
 
     const pubgCard = document.querySelector('#home-content-section .pubg-card');
@@ -704,36 +1047,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bsCard) bsCard.addEventListener('click', () => { currentGame = "BLOOD STRIKE"; openProductsDirectly(); });
 
     // ==========================================
-    // FEEDBACK
+    // SUPPORT / FEEDBACK SUBMIT → TELEGRAM
     // ==========================================
-    const feedbackSubmitBtn      = document.getElementById('feedback-submit-btn');
-    const feedbackTextareaField  = document.getElementById('feedback-textarea-field');
-    const feedbackInputBox       = document.getElementById('feedback-input-box');
-    const feedbackThanksBox      = document.getElementById('feedback-thanks-box');
+    const feedbackSubmitBtn  = document.getElementById('feedback-submit-btn');
+    const feedbackTextarea   = document.getElementById('feedback-textarea-field');
+    const feedbackInputBox   = document.getElementById('feedback-input-box');
+    const feedbackThanksBox  = document.getElementById('feedback-thanks-box');
 
-    if (feedbackSubmitBtn && feedbackTextareaField) {
+    if (feedbackSubmitBtn && feedbackTextarea) {
         feedbackSubmitBtn.addEventListener('click', () => {
-            const content = feedbackTextareaField.value.trim();
-            if (content === "") { alert("من فضلك اكتب تعديلك أو المشكلة أولاً."); return; }
+            const msg = feedbackTextarea.value.trim();
+            if (!msg) {
+                feedbackTextarea.style.borderColor = '#ff3333';
+                feedbackTextarea.focus();
+                return;
+            }
+            feedbackTextarea.style.borderColor = '';
+
+            // Disable button and show sending state
             feedbackSubmitBtn.disabled = true;
-            feedbackTextareaField.disabled = true;
-            let timeLeft = 3;
-            feedbackSubmitBtn.innerText = "processing.";
-            const loop = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) { feedbackSubmitBtn.innerText = "processing" + ".".repeat(((3-timeLeft)%3)+1); }
-                else {
-                    clearInterval(loop);
-                    if (feedbackInputBox) feedbackInputBox.style.display = "none";
-                    if (feedbackThanksBox) feedbackThanksBox.style.display = "block";
-                }
-            }, 1000);
-            const payload = `📝 New Feedback\n\n💭 ${content}`;
-            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            feedbackSubmitBtn.textContent = 'Sending...';
+            feedbackSubmitBtn.style.opacity = '0.6';
+            feedbackSubmitBtn.style.cursor = 'not-allowed';
+
+            const payload = `💬 FEEDBACK / SUPPORT MESSAGE\n\n${msg}`;
+            const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+
+            fetch(telegramApiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: payload })
-            }).catch(err => console.error("Feedback failed:", err));
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    // Success — show thanks box
+                    if (feedbackInputBox)  feedbackInputBox.style.display  = 'none';
+                    if (feedbackThanksBox) feedbackThanksBox.style.display = 'flex';
+                    feedbackTextarea.value = '';
+                    // Reset after 5 seconds so user can send another message
+                    setTimeout(() => {
+                        if (feedbackInputBox)  feedbackInputBox.style.display  = 'block';
+                        if (feedbackThanksBox) feedbackThanksBox.style.display = 'none';
+                        feedbackSubmitBtn.disabled = false;
+                        feedbackSubmitBtn.textContent = 'SUBMIT';
+                        feedbackSubmitBtn.style.opacity = '1';
+                        feedbackSubmitBtn.style.cursor = 'pointer';
+                    }, 5000);
+                } else {
+                    throw new Error('Telegram API error');
+                }
+            })
+            .catch(() => {
+                feedbackSubmitBtn.disabled = false;
+                feedbackSubmitBtn.textContent = 'SUBMIT';
+                feedbackSubmitBtn.style.opacity = '1';
+                feedbackSubmitBtn.style.cursor = 'pointer';
+                feedbackTextarea.style.borderColor = '#ff3333';
+                alert('Failed to send. Please try again or contact us directly on WhatsApp.');
+            });
         });
     }
 
@@ -742,8 +1114,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
+            // Don't reset basket when closing currency or language modal
+            if (e.target.id === 'currency-modal' || e.target.id === 'language-modal') {
+                e.target.classList.remove('active');
+                return;
+            }
             e.target.classList.remove('active');
-            // Also close any other open modals and reset basket on outside-click exit
             [ffTypeModal, rechargeModal, credentialsModal, checkoutModal].forEach(m => {
                 if (m) m.classList.remove('active');
             });

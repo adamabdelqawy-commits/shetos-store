@@ -16,15 +16,15 @@
     <section id="store-page" class="page active">
         <nav class="nav">
             <ul>
-                <li class="active"><a href="#home" id="home" class="nav-link">Home</a></li>
-                <li><a href="#search" id="search" class="nav-link">search</a></li>
-                <li><a href="#about" id="about" class="nav-link">About</a></li>
-                <li><a href="#support" id="support" class="nav-link">support</a></li>
+                <li class="active"><a href="#home" id="home" class="nav-link" data-i18n="navHome">Home</a></li>
+                <li><a href="#search" id="search" class="nav-link" data-i18n="navSearch">search</a></li>
+                <li><a href="#about" id="support" class="nav-link" data-i18n="navSupport">support</a></li>
+                <li><a href="#setting" id="setting" class="nav-link" data-i18n="navSetting">setting</a></li>
             </ul>
         </nav>
 
         <div id="home-content-section" class="store-container tab-content-view active-view">
-            <h2 class="selection-title">CHOOSE YOUR GAME</h2>
+            <h2 class="selection-title" data-i18n="chooseGame">CHOOSE YOUR GAME</h2>
             <div class="game-grid">
                 <div class="game-card ff-card" data-game-search-title="free fire">
                     <div class="card-bg ff-bg"></div>
@@ -74,27 +74,13 @@
         <div id="search-content-section" class="tab-content-view full-tab-modal-view">
             <div class="neon-border-box">
                 <div class="search-bar-header">
-                    <input type="text" id="store-search-input" class="search-input-field" placeholder="Search a game...">
+                    <input type="text" id="store-search-input" class="search-input-field" placeholder="Search a game..." data-i18n-placeholder="searchPlaceholder">
                 </div>
                 <div id="search-results-viewport" class="search-results-wrapper"></div>
             </div>
         </div>
 
         <div id="about-content-section" class="tab-content-view full-tab-modal-view">
-            <div class="plain-modal-box signature-container">
-                <h2 class="about-main-title">Why Choose Shetos Store?</h2>
-                <div class="about-text-content">
-                    <p><strong>All Your Games in One Place:</strong> From mobile battle royales to major console and PC titles, we provide fast and reliable charging services for all your favorite games.</p>
-                    <p><strong>Player-First Behavior:</strong> We don't just process transactions; we build a community. Our team is dedicated to treating every gamer with the respect, honesty, and friendly support you deserve.</p>
-                    <p><strong>Top-Tier Deals:</strong> Through smart marketing and exciting promotions, we make sure you get the best value for your money. Keep an eye out for our exclusive offers and community rewards!</p>
-                    <hr class="about-divider">
-                    <h3>Our Mission</h3>
-                    <p class="mission-text">To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="support-content-section" class="tab-content-view full-tab-modal-view">
             <div class="plain-modal-box contact-container">
                 <a href="https://wa.me/201096170744" target="_blank" class="support-phone-row">01096170744</a>
                 <a href="https://wa.me/201227395613" target="_blank" class="support-phone-row">01227395613</a>
@@ -108,11 +94,99 @@
                 </div>
             </div>
         </div>
+
+        <!-- =====================================================
+             SETTING TAB (NEW)
+             ===================================================== -->
+        <div id="setting-content-section" class="tab-content-view full-tab-modal-view">
+            <div class="plain-modal-box setting-container">
+                <h2 class="about-main-title" style="margin-bottom:28px;">⚙️ <span data-i18n="settingsTitle">Settings</span></h2>
+
+                <!-- Big Currency Button -->
+                <button id="open-currency-modal-btn" class="setting-big-rect-btn">
+                    <span class="setting-btn-icon">💱</span>
+                    <div class="setting-btn-text">
+                        <span class="setting-btn-title" data-i18n="changeCurrency">CHANGE CURRENCY</span>
+                        <span class="setting-btn-sub" id="current-currency-label">Current: Egyptian Pound (EGP)</span>
+                    </div>
+                    <span class="setting-btn-arrow">›</span>
+                </button>
+
+                <!-- Big Language Button -->
+                <button id="open-language-modal-btn" class="setting-big-rect-btn">
+                    <span class="setting-btn-icon">🌐</span>
+                    <div class="setting-btn-text">
+                        <span class="setting-btn-title" data-i18n="changeLanguage">CHANGE LANGUAGE</span>
+                        <span class="setting-btn-sub" id="current-language-label">Current: Default</span>
+                    </div>
+                    <span class="setting-btn-arrow">›</span>
+                </button>
+            </div>
+        </div>
+
     </section>
 
     <!-- =====================================================
-         FREE FIRE TYPE SELECTION MODAL (NEW - Step 1 for FF)
-         Shows 2 big rectangles: ID Recharge / Login Account
+         CURRENCY SELECTION MODAL (NEW)
+         ===================================================== -->
+    <div id="currency-modal" class="modal-overlay">
+        <div class="modal-box currency-modal-box">
+            <button id="close-currency-modal" class="back-btn">← Back</button>
+            <h2 class="currency-modal-title">💱 Choose Your Currency</h2>
+            <div class="currency-choices">
+                <button class="currency-choice-btn" data-currency="EGP">
+                    <span class="currency-flag">🇪🇬</span>
+                    <span class="currency-name">Egyptian Pound</span>
+                    <span class="currency-code">EGP</span>
+                </button>
+                <button class="currency-choice-btn" data-currency="USD">
+                    <span class="currency-flag">🇺🇸</span>
+                    <span class="currency-name">US Dollar</span>
+                    <span class="currency-code">USD</span>
+                </button>
+                <button class="currency-choice-btn" data-currency="TND">
+                    <span class="currency-flag">🇹🇳</span>
+                    <span class="currency-name">Tunisian Dinar</span>
+                    <span class="currency-code">TND</span>
+                </button>
+                <button class="currency-choice-btn" data-currency="SAR">
+                    <span class="currency-flag">🇸🇦</span>
+                    <span class="currency-name">Saudi Riyal</span>
+                    <span class="currency-code">SAR</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         LANGUAGE SELECTION MODAL (NEW)
+         ===================================================== -->
+    <div id="language-modal" class="modal-overlay">
+        <div class="modal-box language-modal-box">
+            <button id="close-language-modal" class="back-btn">← Back</button>
+            <h2 class="language-modal-title">🌐 <span data-i18n="chooseLanguage">Choose Your Language</span></h2>
+            <div class="language-choices">
+                <button class="language-choice-btn" data-lang="default">
+                    <span class="language-flag">🌍</span>
+                    <span class="language-name">Default Language</span>
+                    <span class="language-code">DEF</span>
+                </button>
+                <button class="language-choice-btn" data-lang="en">
+                    <span class="language-flag">🇬🇧</span>
+                    <span class="language-name">English Language</span>
+                    <span class="language-code">EN</span>
+                </button>
+                <button class="language-choice-btn" data-lang="ar">
+                    <span class="language-flag">🇸🇦</span>
+                    <span class="language-name">Arabic Language / العربية</span>
+                    <span class="language-code">AR</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         FREE FIRE TYPE SELECTION MODAL (Step 1 for FF)
          ===================================================== -->
     <div id="ff-type-modal" class="modal-overlay">
         <div class="modal-box ff-type-box">
@@ -125,13 +199,11 @@
             </div>
             <p class="ff-type-subtitle">Choose your recharge method</p>
             <div class="ff-type-choices">
-                <!-- Rectangle 1: ID Recharge -->
                 <button class="ff-type-rect" id="ff-choose-id">
                     <span class="ff-type-icon">🆔</span>
                     <span class="ff-type-label">ID RECHARGE</span>
                     <span class="ff-type-desc">شحن من خلال اي دي</span>
                 </button>
-                <!-- Rectangle 2: Account Login -->
                 <button class="ff-type-rect" id="ff-choose-acc">
                     <span class="ff-type-icon">📧</span>
                     <span class="ff-type-label">LOGIN ACCOUNT</span>
@@ -142,7 +214,7 @@
     </div>
 
     <!-- =====================================================
-         PRODUCT SELECTION MODAL (Step 2 for FF / Step 1 for others)
+         PRODUCT SELECTION MODAL
          ===================================================== -->
     <div id="recharge-modal" class="modal-overlay">
         <div class="modal-box recharge-box">
@@ -156,9 +228,7 @@
     </div>
 
     <!-- =====================================================
-         CREDENTIALS MODAL (Step 3 for FF / Step 2 for others)
-         For ID type: shows Game ID field
-         For Account type: shows Gmail + Password fields
+         CREDENTIALS MODAL
          ===================================================== -->
     <div id="credentials-modal" class="modal-overlay">
         <div class="modal-box">
@@ -168,7 +238,6 @@
                 <h2 id="cred-modal-title" style="color:#ff6600; font-size:1.4rem;">FREE FIRE</h2>
             </div>
 
-            <!-- ID CREDENTIALS SECTION -->
             <div id="id-credentials-section" style="display:none;">
                 <div class="input-section" id="id-input-section-box">
                     <div class="input-header">
@@ -180,7 +249,6 @@
                 </div>
             </div>
 
-            <!-- ACCOUNT CREDENTIALS SECTION -->
             <div id="acc-credentials-section" style="display:none;">
                 <div class="input-section" id="acc-input-section-box">
                     <div class="input-header">

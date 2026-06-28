@@ -1183,3 +1183,303 @@ body::after {
     background: linear-gradient(to bottom, #008ae6, #006dba);
     box-shadow: 0 0 20px rgba(0,122,204,0.5);
 }
+/* =====================================================
+   SETTING TAB STYLES (NEW)
+   ===================================================== */
+.setting-container {
+    max-width: 500px;
+    width: 95%;
+    padding: 30px 24px;
+}
+
+.setting-big-rect-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 22px 20px;
+    background: #0d0d0d;
+    border: 2px solid #ff6600;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25,1,0.5,1);
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.setting-big-rect-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,102,0,0.08), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.setting-big-rect-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255,102,0,0.07);
+    box-shadow: 0 0 28px rgba(255,102,0,0.35);
+    border-color: #ff8a00;
+}
+
+.setting-big-rect-btn:hover::before { opacity: 1; }
+.setting-big-rect-btn:active { transform: scale(0.98); }
+
+.setting-btn-icon {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+}
+
+.setting-btn-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.setting-btn-title {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #ff6600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.setting-btn-sub {
+    font-size: 0.8rem;
+    color: #a1a1aa;
+    font-weight: 400;
+}
+
+.setting-btn-arrow {
+    font-size: 2rem;
+    color: #ff6600;
+    flex-shrink: 0;
+    font-weight: 300;
+    line-height: 1;
+}
+
+/* =====================================================
+   CURRENCY MODAL STYLES (NEW)
+   ===================================================== */
+.currency-modal-box {
+    max-width: 420px;
+    text-align: center;
+}
+
+.currency-modal-title {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #ff6600;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.currency-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.currency-choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 18px;
+    background: #0d0d0d;
+    border: 2px solid #27272a;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.25,1,0.5,1);
+    position: relative;
+    overflow: hidden;
+}
+
+.currency-choice-btn:hover {
+    border-color: #ff6600;
+    background: rgba(255,102,0,0.07);
+    box-shadow: 0 0 20px rgba(255,102,0,0.25);
+    transform: translateY(-2px);
+}
+
+.currency-choice-btn:active { transform: scale(0.98); }
+
+.currency-choice-btn.currency-active {
+    border-color: #ff6600;
+    background: rgba(255,102,0,0.12);
+    box-shadow: 0 0 22px rgba(255,102,0,0.3);
+}
+
+.currency-choice-btn.currency-active::after {
+    content: '✓';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ff6600;
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+
+.currency-flag {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.currency-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    flex: 1;
+    text-align: left;
+}
+
+.currency-code {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #a1a1aa;
+    background: rgba(255,255,255,0.07);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #3f3f46;
+    margin-right: 10px;
+}
+
+/* =====================================================
+   LANGUAGE MODAL STYLES (NEW)
+   ===================================================== */
+.language-modal-box {
+    max-width: 420px;
+    text-align: center;
+}
+
+.language-modal-title {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #ff6600;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+.language-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.language-choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 18px;
+    background: #0d0d0d;
+    border: 2px solid #27272a;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.25,1,0.5,1);
+    position: relative;
+    overflow: hidden;
+}
+
+.language-choice-btn:hover {
+    border-color: #ff6600;
+    background: rgba(255,102,0,0.07);
+    box-shadow: 0 0 20px rgba(255,102,0,0.25);
+    transform: translateY(-2px);
+}
+
+.language-choice-btn:active { transform: scale(0.98); }
+
+.language-choice-btn.lang-active {
+    border-color: #ff6600;
+    background: rgba(255,102,0,0.12);
+    box-shadow: 0 0 22px rgba(255,102,0,0.3);
+}
+
+.language-choice-btn.lang-active::after {
+    content: '✓';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ff6600;
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+
+.language-flag {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.language-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    flex: 1;
+    text-align: left;
+}
+
+.language-code {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #a1a1aa;
+    background: rgba(255,255,255,0.07);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #3f3f46;
+    margin-right: 10px;
+}
+
+/* RTL support for Arabic */
+body.lang-ar {
+    direction: rtl;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+body.lang-ar .nav ul {
+    direction: rtl;
+}
+
+body.lang-ar .setting-big-rect-btn {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+body.lang-ar .setting-btn-arrow {
+    transform: scaleX(-1);
+}
+
+body.lang-ar .currency-name,
+body.lang-ar .language-name {
+    text-align: right;
+}
+
+body.lang-ar .currency-choice-btn,
+body.lang-ar .language-choice-btn {
+    flex-direction: row-reverse;
+}
+
+body.lang-ar .currency-choice-btn.currency-active::after,
+body.lang-ar .language-choice-btn.lang-active::after {
+    right: auto;
+    left: 18px;
+}
+
+body.lang-ar .about-text-content p,
+body.lang-ar .mission-text {
+    text-align: right;
+}
+
+body.lang-ar .back-btn {
+    float: right;
+    transform: scaleX(-1);
+    display: inline-block;
+}
