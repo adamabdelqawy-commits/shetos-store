@@ -767,8 +767,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // INPUT VALIDATION
     // ==========================================
+    // Strip any non-digit characters as the user types or pastes,
+    // so the Game ID field only ever contains numbers.
+    function sanitizeIdField() {
+        if (!idField) return;
+        const cursorPos = idField.selectionStart;
+        const originalLength = idField.value.length;
+        const digitsOnly = idField.value.replace(/[^0-9]/g, '');
+        if (digitsOnly !== idField.value) {
+            idField.value = digitsOnly;
+            // Keep the caret in a sensible position after stripping characters
+            const removedBeforeCursor = originalLength - digitsOnly.length;
+            const newPos = Math.max(0, (cursorPos || digitsOnly.length) - removedBeforeCursor);
+            idField.setSelectionRange(newPos, newPos);
+        }
+    }
+
     function validateIdInput() {
         if (!confirmIdBtn) return;
+        sanitizeIdField();
         const valid = idField && idField.value.trim().length > 4;
         confirmIdBtn.disabled = !valid;
         confirmIdBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
