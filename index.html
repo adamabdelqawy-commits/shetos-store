@@ -8,24 +8,42 @@
 </head>
 <body>
 
-    <div id="animation-container">
+    <!-- =====================================================
+         PROFILE SETUP SCREEN (STEP 1)
+         ===================================================== -->
+    <div id="profile-setup-page">
+        <div class="profile-setup-box">
+            <h1 class="profile-setup-heading">Hello, please enter to create your profile</h1>
+
+            <input type="text" id="setup-username-input" class="profile-setup-field" placeholder="Enter your username" maxlength="30" autocomplete="off">
+
+            <input type="tel" id="setup-phone-input" class="profile-setup-field" placeholder="Enter your phone number (01xxxxxxxxx)" maxlength="11" autocomplete="off" inputmode="numeric">
+            <span id="setup-phone-error" class="profile-setup-error">Phone must be 11 digits and start with 01</span>
+
+            <div class="profile-setup-btn-row">
+                <button id="setup-enter-btn" class="profile-setup-enter-btn" disabled>Enter to Shetos Store</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="animation-container" style="display:none;">
         <div class="intro-energy-sphere"></div>
          <h1 class="brand-text">SHETOS STORE    <hr class="about-divider"> </h1>
     </div>
 
     <section id="store-page" class="page active">
-        <nav class="nav">
-            <ul>
-                <li class="active"><a href="#home" id="home" class="nav-link" data-i18n="navHome">Home</a></li>
-                <li><a href="#search" id="search" class="nav-link" data-i18n="navSearch">search</a></li>
-                <li><a href="#about" id="support" class="nav-link" data-i18n="navSupport">support</a></li>
-                <li><a href="#setting" id="setting" class="nav-link" data-i18n="navSetting">setting</a></li>
-            </ul>
-        </nav>
 
-        <div id="home-content-section" class="store-container tab-content-view active-view">
+        <div class="top-bar">
+            <div class="top-search-wrap">
+                <span class="top-search-icon">🔍</span>
+                <input type="text" id="top-search-input" class="top-search-rect" placeholder="Search a game...">
+            </div>
+            <button id="top-settings-btn" class="top-settings-icon-btn" aria-label="Settings">⚙️</button>
+        </div>
+
+        <div id="home-content-section" class="store-container">
             <h2 class="selection-title" data-i18n="chooseGame">CHOOSE YOUR GAME</h2>
-            <div class="game-grid">
+            <div class="game-grid" id="game-grid-scroll">
                 <div class="game-card ff-card" data-game-search-title="free fire">
                     <div class="card-bg ff-bg"></div>
                     <div class="icon-badge">
@@ -69,62 +87,113 @@
                     <span class="game-label">BLOOD STRIKE</span>
                 </div>
             </div>
-        </div>
-        
-        <div id="search-content-section" class="tab-content-view full-tab-modal-view">
-            <div class="neon-border-box">
-                <div class="search-bar-header">
-                    <input type="text" id="store-search-input" class="search-input-field" placeholder="Search a game..." data-i18n-placeholder="searchPlaceholder">
-                </div>
-                <div id="search-results-viewport" class="search-results-wrapper"></div>
-            </div>
-        </div>
-
-        <div id="about-content-section" class="tab-content-view full-tab-modal-view">
-            <div class="plain-modal-box contact-container">
-                <a href="https://wa.me/201096170744" target="_blank" class="support-phone-row">01096170744</a>
-                <a href="https://wa.me/201227395613" target="_blank" class="support-phone-row">01227395613</a>
-                <div id="feedback-input-box" class="feedback-form-box">
-                    <span class="feedback-small-text">اخبرنا ما رايك في موقعنا و اخبرنا تعديلاتك او مشاكل الموقع</span>
-                    <textarea id="feedback-textarea-field" class="feedback-input-rectangle" placeholder="اكتب هنا... write here..."></textarea>
-                    <button id="feedback-submit-btn" class="feedback-submit-button">SUBMIT</button>
-                </div>
-                <div id="feedback-thanks-box" class="feedback-cooperation-box" style="display: none;">
-                    thanks for your cooperation
-                </div>
-            </div>
-        </div>
-
-        <!-- =====================================================
-             SETTING TAB (NEW)
-             ===================================================== -->
-        <div id="setting-content-section" class="tab-content-view full-tab-modal-view">
-            <div class="plain-modal-box setting-container">
-                <h2 class="about-main-title" style="margin-bottom:28px;">⚙️ <span data-i18n="settingsTitle">Settings</span></h2>
-
-                <!-- Big Currency Button -->
-                <button id="open-currency-modal-btn" class="setting-big-rect-btn">
-                    <span class="setting-btn-icon">💱</span>
-                    <div class="setting-btn-text">
-                        <span class="setting-btn-title" data-i18n="changeCurrency">CHANGE CURRENCY</span>
-                        <span class="setting-btn-sub" id="current-currency-label">Current: Egyptian Pound (EGP)</span>
-                    </div>
-                    <span class="setting-btn-arrow">›</span>
-                </button>
-
-                <!-- Big Language Button -->
-                <button id="open-language-modal-btn" class="setting-big-rect-btn">
-                    <span class="setting-btn-icon">🌐</span>
-                    <div class="setting-btn-text">
-                        <span class="setting-btn-title" data-i18n="changeLanguage">CHANGE LANGUAGE</span>
-                        <span class="setting-btn-sub" id="current-language-label">Current: Default</span>
-                    </div>
-                    <span class="setting-btn-arrow">›</span>
-                </button>
-            </div>
+            <p id="no-games-found" class="no-games-found-msg" style="display:none;">No games found</p>
         </div>
 
     </section>
+
+    <!-- =====================================================
+         SETTINGS MODAL (restructured)
+         ===================================================== -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-box setting-container">
+            <button id="close-settings-modal" class="back-btn">← Back</button>
+            <h2 class="about-main-title" style="margin-bottom:28px;">⚙️ <span data-i18n="settingsTitle">Settings</span></h2>
+
+            <!-- Profile Section: single Edit button -->
+            <div class="profile-section">
+                <div id="profile-display-view" class="profile-display-view">
+                    <div class="profile-display-line"><span class="profile-row-icon">👤</span><span id="profile-username-display">-</span></div>
+                    <div class="profile-display-line"><span class="profile-row-icon">📱</span><span id="profile-phone-display">-</span></div>
+                    <button id="profile-edit-toggle-btn" class="profile-edit-toggle-btn">✏️ Edit Profile</button>
+                </div>
+                <div id="profile-edit-view" class="profile-edit-view" style="display:none;">
+                    <input type="text" id="profile-username-field" class="profile-row-value-input" maxlength="30" placeholder="Username">
+                    <input type="tel" id="profile-phone-field" class="profile-row-value-input" maxlength="11" inputmode="numeric" placeholder="Phone (01xxxxxxxxx)">
+                    <span id="profile-edit-error" class="profile-setup-error"></span>
+                    <button id="profile-save-btn" class="profile-save-btn">Save</button>
+                </div>
+                <span id="profile-save-status" class="profile-save-status"></span>
+            </div>
+
+            <!-- Feedback Button -->
+            <button id="open-feedback-modal-btn" class="setting-big-rect-btn">
+                <span class="setting-btn-icon">💬</span>
+                <div class="setting-btn-text">
+                    <span class="setting-btn-title">FEEDBACK</span>
+                    <span class="setting-btn-sub">Tell us what you think</span>
+                </div>
+                <span class="setting-btn-arrow">›</span>
+            </button>
+
+            <!-- Contact Us Button -->
+            <button id="open-contactus-modal-btn" class="setting-big-rect-btn">
+                <span class="setting-btn-icon">📞</span>
+                <div class="setting-btn-text">
+                    <span class="setting-btn-title">CONTACT US</span>
+                    <span class="setting-btn-sub">Reach us on WhatsApp</span>
+                </div>
+                <span class="setting-btn-arrow">›</span>
+            </button>
+
+            <!-- Big Currency Button -->
+            <button id="open-currency-modal-btn" class="setting-big-rect-btn">
+                <span class="setting-btn-icon">💱</span>
+                <div class="setting-btn-text">
+                    <span class="setting-btn-title" data-i18n="changeCurrency">CHANGE CURRENCY</span>
+                    <span class="setting-btn-sub" id="current-currency-label">Current: Egyptian Pound (EGP)</span>
+                </div>
+                <span class="setting-btn-arrow">›</span>
+            </button>
+
+            <!-- Big Language Button -->
+            <button id="open-language-modal-btn" class="setting-big-rect-btn">
+                <span class="setting-btn-icon">🌐</span>
+                <div class="setting-btn-text">
+                    <span class="setting-btn-title" data-i18n="changeLanguage">CHANGE LANGUAGE</span>
+                    <span class="setting-btn-sub" id="current-language-label">Current: Default</span>
+                </div>
+                <span class="setting-btn-arrow">›</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         FEEDBACK MODAL (moved out of "support")
+         ===================================================== -->
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="modal-box plain-modal-box">
+            <button id="close-feedback-modal" class="back-btn">← Back</button>
+            <h2 class="about-main-title" style="margin-bottom:20px;">💬 Feedback</h2>
+            <div id="feedback-input-box" class="feedback-form-box">
+                <span class="feedback-small-text">اخبرنا ما رايك في موقعنا و اخبرنا تعديلاتك او مشاكل الموقع</span>
+                <textarea id="feedback-textarea-field" class="feedback-input-rectangle" placeholder="اكتب هنا... write here..."></textarea>
+                <button id="feedback-submit-btn" class="feedback-submit-button">SUBMIT</button>
+            </div>
+            <div id="feedback-thanks-box" class="feedback-cooperation-box" style="display: none;">
+                thanks for your cooperation
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         CONTACT US MODAL (moved out of "support")
+         ===================================================== -->
+    <div id="contactus-modal" class="modal-overlay">
+        <div class="modal-box plain-modal-box contact-container">
+            <button id="close-contactus-modal" class="back-btn">← Back</button>
+            <h2 class="about-main-title" style="margin-bottom:20px;">📞 Contact Us</h2>
+            <div class="chat-icon-wrap">
+                <svg viewBox="0 0 64 64" class="chat-icon-svg" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="30" fill="#25D366"/>
+                    <path d="M20 44l2.4-8.2A14 14 0 1 1 32 46a13.9 13.9 0 0 1-6.6-1.7L20 46z" fill="#fff"/>
+                </svg>
+                <span class="chat-icon-label">Chat with us</span>
+            </div>
+            <a href="https://wa.me/201096170744" target="_blank" class="support-phone-row">01096170744</a>
+            <a href="https://wa.me/201227395613" target="_blank" class="support-phone-row">01227395613</a>
+        </div>
+    </div>
 
     <!-- =====================================================
          CURRENCY SELECTION MODAL (NEW)
