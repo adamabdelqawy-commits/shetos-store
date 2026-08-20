@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="color-scheme" content="dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Shetos Store">
+    <meta name="description" content="Shetos Store - fast and reliable game top-ups for Free Fire, PUBG, Call of Duty, FIFA, PES and Blood Strike.">
     <title>Shetos Store</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -43,7 +50,9 @@
 
         <div id="home-content-section" class="store-container">
             <h2 class="selection-title" data-i18n="chooseGame">CHOOSE YOUR GAME</h2>
-            <div class="game-grid" id="game-grid-scroll">
+            <div class="game-grid-wrapper">
+                <button type="button" id="game-scroll-left" class="scroll-arrow-btn scroll-arrow-left" aria-label="Scroll left">&#10094;</button>
+                <div class="game-grid" id="game-grid-scroll">
                 <div class="game-card ff-card" data-game-search-title="free fire">
                     <div class="card-bg ff-bg"></div>
                     <div class="icon-badge">
@@ -86,6 +95,8 @@
                     </div>
                     <span class="game-label">BLOOD STRIKE</span>
                 </div>
+                </div>
+                <button type="button" id="game-scroll-right" class="scroll-arrow-btn scroll-arrow-right" aria-label="Scroll right">&#10095;</button>
             </div>
             <p id="no-games-found" class="no-games-found-msg" style="display:none;">No games found</p>
         </div>
@@ -349,7 +360,7 @@
                     <span id="basket-total-price-sum">0 EGP</span>
                 </div>
                 <div id="success-notification" class="arabic-notice" style="display: none;">
-                    تم استلام رسالتك , و سيتم الشحن تلقاءيا خلال 20 دقيقه بعد استلام المبلغ المختار 01096170744
+                    تم استلام رسالتك , و سيتم الشحن تلقاءيا خلال 20 دقيقه بعد استلام المبلغ علي 01096170744
                 </div>
                 <div id="checkout-action-container">
                     <button id="checkout-btn" class="blue-btn">CONFIRM & COMPLETE CHECKOUT</button>

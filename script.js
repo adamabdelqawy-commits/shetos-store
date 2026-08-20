@@ -602,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // All data-price values are in EGP (base currency)
     // ==========================================
     const ffIdProducts = `
+        <div class="recharge-item" data-id="ff_id_50" data-name="◇ 50 Diamond" data-price="30"><span class="item-name">◇ 50 Diamond</span><span class="item-price">35 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_100" data-name="◇ 100 Diamond" data-price="55"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_210" data-name="◇ 210 Diamond" data-price="105"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_310" data-name="◇ 310 Diamond" data-price="155"><span class="item-name">◇ 310 Diamond</span><span class="item-price">155 EGP</span></div>
@@ -616,19 +617,16 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="ff_id_1450" data-name="◇ 1450 Diamond [اسبوعي +1000]" data-price="660"><span class="item-name">◇ 1450 Diamond [اسبوعي +1000]</span><span class="item-price">660 EGP</span></div>
     `;
 
-    const ffAccProducts = `
-        <div class="recharge-item membership" data-id="ff_acc_w_mem" data-name="★ Weekly Membership" data-price="85"><span class="item-name">★ Weekly Membership</span><span class="item-price">85 EGP</span></div>
-        <div class="recharge-item membership" data-id="ff_acc_m_mem" data-name="★ Monthly Membership" data-price="430"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
-    `;
+
 
     const pubgProducts = `
-        <div class="recharge-item" data-id="pubg_30" data-name="◇ 30 UC" data-price="25"><span class="item-name">◇ 30 UC</span><span class="item-price">25 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_60" data-name="◇ 60 UC" data-price="45"><span class="item-name">◇ 60 UC</span><span class="item-price">45 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_325" data-name="◇ 325 UC" data-price="215"><span class="item-name">◇ 325 UC</span><span class="item-price">215 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_660" data-name="◇ 660 UC" data-price="425"><span class="item-name">◇ 660 UC</span><span class="item-price">425 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_1800" data-name="◇ 1800 UC" data-price="1055"><span class="item-name">◇ 1800 UC</span><span class="item-price">1055 EGP</span></div>
-        <div class="recharge-item membership" data-id="pubg_lvl_50" data-name="★ LVL (1 - 50)" data-price="255"><span class="item-name">★ LVL (1 - 50)</span><span class="item-price">255 EGP</span></div>
-        <div class="recharge-item membership" data-id="pubg_lvl_100" data-name="★ LVL (1 - 100)" data-price="510"><span class="item-name">★ LVL (1 - 100)</span><span class="item-price">510 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_30" data-name="◇ 30 UC" data-price="30"><span class="item-name">◇ 30 UC</span><span class="item-price">30 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_60" data-name="◇ 60 UC" data-price="55"><span class="item-name">◇ 60 UC</span><span class="item-price">55 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_325" data-name="◇ 325 UC" data-price="245"><span class="item-name">◇ 325 UC</span><span class="item-price">245 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_660" data-name="◇ 660 UC" data-price="485"><span class="item-name">◇ 660 UC</span><span class="item-price">480 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_1800" data-name="◇ 1800 UC" data-price="1210"><span class="item-name">◇ 1800 UC</span><span class="item-price">1210 EGP</span></div>
+        <div class="recharge-item membership" data-id="pubg_lvl_50" data-name="★ LVL (1 - 50)" data-price="275"><span class="item-name">★ LVL (1 - 50)</span><span class="item-price">275 EGP</span></div>
+        <div class="recharge-item membership" data-id="pubg_lvl_100" data-name="★ LVL (1 - 100)" data-price="545"><span class="item-name">★ LVL (1 - 100)</span><span class="item-price">454 EGP</span></div>
     `;
 
     const codProducts = `
@@ -1128,6 +1126,112 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.error("Transmission failed:", err));
     }
+
+    // ==========================================
+    // HORIZONTAL SCROLL FOR GAME CARDS
+    // Works with: touch swipe (mobile/tablet), mouse click-drag (PC),
+    // mouse wheel (PC trackpads/mice), and left/right arrow buttons.
+    // ==========================================
+    (function initGameGridHorizontalScroll() {
+        const scrollTrack = document.getElementById('game-grid-scroll');
+        const btnLeft = document.getElementById('game-scroll-left');
+        const btnRight = document.getElementById('game-scroll-right');
+        if (!scrollTrack) return;
+
+        let isDown = false;
+        let didDrag = false;
+        let startX = 0;
+        let startScrollLeft = 0;
+
+        function beginDrag(clientX) {
+            isDown = true;
+            didDrag = false;
+            startX = clientX;
+            startScrollLeft = scrollTrack.scrollLeft;
+            scrollTrack.classList.add('is-dragging');
+        }
+
+        function moveDrag(clientX) {
+            if (!isDown) return;
+            const delta = clientX - startX;
+            if (Math.abs(delta) > 4) didDrag = true;
+            scrollTrack.scrollLeft = startScrollLeft - delta;
+        }
+
+        function endDrag() {
+            isDown = false;
+            scrollTrack.classList.remove('is-dragging');
+        }
+
+        // Mouse drag (desktop / PC)
+        scrollTrack.addEventListener('mousedown', (e) => {
+            beginDrag(e.pageX);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            moveDrag(e.pageX);
+        });
+        window.addEventListener('mouseup', endDrag);
+        scrollTrack.addEventListener('mouseleave', () => { if (isDown) endDrag(); });
+
+        // Prevent a click firing right after a drag (so cards don't open by accident)
+        scrollTrack.addEventListener('click', (e) => {
+            if (didDrag) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }, true);
+
+        // Touch swipe (Android / iOS) — native overflow-x handles this already,
+        // but we track drag state too so a swipe doesn't trigger a card tap.
+        scrollTrack.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length === 1) {
+                startX = e.touches[0].clientX;
+                startScrollLeft = scrollTrack.scrollLeft;
+                didDrag = false;
+            }
+        }, { passive: true });
+
+        scrollTrack.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches.length === 1) {
+                if (Math.abs(e.touches[0].clientX - startX) > 4) didDrag = true;
+            }
+        }, { passive: true });
+
+        // Mouse wheel: convert vertical wheel movement into horizontal scroll (PC)
+        scrollTrack.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                e.preventDefault();
+                scrollTrack.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+
+        // Arrow buttons
+        function cardScrollDistance() {
+            const firstCard = scrollTrack.querySelector('.game-card');
+            const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 200;
+            return cardWidth + 18; // card width + gap
+        }
+
+        if (btnLeft) {
+            btnLeft.addEventListener('click', () => {
+                scrollTrack.scrollBy({ left: -cardScrollDistance() * 2, behavior: 'smooth' });
+            });
+        }
+        if (btnRight) {
+            btnRight.addEventListener('click', () => {
+                scrollTrack.scrollBy({ left: cardScrollDistance() * 2, behavior: 'smooth' });
+            });
+        }
+
+        // Keyboard support (left/right arrow keys when the strip is focused)
+        scrollTrack.setAttribute('tabindex', '0');
+        scrollTrack.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') scrollTrack.scrollBy({ left: cardScrollDistance(), behavior: 'smooth' });
+            if (e.key === 'ArrowLeft') scrollTrack.scrollBy({ left: -cardScrollDistance(), behavior: 'smooth' });
+        });
+    })();
 
     // ==========================================
     // GAME CARD CLICK EVENTS
