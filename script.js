@@ -1,163 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================
-    // PROFILE (STEP 1) + INTRO ANIMATION GATE
+    // INTRO ANIMATION TIMING ENGINE
     // ==========================================
-    const PHONE_REGEX = /^01[0-9]{9}$/; // exactly 11 digits, starts with 01
-
-    function getSavedProfile() {
-        return {
-            username: localStorage.getItem('shetos_username') || '',
-            phone: localStorage.getItem('shetos_phone') || ''
-        };
-    }
-
-    function saveProfile(username, phone) {
-        localStorage.setItem('shetos_username', username);
-        localStorage.setItem('shetos_phone', phone);
-    }
-
-    function runIntroThenStore() {
-        const introOverlayNode = document.getElementById("animation-container");
-        if (introOverlayNode) {
-            introOverlayNode.style.display = "flex";
+    const introOverlayNode = document.getElementById("animation-container");
+    if (introOverlayNode) {
+        setTimeout(() => {
+            introOverlayNode.style.opacity = "0";
             setTimeout(() => {
-                introOverlayNode.style.opacity = "0";
-                setTimeout(() => {
-                    introOverlayNode.remove();
-                    document.body.style.overflow = "auto";
-                    document.body.style.overflowX = "hidden";
-                }, 800);
-            }, 3200);
-        }
-    }
-
-    const profileSetupPage = document.getElementById('profile-setup-page');
-    const setupUsernameInput = document.getElementById('setup-username-input');
-    const setupPhoneInput = document.getElementById('setup-phone-input');
-    const setupPhoneError = document.getElementById('setup-phone-error');
-    const setupEnterBtn = document.getElementById('setup-enter-btn');
-
-    function validateSetupForm() {
-        const uname = setupUsernameInput.value.trim();
-        const phone = setupPhoneInput.value.trim();
-        const phoneValid = PHONE_REGEX.test(phone);
-
-        if (phone.length > 0 && !phoneValid) {
-            setupPhoneInput.classList.add('field-invalid');
-            setupPhoneError.classList.add('show');
-        } else {
-            setupPhoneInput.classList.remove('field-invalid');
-            setupPhoneError.classList.remove('show');
-        }
-
-        const ready = uname.length > 0 && phoneValid;
-        setupEnterBtn.disabled = !ready;
-        setupEnterBtn.classList.toggle('ready', ready);
-        return ready;
-    }
-
-    if (setupPhoneInput) {
-        setupPhoneInput.addEventListener('input', () => {
-            // Only allow digits
-            setupPhoneInput.value = setupPhoneInput.value.replace(/[^0-9]/g, '').slice(0, 11);
-            validateSetupForm();
-        });
-    }
-    if (setupUsernameInput) {
-        setupUsernameInput.addEventListener('input', validateSetupForm);
-    }
-
-    if (setupEnterBtn) {
-        setupEnterBtn.addEventListener('click', () => {
-            if (!validateSetupForm()) return;
-            const uname = setupUsernameInput.value.trim();
-            const phone = setupPhoneInput.value.trim();
-            saveProfile(uname, phone);
-            if (profileSetupPage) profileSetupPage.remove();
-            runIntroThenStore();
-        });
-    }
-
-    // Entry point: skip setup if a profile already exists, otherwise show it
-    const existingProfile = getSavedProfile();
-    if (existingProfile.username && PHONE_REGEX.test(existingProfile.phone)) {
-        if (profileSetupPage) profileSetupPage.remove();
-        runIntroThenStore();
-    }
-    // else: profile-setup-page stays visible (animation-container is display:none until then)
-
-    // ==========================================
-    // SETTINGS: PROFILE VIEW / EDIT (combined single button, auto-save)
-    // ==========================================
-    const profileDisplayView   = document.getElementById('profile-display-view');
-    const profileEditView      = document.getElementById('profile-edit-view');
-    const profileUsernameDisplay = document.getElementById('profile-username-display');
-    const profilePhoneDisplay    = document.getElementById('profile-phone-display');
-    const profileEditToggleBtn = document.getElementById('profile-edit-toggle-btn');
-    const profileUsernameField = document.getElementById('profile-username-field');
-    const profilePhoneField    = document.getElementById('profile-phone-field');
-    const profileEditError     = document.getElementById('profile-edit-error');
-    const profileSaveBtn       = document.getElementById('profile-save-btn');
-    const profileSaveStatus    = document.getElementById('profile-save-status');
-
-    function flashSaveStatus(text) {
-        if (!profileSaveStatus) return;
-        profileSaveStatus.textContent = text;
-        profileSaveStatus.classList.add('show');
-        setTimeout(() => profileSaveStatus.classList.remove('show'), 1600);
-    }
-
-    function loadProfileIntoSettings() {
-        const p = getSavedProfile();
-        if (profileUsernameDisplay) profileUsernameDisplay.textContent = p.username || '-';
-        if (profilePhoneDisplay) profilePhoneDisplay.textContent = p.phone || '-';
-        if (profileUsernameField) profileUsernameField.value = p.username;
-        if (profilePhoneField) profilePhoneField.value = p.phone;
-    }
-    loadProfileIntoSettings();
-
-    if (profileEditToggleBtn) {
-        profileEditToggleBtn.addEventListener('click', () => {
-            const p = getSavedProfile();
-            if (profileUsernameField) profileUsernameField.value = p.username;
-            if (profilePhoneField) profilePhoneField.value = p.phone;
-            if (profileEditError) profileEditError.classList.remove('show');
-            if (profileDisplayView) profileDisplayView.style.display = 'none';
-            if (profileEditView) profileEditView.style.display = 'flex';
-            if (profileUsernameField) profileUsernameField.focus();
-        });
-    }
-
-    if (profilePhoneField) {
-        profilePhoneField.addEventListener('input', () => {
-            profilePhoneField.value = profilePhoneField.value.replace(/[^0-9]/g, '').slice(0, 11);
-        });
-    }
-
-    if (profileSaveBtn) {
-        profileSaveBtn.addEventListener('click', () => {
-            const uname = (profileUsernameField.value || '').trim();
-            const phone = (profilePhoneField.value || '').trim();
-
-            if (uname.length === 0) {
-                profileEditError.textContent = 'Username cannot be empty';
-                profileEditError.classList.add('show');
-                return;
-            }
-            if (!PHONE_REGEX.test(phone)) {
-                profileEditError.textContent = 'Phone must be 11 digits and start with 01';
-                profileEditError.classList.add('show');
-                return;
-            }
-
-            saveProfile(uname, phone);
-            loadProfileIntoSettings();
-            if (profileEditError) profileEditError.classList.remove('show');
-            if (profileEditView) profileEditView.style.display = 'none';
-            if (profileDisplayView) profileDisplayView.style.display = 'flex';
-            flashSaveStatus('✔ Profile saved');
-        });
+                introOverlayNode.remove();
+                document.body.style.overflow = "auto";
+                document.body.style.overflowX = "hidden";
+                syncInitialNavbarLayout();
+                routeTabView("#home");
+            }, 800); 
+        }, 3200); 
     }
 
     // ==========================================
@@ -291,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
             selectProducts: "SELECT PRODUCTS",
             basket: "Basket",
-            basketMarket: "ORDER SUMMARY",
+            basketMarket: "SHOPPING BASKET MARKET",
             totalAmount: "TOTAL AMOUNT:",
             confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
             enterGameId: "ENTER YOUR GAME ID",
@@ -331,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
             selectProducts: "SELECT PRODUCTS",
             basket: "Basket",
-            basketMarket: "ORDER SUMMARY",
+            basketMarket: "SHOPPING BASKET",
             totalAmount: "TOTAL AMOUNT:",
             confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
             enterGameId: "ENTER YOUR GAME ID",
@@ -371,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "إبقائك في اللعبة بدون متاعب. في شيتوس ستور، نجمع الخدمة السلسة وأفضل الصفقات والشغف الحقيقي بالألعاب لمنحك أفضل تجربة.",
             selectProducts: "اختر المنتجات",
             basket: "السلة",
-            basketMarket: "ملخص الطلب",
+            basketMarket: "سلة التسوق",
             totalAmount: "الإجمالي:",
             confirmCheckout: "تأكيد وإتمام الطلب",
             enterGameId: "أدخل معرف اللعبة",
@@ -469,8 +326,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const ffAccDesc = document.querySelector('#ff-choose-acc .ff-type-desc');
         if (ffAccDesc) ffAccDesc.textContent = t('loginDesc');
 
+        const openBasketBtn = document.getElementById('open-basket-from-products');
+        if (openBasketBtn) {
+            const count = openBasketBtn.querySelector('span') ? openBasketBtn.querySelector('span').textContent : '0';
+            openBasketBtn.innerHTML = `${t('basket')} (<span>${count}</span>) 🛒`;
+        }
+
         // Update search placeholder live
-        const searchInp = document.getElementById('top-search-input');
+        const searchInp = document.getElementById('store-search-input');
         if (searchInp) searchInp.placeholder = t('searchPlaceholder');
     }
 
@@ -549,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Recharge / product list
     const rechargeList = document.querySelector('.recharge-list');
     const backToId     = document.getElementById('back-to-id');
+    const openBasketFromProducts = document.getElementById('open-basket-from-products');
 
     // Credentials modal elements
     const credModalTitle   = document.getElementById('cred-modal-title');
@@ -568,13 +432,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToRecharge       = document.getElementById('back-to-recharge');
     const checkoutActionCont   = document.getElementById('checkout-action-container');
     const successNotification  = document.getElementById('success-notification');
+    const floatingBasketTrigger = document.getElementById('floating-basket-trigger');
 
     // ==========================================
     // STATE
     // ==========================================
     let currentGame   = "";
     let currentMethod = "ID"; // "ID" or "ACC"
-    let selectedProduct = null; // { id, name, price, game, method } — single item being purchased
+    let shoppingBasket = [];
     let authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
 
     // ==========================================
@@ -594,7 +459,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // All data-price values are in EGP (base currency)
     // ==========================================
     const ffIdProducts = `
-        <div class="recharge-item" data-id="ff_id_50" data-name="◇ 50 Diamond" data-price="30"><span class="item-name">◇ 50 Diamond</span><span class="item-price">35 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_100" data-name="◇ 100 Diamond" data-price="55"><span class="item-name">◇ 100 Diamond</span><span class="item-price">55 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_210" data-name="◇ 210 Diamond" data-price="105"><span class="item-name">◇ 210 Diamond</span><span class="item-price">105 EGP</span></div>
         <div class="recharge-item" data-id="ff_id_310" data-name="◇ 310 Diamond" data-price="155"><span class="item-name">◇ 310 Diamond</span><span class="item-price">155 EGP</span></div>
@@ -609,16 +473,19 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="recharge-item" data-id="ff_id_1450" data-name="◇ 1450 Diamond [اسبوعي +1000]" data-price="660"><span class="item-name">◇ 1450 Diamond [اسبوعي +1000]</span><span class="item-price">660 EGP</span></div>
     `;
 
-
+    const ffAccProducts = `
+        <div class="recharge-item membership" data-id="ff_acc_w_mem" data-name="★ Weekly Membership" data-price="85"><span class="item-name">★ Weekly Membership</span><span class="item-price">85 EGP</span></div>
+        <div class="recharge-item membership" data-id="ff_acc_m_mem" data-name="★ Monthly Membership" data-price="430"><span class="item-name">★ Monthly Membership</span><span class="item-price">430 EGP</span></div>
+    `;
 
     const pubgProducts = `
-        <div class="recharge-item" data-id="pubg_30" data-name="◇ 30 UC" data-price="30"><span class="item-name">◇ 30 UC</span><span class="item-price">30 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_60" data-name="◇ 60 UC" data-price="55"><span class="item-name">◇ 60 UC</span><span class="item-price">55 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_325" data-name="◇ 325 UC" data-price="245"><span class="item-name">◇ 325 UC</span><span class="item-price">245 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_660" data-name="◇ 660 UC" data-price="485"><span class="item-name">◇ 660 UC</span><span class="item-price">480 EGP</span></div>
-        <div class="recharge-item" data-id="pubg_1800" data-name="◇ 1800 UC" data-price="1210"><span class="item-name">◇ 1800 UC</span><span class="item-price">1210 EGP</span></div>
-        <div class="recharge-item membership" data-id="pubg_lvl_50" data-name="★ LVL (1 - 50)" data-price="275"><span class="item-name">★ LVL (1 - 50)</span><span class="item-price">275 EGP</span></div>
-        <div class="recharge-item membership" data-id="pubg_lvl_100" data-name="★ LVL (1 - 100)" data-price="545"><span class="item-name">★ LVL (1 - 100)</span><span class="item-price">454 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_30" data-name="◇ 30 UC" data-price="25"><span class="item-name">◇ 30 UC</span><span class="item-price">25 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_60" data-name="◇ 60 UC" data-price="45"><span class="item-name">◇ 60 UC</span><span class="item-price">45 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_325" data-name="◇ 325 UC" data-price="215"><span class="item-name">◇ 325 UC</span><span class="item-price">215 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_660" data-name="◇ 660 UC" data-price="425"><span class="item-name">◇ 660 UC</span><span class="item-price">425 EGP</span></div>
+        <div class="recharge-item" data-id="pubg_1800" data-name="◇ 1800 UC" data-price="1055"><span class="item-name">◇ 1800 UC</span><span class="item-price">1055 EGP</span></div>
+        <div class="recharge-item membership" data-id="pubg_lvl_50" data-name="★ LVL (1 - 50)" data-price="255"><span class="item-name">★ LVL (1 - 50)</span><span class="item-price">255 EGP</span></div>
+        <div class="recharge-item membership" data-id="pubg_lvl_100" data-name="★ LVL (1 - 100)" data-price="510"><span class="item-name">★ LVL (1 - 100)</span><span class="item-price">510 EGP</span></div>
     `;
 
     const codProducts = `
@@ -655,81 +522,120 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     // ==========================================
-    // TOP BAR: SEARCH (inline, filters home cards)
+    // NAV / ROUTING
     // ==========================================
-    const topSearchInput = document.getElementById('top-search-input');
-    const noGamesFoundMsg = document.getElementById('no-games-found');
+    function inverseMousePosition(element, event) {
+        const rect = element.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        return {
+            x1: -(x - rect.width / 2) / 20,
+            y1: -(y - rect.height / 2) / 20
+        };
+    }
 
-    function filterHomeGameCards(queryText) {
+    function handleTabClick(event) {
+        const navNode = document.querySelector('.nav');
+        const targetLi = event.target.closest('li');
+        if (!targetLi) return;
+        const width = targetLi.offsetWidth;
+        const left = targetLi.getBoundingClientRect().left;
+        const offsetLeft = left - navNode.getBoundingClientRect().left;
+        document.querySelectorAll('.nav ul li').forEach(link => link.classList.remove('active'));
+        targetLi.classList.add('active');
+        navNode.style.setProperty('--after-bg-position', offsetLeft);
+        navNode.style.setProperty('--after-radial-bg-position', (left + width / 2) - navNode.getBoundingClientRect().left);
+        navNode.style.setProperty('--after-bg-width', width);
+        const targetHash = event.target.getAttribute('href');
+        routeTabView(targetHash);
+    }
+
+    const premiumNav = document.querySelector('.nav');
+    if (premiumNav) {
+        const navLinks = premiumNav.querySelectorAll('li a');
+        for (let i = 0; i < navLinks.length; i++) {
+            navLinks[i].addEventListener('click', (e) => { e.preventDefault(); handleTabClick(e); });
+            navLinks[i].addEventListener("mousemove", (event) => {
+                const tilt = inverseMousePosition(event.target, event);
+                premiumNav.style.setProperty("--tilt-bg-y", tilt.x1 * 2);
+                premiumNav.style.setProperty("--tilt-bg-x", tilt.y1 * 2);
+            });
+        }
+    }
+
+    function syncInitialNavbarLayout() {
+        if (!storePage || !storePage.classList.contains('active')) return;
+        if (!premiumNav) return;
+        const activeLi = premiumNav.querySelector('ul li.active') || premiumNav.querySelector('ul li');
+        if (!activeLi) return;
+        const width = activeLi.offsetWidth;
+        const left = activeLi.getBoundingClientRect().left;
+        const offsetLeft = left - premiumNav.getBoundingClientRect().left;
+        premiumNav.style.setProperty('--after-bg-position', offsetLeft);
+        premiumNav.style.setProperty('--after-radial-bg-position', (left + width / 2) - premiumNav.getBoundingClientRect().left);
+        premiumNav.style.setProperty('--after-bg-width', width);
+    }
+    window.addEventListener('resize', syncInitialNavbarLayout);
+
+    function routeTabView(hashTarget) {
+        document.querySelectorAll('.tab-content-view').forEach(view => view.classList.remove('active-view'));
+        if (hashTarget === "#home" || hashTarget === "") {
+            const homeSec = document.getElementById('home-content-section');
+            if (homeSec) homeSec.classList.add('active-view');
+        } else if (hashTarget === "#search") {
+            const searchSec = document.getElementById('search-content-section');
+            if (searchSec) searchSec.classList.add('active-view');
+            const searchInp = document.getElementById('store-search-input');
+            if (searchInp) searchInp.value = "";
+            processLiveSearchFilter("");
+        } else if (hashTarget === "#about") {
+            const aboutSec = document.getElementById('about-content-section');
+            if (aboutSec) aboutSec.classList.add('active-view');
+        } else if (hashTarget === "#setting") {
+            const settingSec = document.getElementById('setting-content-section');
+            if (settingSec) settingSec.classList.add('active-view');
+        }
+    }
+
+    // ==========================================
+    // SEARCH
+    // ==========================================
+    const searchInput = document.getElementById('store-search-input');
+    const searchResultsViewport = document.getElementById('search-results-viewport');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => { processLiveSearchFilter(e.target.value); });
+    }
+
+    function processLiveSearchFilter(queryText) {
+        if (!searchResultsViewport) return;
         const cleanedQuery = queryText.trim().toLowerCase();
+        searchResultsViewport.innerHTML = "";
+        if (cleanedQuery === "") {
+            searchResultsViewport.innerHTML = `<div style="color: #52525b; font-size: 1rem; grid-column: 1/-1; text-align:center;">Type a game title to filter...</div>`;
+            return;
+        }
         const sourceCards = document.querySelectorAll('#home-content-section .game-card');
         let matchesCount = 0;
         sourceCards.forEach(card => {
             const indexName = card.getAttribute('data-game-search-title') || "";
-            const isMatch = cleanedQuery === "" || indexName.includes(cleanedQuery);
-            card.style.display = isMatch ? "" : "none";
-            if (isMatch) matchesCount++;
+            if (indexName.includes(cleanedQuery)) {
+                matchesCount++;
+                const clonedCard = card.cloneNode(true);
+                clonedCard.addEventListener('click', () => {
+                    if (indexName.includes("free fire"))   { currentGame = "FREE FIRE";    openFFTypeModal(); }
+                    else if (indexName.includes("pubg"))   { currentGame = "PUBG";          openProductsDirectly(); }
+                    else if (indexName.includes("call of duty")) { currentGame = "CALL OF DUTY"; openProductsDirectly(); }
+                    else if (indexName.includes("fifa"))   { currentGame = "FIFA MOBILE";  openProductsDirectly(); }
+                    else if (indexName.includes("pes"))    { currentGame = "PES MOBILE";   openProductsDirectly(); }
+                    else if (indexName.includes("blood strike")) { currentGame = "BLOOD STRIKE"; openProductsDirectly(); }
+                });
+                searchResultsViewport.appendChild(clonedCard);
+            }
         });
-        if (noGamesFoundMsg) noGamesFoundMsg.style.display = matchesCount === 0 ? "block" : "none";
-    }
-
-    if (topSearchInput) {
-        topSearchInput.addEventListener('input', (e) => { filterHomeGameCards(e.target.value); });
-    }
-
-    // ==========================================
-    // TOP BAR: SETTINGS ICON → SETTINGS MODAL
-    // ==========================================
-    const settingsModal      = document.getElementById('settings-modal');
-    const topSettingsBtn     = document.getElementById('top-settings-btn');
-    const closeSettingsModal = document.getElementById('close-settings-modal');
-
-    if (topSettingsBtn) {
-        topSettingsBtn.addEventListener('click', () => {
-            loadProfileIntoSettings();
-            if (settingsModal) settingsModal.classList.add('active');
-        });
-    }
-    if (closeSettingsModal) {
-        closeSettingsModal.addEventListener('click', () => {
-            if (settingsModal) settingsModal.classList.remove('active');
-        });
-    }
-
-    // ==========================================
-    // SETTINGS: FEEDBACK MODAL (opens on top of settings)
-    // ==========================================
-    const feedbackModal          = document.getElementById('feedback-modal');
-    const openFeedbackModalBtn   = document.getElementById('open-feedback-modal-btn');
-    const closeFeedbackModalBtn  = document.getElementById('close-feedback-modal');
-
-    if (openFeedbackModalBtn) {
-        openFeedbackModalBtn.addEventListener('click', () => {
-            if (feedbackModal) feedbackModal.classList.add('active');
-        });
-    }
-    if (closeFeedbackModalBtn) {
-        closeFeedbackModalBtn.addEventListener('click', () => {
-            if (feedbackModal) feedbackModal.classList.remove('active');
-        });
-    }
-
-    // ==========================================
-    // SETTINGS: CONTACT US MODAL (opens on top of settings)
-    // ==========================================
-    const contactUsModal         = document.getElementById('contactus-modal');
-    const openContactUsModalBtn  = document.getElementById('open-contactus-modal-btn');
-    const closeContactUsModalBtn = document.getElementById('close-contactus-modal');
-
-    if (openContactUsModalBtn) {
-        openContactUsModalBtn.addEventListener('click', () => {
-            if (contactUsModal) contactUsModal.classList.add('active');
-        });
-    }
-    if (closeContactUsModalBtn) {
-        closeContactUsModalBtn.addEventListener('click', () => {
-            if (contactUsModal) contactUsModal.classList.remove('active');
-        });
+        if (matchesCount === 0) {
+            searchResultsViewport.innerHTML = `<div class="not-found-feedback">No Games Found for "${queryText}"</div>`;
+        }
     }
 
     // ==========================================
@@ -742,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeFFType) {
         closeFFType.addEventListener('click', () => {
             if (ffTypeModal) ffTypeModal.classList.remove('active');
-            resetSelection();
+            resetBasket();
         });
     }
 
@@ -772,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyThemeColors();
         refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
-        bindProductClickHandlers();
+        injectReactiveQuantitySelectors();
     }
 
     // ==========================================
@@ -789,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyThemeColors();
         refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
-        bindProductClickHandlers();
+        injectReactiveQuantitySelectors();
     }
 
     function applyThemeColors() {
@@ -813,13 +719,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentGame === "FREE FIRE") {
                 openFFTypeModal();
             } else {
-                resetSelection();
+                resetBasket();
             }
         });
     }
 
     function openCredentialsModal() {
-        if (!credentialsModal || !themes[currentGame] || !selectedProduct) return;
+        if (!credentialsModal || !themes[currentGame]) return;
         const theme = themes[currentGame];
 
         if (credModalTitle) { credModalTitle.innerText = currentGame; credModalTitle.style.color = theme.color; }
@@ -912,54 +818,122 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // PRODUCT SELECTION — tap a product to buy it directly
+    // BASKET / CART
     // ==========================================
-    function resetSelection() {
-        selectedProduct = null;
-        authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
+    function updateBasketDOMCounters() {
+        const totalItemsCount = shoppingBasket.reduce((acc, curr) => acc + curr.quantity, 0);
+        document.querySelectorAll('.basket-badge-count, #open-basket-from-products span').forEach(el => {
+            el.innerText = totalItemsCount;
+        });
+        if (floatingBasketTrigger) {
+            floatingBasketTrigger.style.display = totalItemsCount > 0 ? 'flex' : 'none';
+        }
     }
 
-    function bindProductClickHandlers() {
+    // ==========================================
+    // RESET BASKET
+    // ==========================================
+    function resetBasket() {
+        shoppingBasket = [];
+        authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
+        updateBasketDOMCounters();
+        if (rechargeList) {
+            rechargeList.querySelectorAll('.qty-current-val').forEach(el => { el.innerText = '0'; });
+        }
+    }
+
+    function injectReactiveQuantitySelectors() {
         if (!rechargeList) return;
         rechargeList.querySelectorAll('.recharge-item').forEach(itemNode => {
-            const pId = itemNode.getAttribute('data-id');
+            const pId    = itemNode.getAttribute('data-id');
+            const pName  = itemNode.getAttribute('data-name');
+            const pPrice = parseFloat(itemNode.getAttribute('data-price')); // always EGP base
             if (!pId) return;
-            itemNode.onclick = () => {
-                const pName  = itemNode.getAttribute('data-name');
-                const pPrice = parseFloat(itemNode.getAttribute('data-price')); // always EGP base
-                selectedProduct = { id: pId, name: pName, price: pPrice, game: currentGame, method: currentMethod };
-                openCredentialsModal();
-            };
+
+            const activeCartItem  = shoppingBasket.find(i => i.id === pId);
+            const currentQuantity = activeCartItem ? activeCartItem.quantity : 0;
+
+            let qtyContainer = itemNode.querySelector('.product-quantity-selector');
+            if (!qtyContainer) {
+                qtyContainer = document.createElement('div');
+                qtyContainer.className = 'product-quantity-selector';
+                qtyContainer.addEventListener('click', (e) => e.stopPropagation());
+                itemNode.appendChild(qtyContainer);
+            }
+            qtyContainer.innerHTML = `
+                <button class="qty-mod-btn decrement-val">-</button>
+                <span class="qty-current-val">${currentQuantity}</span>
+                <button class="qty-mod-btn increment-val">+</button>
+            `;
+            // Cart always stores EGP price; display conversion happens at render time
+            qtyContainer.querySelector('.increment-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, 1); };
+            qtyContainer.querySelector('.decrement-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, -1); };
         });
     }
 
+    function modifyCartItemQuantity(id, name, price, step) {
+        let idx = shoppingBasket.findIndex(item => item.id === id);
+        if (idx > -1) {
+            shoppingBasket[idx].quantity += step;
+            if (shoppingBasket[idx].quantity <= 0) shoppingBasket.splice(idx, 1);
+        } else if (step > 0) {
+            shoppingBasket.push({ id, name, price, game: currentGame, method: currentMethod, quantity: 1 });
+        }
+        updateBasketDOMCounters();
+        injectReactiveQuantitySelectors();
+    }
+
+    if (openBasketFromProducts) {
+        openBasketFromProducts.onclick = () => {
+            if (shoppingBasket.length === 0) {
+                alert(t('basketEmpty'));
+                return;
+            }
+            openCredentialsModal();
+        };
+    }
+
+    if (floatingBasketTrigger) {
+        floatingBasketTrigger.onclick = () => {
+            if (shoppingBasket.length > 0) {
+                openCredentialsModal();
+            }
+        };
+    }
+
     // ==========================================
-    // CHECKOUT MODAL — price shown in active currency
+    // CHECKOUT MODAL — prices shown in active currency
     // ==========================================
     function compileAndOpenCheckoutModal() {
         const basketContainer    = document.getElementById('basket-items-wrapper');
         const totalPriceSumNode  = document.getElementById('basket-total-price-sum');
 
-        if (!selectedProduct) {
-            alert("Please choose a product first.");
+        if (shoppingBasket.length === 0) {
+            alert("Your shopping basket is empty! Add products first.");
             return;
         }
 
-        if (basketContainer) {
-            basketContainer.innerHTML = "";
-            const rowEl = document.createElement('div');
-            rowEl.className = 'basket-summary-row';
-            rowEl.innerHTML = `
-                <div class="basket-item-info">
-                    <div class="basket-item-title">${selectedProduct.name}</div>
-                    <div class="basket-item-meta">Game: ${selectedProduct.game}</div>
-                </div>
-                <div class="basket-item-cost">${formatPrice(selectedProduct.price)}</div>
-            `;
-            basketContainer.appendChild(rowEl);
-        }
+        if (basketContainer) basketContainer.innerHTML = "";
+        let accumulatedSumEGP = 0;
 
-        if (totalPriceSumNode) totalPriceSumNode.innerText = formatPrice(selectedProduct.price);
+        shoppingBasket.forEach(item => {
+            const rowTotalEGP = item.price * item.quantity; // item.price is always EGP
+            accumulatedSumEGP += rowTotalEGP;
+            if (basketContainer) {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'basket-summary-row';
+                rowEl.innerHTML = `
+                    <div class="basket-item-info">
+                        <div class="basket-item-title">${item.name} (x${item.quantity})</div>
+                        <div class="basket-item-meta">Game: ${item.game}</div>
+                    </div>
+                    <div class="basket-item-cost">${formatPrice(rowTotalEGP)}</div>
+                `;
+                basketContainer.appendChild(rowEl);
+            }
+        });
+
+        if (totalPriceSumNode) totalPriceSumNode.innerText = formatPrice(accumulatedSumEGP);
         if (checkoutModal) checkoutModal.classList.add('active');
     }
 
@@ -973,45 +947,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // CHECKOUT CONFIRM → TELEGRAM
     // ==========================================
-    function bindCheckoutButton(btn) {
-        if (!btn) return;
-        btn.addEventListener('click', () => {
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
             let timerSeconds = 6;
-            btn.disabled = true;
-            btn.style.cursor = "not-allowed";
-            btn.style.background = "#555";
+            checkoutBtn.disabled = true;
+            checkoutBtn.style.cursor = "not-allowed";
+            checkoutBtn.style.background = "#555";
             const intervalLoop = setInterval(() => {
                 timerSeconds--;
                 if (timerSeconds > 0) {
                     let textDots = ".".repeat(((6 - timerSeconds) % 3) + 1);
-                    btn.innerText = `processing${textDots}`;
+                    checkoutBtn.innerText = `processing${textDots}`;
                 } else {
                     clearInterval(intervalLoop);
                     executeOrderCompletion();
                 }
             }, 1000);
-            btn.innerText = "processing.";
+            checkoutBtn.innerText = "processing.";
         });
     }
 
-    bindCheckoutButton(document.getElementById('checkout-btn'));
-
-    function showCheckoutError(message) {
-        if (checkoutActionCont) {
-            checkoutActionCont.innerHTML = `
-                <div class="checkout-error-block">⚠ ${message}</div>
-                <button id="checkout-btn" class="blue-btn">TRY AGAIN</button>
-            `;
-            bindCheckoutButton(document.getElementById('checkout-btn'));
-        }
-    }
-
     function executeOrderCompletion() {
-        if (!selectedProduct) return;
+        if (successNotification) successNotification.style.display = "block";
+        if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
 
-        // Telegram message always sends EGP price (base currency) for clarity
-        const productLine = `🎮 [${selectedProduct.game}] - ${selectedProduct.name} -> (${selectedProduct.price} EGP)`;
-        const orderTotal = selectedProduct.price;
+        // Telegram message always sends EGP prices (base currency) for clarity
+        let productsMessageList = shoppingBasket.map((item, idx) => {
+            return `${idx + 1}. 🎮 [${item.game}] - ${item.name} x${item.quantity} -> (${item.price * item.quantity} EGP)`;
+        }).join('\n');
+        let overallCartTotal = shoppingBasket.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         let userAccessInfoString = "";
         if (authenticatedUserMeta.method === "ID") {
@@ -1020,10 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userAccessInfoString = `📧 Login Email: ${authenticatedUserMeta.email}\n🔑 Account Password: ${authenticatedUserMeta.password}`;
         }
 
-        const customerProfile = getSavedProfile();
-        const customerInfoString = `👤 Customer: ${customerProfile.username || 'N/A'}\n📞 Contact: ${customerProfile.phone || 'N/A'}`;
-
-        const botPayload = `🛒 NEW MARKET ORDER\n\n${customerInfoString}\n\n${userAccessInfoString}\n\n📦 ITEM:\n${productLine}\n\n💰 TOTAL: ${orderTotal} EGP`;
+        const botPayload = `🛒 NEW MARKET ORDER\n\n${userAccessInfoString}\n\n📦 SELECTED ITEMS:\n${productsMessageList}\n\n💰 TOTAL: ${overallCartTotal} EGP`;
         const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         fetch(telegramApiUrl, {
@@ -1031,134 +993,34 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: botPayload })
         })
-        .then(res => res.json().then(data => ({ ok: res.ok && data.ok, data })))
-        .then(({ ok }) => {
-            if (!ok) throw new Error('Telegram API rejected the message');
-
-            // Order actually confirmed — now it's safe to show success and clear the selection
-            if (successNotification) successNotification.style.display = "block";
-            if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
-            resetSelection();
+        .then(() => {
+            shoppingBasket = [];
+            updateBasketDOMCounters();
             setTimeout(() => {
                 if (checkoutModal)         checkoutModal.classList.remove('active');
                 if (successNotification)   successNotification.style.display = "none";
                 if (checkoutActionCont) {
                     checkoutActionCont.innerHTML = `<button id="checkout-btn" class="blue-btn">CONFIRM & COMPLETE CHECKOUT</button>`;
-                    bindCheckoutButton(document.getElementById('checkout-btn'));
+                    const newBtn = document.getElementById('checkout-btn');
+                    if (newBtn) {
+                        newBtn.addEventListener('click', () => {
+                            let t = 6;
+                            newBtn.disabled = true;
+                            newBtn.style.cursor = "not-allowed";
+                            newBtn.style.background = "#555";
+                            const lp = setInterval(() => {
+                                t--;
+                                if (t > 0) { let d = ".".repeat(((6-t)%3)+1); newBtn.innerText = `processing${d}`; }
+                                else { clearInterval(lp); executeOrderCompletion(); }
+                            }, 1000);
+                            newBtn.innerText = "processing.";
+                        });
+                    }
                 }
             }, 20000);
         })
-        .catch(err => {
-            console.error("Order transmission failed:", err);
-            showCheckoutError("Couldn't send your order. Please check your connection and try again, or contact us on WhatsApp.");
-        });
+        .catch(err => console.error("Transmission failed:", err));
     }
-
-    // ==========================================
-    // HORIZONTAL SCROLL FOR GAME CARDS
-    // Works with: touch swipe (mobile/tablet), mouse click-drag (PC),
-    // mouse wheel (PC trackpads/mice), and left/right arrow buttons.
-    // ==========================================
-    (function initGameGridHorizontalScroll() {
-        const scrollTrack = document.getElementById('game-grid-scroll');
-        const btnLeft = document.getElementById('game-scroll-left');
-        const btnRight = document.getElementById('game-scroll-right');
-        if (!scrollTrack) return;
-
-        let isDown = false;
-        let didDrag = false;
-        let startX = 0;
-        let startScrollLeft = 0;
-
-        function beginDrag(clientX) {
-            isDown = true;
-            didDrag = false;
-            startX = clientX;
-            startScrollLeft = scrollTrack.scrollLeft;
-            scrollTrack.classList.add('is-dragging');
-        }
-
-        function moveDrag(clientX) {
-            if (!isDown) return;
-            const delta = clientX - startX;
-            if (Math.abs(delta) > 4) didDrag = true;
-            scrollTrack.scrollLeft = startScrollLeft - delta;
-        }
-
-        function endDrag() {
-            isDown = false;
-            scrollTrack.classList.remove('is-dragging');
-        }
-
-        // Mouse drag (desktop / PC)
-        scrollTrack.addEventListener('mousedown', (e) => {
-            beginDrag(e.pageX);
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            moveDrag(e.pageX);
-        });
-        window.addEventListener('mouseup', endDrag);
-        scrollTrack.addEventListener('mouseleave', () => { if (isDown) endDrag(); });
-
-        // Prevent a click firing right after a drag (so cards don't open by accident)
-        scrollTrack.addEventListener('click', (e) => {
-            if (didDrag) {
-                e.stopPropagation();
-                e.preventDefault();
-            }
-        }, true);
-
-        // Touch swipe (Android / iOS) — native overflow-x handles this already,
-        // but we track drag state too so a swipe doesn't trigger a card tap.
-        scrollTrack.addEventListener('touchstart', (e) => {
-            if (e.touches && e.touches.length === 1) {
-                startX = e.touches[0].clientX;
-                startScrollLeft = scrollTrack.scrollLeft;
-                didDrag = false;
-            }
-        }, { passive: true });
-
-        scrollTrack.addEventListener('touchmove', (e) => {
-            if (e.touches && e.touches.length === 1) {
-                if (Math.abs(e.touches[0].clientX - startX) > 4) didDrag = true;
-            }
-        }, { passive: true });
-
-        // Mouse wheel: convert vertical wheel movement into horizontal scroll (PC)
-        scrollTrack.addEventListener('wheel', (e) => {
-            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                e.preventDefault();
-                scrollTrack.scrollLeft += e.deltaY;
-            }
-        }, { passive: false });
-
-        // Arrow buttons
-        function cardScrollDistance() {
-            const firstCard = scrollTrack.querySelector('.game-card');
-            const cardWidth = firstCard ? firstCard.getBoundingClientRect().width : 200;
-            return cardWidth + 18; // card width + gap
-        }
-
-        if (btnLeft) {
-            btnLeft.addEventListener('click', () => {
-                scrollTrack.scrollBy({ left: -cardScrollDistance() * 2, behavior: 'smooth' });
-            });
-        }
-        if (btnRight) {
-            btnRight.addEventListener('click', () => {
-                scrollTrack.scrollBy({ left: cardScrollDistance() * 2, behavior: 'smooth' });
-            });
-        }
-
-        // Keyboard support (left/right arrow keys when the strip is focused)
-        scrollTrack.setAttribute('tabindex', '0');
-        scrollTrack.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') scrollTrack.scrollBy({ left: cardScrollDistance(), behavior: 'smooth' });
-            if (e.key === 'ArrowLeft') scrollTrack.scrollBy({ left: -cardScrollDistance(), behavior: 'smooth' });
-        });
-    })();
 
     // ==========================================
     // GAME CARD CLICK EVENTS
@@ -1252,8 +1114,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
-            // Don't reset the selected product when closing currency, language, settings, feedback or contact-us modal
-            if (['currency-modal', 'language-modal', 'settings-modal', 'feedback-modal', 'contactus-modal'].includes(e.target.id)) {
+            // Don't reset basket when closing currency or language modal
+            if (e.target.id === 'currency-modal' || e.target.id === 'language-modal') {
                 e.target.classList.remove('active');
                 return;
             }
@@ -1261,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             [ffTypeModal, rechargeModal, credentialsModal, checkoutModal].forEach(m => {
                 if (m) m.classList.remove('active');
             });
-            resetSelection();
+            resetBasket();
         }
     });
 });
