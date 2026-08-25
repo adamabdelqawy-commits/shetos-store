@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
             selectProducts: "SELECT PRODUCTS",
             basket: "Basket",
-            basketMarket: "SHOPPING BASKET MARKET",
+            basketMarket: "ORDER SUMMARY",
             totalAmount: "TOTAL AMOUNT:",
             confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
             enterGameId: "ENTER YOUR GAME ID",
@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "To keep you in the game without the hassle. At Shetos Store, we combine seamless service, unbeatable deals, and a genuine passion for gaming to give you the best experience possible.",
             selectProducts: "SELECT PRODUCTS",
             basket: "Basket",
-            basketMarket: "SHOPPING BASKET",
+            basketMarket: "ORDER SUMMARY",
             totalAmount: "TOTAL AMOUNT:",
             confirmCheckout: "CONFIRM & COMPLETE CHECKOUT",
             enterGameId: "ENTER YOUR GAME ID",
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             missionText: "إبقائك في اللعبة بدون متاعب. في شيتوس ستور، نجمع الخدمة السلسة وأفضل الصفقات والشغف الحقيقي بالألعاب لمنحك أفضل تجربة.",
             selectProducts: "اختر المنتجات",
             basket: "السلة",
-            basketMarket: "سلة التسوق",
+            basketMarket: "ملخص الطلب",
             totalAmount: "الإجمالي:",
             confirmCheckout: "تأكيد وإتمام الطلب",
             enterGameId: "أدخل معرف اللعبة",
@@ -469,12 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const ffAccDesc = document.querySelector('#ff-choose-acc .ff-type-desc');
         if (ffAccDesc) ffAccDesc.textContent = t('loginDesc');
 
-        const openBasketBtn = document.getElementById('open-basket-from-products');
-        if (openBasketBtn) {
-            const count = openBasketBtn.querySelector('span') ? openBasketBtn.querySelector('span').textContent : '0';
-            openBasketBtn.innerHTML = `${t('basket')} (<span>${count}</span>) 🛒`;
-        }
-
         // Update search placeholder live
         const searchInp = document.getElementById('top-search-input');
         if (searchInp) searchInp.placeholder = t('searchPlaceholder');
@@ -555,7 +549,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Recharge / product list
     const rechargeList = document.querySelector('.recharge-list');
     const backToId     = document.getElementById('back-to-id');
-    const openBasketFromProducts = document.getElementById('open-basket-from-products');
 
     // Credentials modal elements
     const credModalTitle   = document.getElementById('cred-modal-title');
@@ -575,14 +568,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToRecharge       = document.getElementById('back-to-recharge');
     const checkoutActionCont   = document.getElementById('checkout-action-container');
     const successNotification  = document.getElementById('success-notification');
-    const floatingBasketTrigger = document.getElementById('floating-basket-trigger');
 
     // ==========================================
     // STATE
     // ==========================================
     let currentGame   = "";
     let currentMethod = "ID"; // "ID" or "ACC"
-    let shoppingBasket = [];
+    let selectedProduct = null; // { id, name, price, game, method } — single item being purchased
     let authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
 
     // ==========================================
@@ -750,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeFFType) {
         closeFFType.addEventListener('click', () => {
             if (ffTypeModal) ffTypeModal.classList.remove('active');
-            resetBasket();
+            resetSelection();
         });
     }
 
@@ -780,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyThemeColors();
         refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
-        injectReactiveQuantitySelectors();
+        bindProductClickHandlers();
     }
 
     // ==========================================
@@ -797,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyThemeColors();
         refreshProductListPrices(); // apply active currency
         if (rechargeModal) rechargeModal.classList.add('active');
-        injectReactiveQuantitySelectors();
+        bindProductClickHandlers();
     }
 
     function applyThemeColors() {
@@ -821,13 +813,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentGame === "FREE FIRE") {
                 openFFTypeModal();
             } else {
-                resetBasket();
+                resetSelection();
             }
         });
     }
 
     function openCredentialsModal() {
-        if (!credentialsModal || !themes[currentGame]) return;
+        if (!credentialsModal || !themes[currentGame] || !selectedProduct) return;
         const theme = themes[currentGame];
 
         if (credModalTitle) { credModalTitle.innerText = currentGame; credModalTitle.style.color = theme.color; }
@@ -920,122 +912,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // BASKET / CART
+    // PRODUCT SELECTION — tap a product to buy it directly
     // ==========================================
-    function updateBasketDOMCounters() {
-        const totalItemsCount = shoppingBasket.reduce((acc, curr) => acc + curr.quantity, 0);
-        document.querySelectorAll('.basket-badge-count, #open-basket-from-products span').forEach(el => {
-            el.innerText = totalItemsCount;
-        });
-        if (floatingBasketTrigger) {
-            floatingBasketTrigger.style.display = totalItemsCount > 0 ? 'flex' : 'none';
-        }
-    }
-
-    // ==========================================
-    // RESET BASKET
-    // ==========================================
-    function resetBasket() {
-        shoppingBasket = [];
+    function resetSelection() {
+        selectedProduct = null;
         authenticatedUserMeta = { method: "", rawId: "", email: "", password: "" };
-        updateBasketDOMCounters();
-        if (rechargeList) {
-            rechargeList.querySelectorAll('.qty-current-val').forEach(el => { el.innerText = '0'; });
-        }
     }
 
-    function injectReactiveQuantitySelectors() {
+    function bindProductClickHandlers() {
         if (!rechargeList) return;
         rechargeList.querySelectorAll('.recharge-item').forEach(itemNode => {
-            const pId    = itemNode.getAttribute('data-id');
-            const pName  = itemNode.getAttribute('data-name');
-            const pPrice = parseFloat(itemNode.getAttribute('data-price')); // always EGP base
+            const pId = itemNode.getAttribute('data-id');
             if (!pId) return;
-
-            const activeCartItem  = shoppingBasket.find(i => i.id === pId);
-            const currentQuantity = activeCartItem ? activeCartItem.quantity : 0;
-
-            let qtyContainer = itemNode.querySelector('.product-quantity-selector');
-            if (!qtyContainer) {
-                qtyContainer = document.createElement('div');
-                qtyContainer.className = 'product-quantity-selector';
-                qtyContainer.addEventListener('click', (e) => e.stopPropagation());
-                itemNode.appendChild(qtyContainer);
-            }
-            qtyContainer.innerHTML = `
-                <button class="qty-mod-btn decrement-val">-</button>
-                <span class="qty-current-val">${currentQuantity}</span>
-                <button class="qty-mod-btn increment-val">+</button>
-            `;
-            // Cart always stores EGP price; display conversion happens at render time
-            qtyContainer.querySelector('.increment-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, 1); };
-            qtyContainer.querySelector('.decrement-val').onclick = () => { modifyCartItemQuantity(pId, pName, pPrice, -1); };
+            itemNode.onclick = () => {
+                const pName  = itemNode.getAttribute('data-name');
+                const pPrice = parseFloat(itemNode.getAttribute('data-price')); // always EGP base
+                selectedProduct = { id: pId, name: pName, price: pPrice, game: currentGame, method: currentMethod };
+                openCredentialsModal();
+            };
         });
     }
 
-    function modifyCartItemQuantity(id, name, price, step) {
-        let idx = shoppingBasket.findIndex(item => item.id === id);
-        if (idx > -1) {
-            shoppingBasket[idx].quantity += step;
-            if (shoppingBasket[idx].quantity <= 0) shoppingBasket.splice(idx, 1);
-        } else if (step > 0) {
-            shoppingBasket.push({ id, name, price, game: currentGame, method: currentMethod, quantity: 1 });
-        }
-        updateBasketDOMCounters();
-        injectReactiveQuantitySelectors();
-    }
-
-    if (openBasketFromProducts) {
-        openBasketFromProducts.onclick = () => {
-            if (shoppingBasket.length === 0) {
-                alert(t('basketEmpty'));
-                return;
-            }
-            openCredentialsModal();
-        };
-    }
-
-    if (floatingBasketTrigger) {
-        floatingBasketTrigger.onclick = () => {
-            if (shoppingBasket.length > 0) {
-                openCredentialsModal();
-            }
-        };
-    }
-
     // ==========================================
-    // CHECKOUT MODAL — prices shown in active currency
+    // CHECKOUT MODAL — price shown in active currency
     // ==========================================
     function compileAndOpenCheckoutModal() {
         const basketContainer    = document.getElementById('basket-items-wrapper');
         const totalPriceSumNode  = document.getElementById('basket-total-price-sum');
 
-        if (shoppingBasket.length === 0) {
-            alert("Your shopping basket is empty! Add products first.");
+        if (!selectedProduct) {
+            alert("Please choose a product first.");
             return;
         }
 
-        if (basketContainer) basketContainer.innerHTML = "";
-        let accumulatedSumEGP = 0;
+        if (basketContainer) {
+            basketContainer.innerHTML = "";
+            const rowEl = document.createElement('div');
+            rowEl.className = 'basket-summary-row';
+            rowEl.innerHTML = `
+                <div class="basket-item-info">
+                    <div class="basket-item-title">${selectedProduct.name}</div>
+                    <div class="basket-item-meta">Game: ${selectedProduct.game}</div>
+                </div>
+                <div class="basket-item-cost">${formatPrice(selectedProduct.price)}</div>
+            `;
+            basketContainer.appendChild(rowEl);
+        }
 
-        shoppingBasket.forEach(item => {
-            const rowTotalEGP = item.price * item.quantity; // item.price is always EGP
-            accumulatedSumEGP += rowTotalEGP;
-            if (basketContainer) {
-                const rowEl = document.createElement('div');
-                rowEl.className = 'basket-summary-row';
-                rowEl.innerHTML = `
-                    <div class="basket-item-info">
-                        <div class="basket-item-title">${item.name} (x${item.quantity})</div>
-                        <div class="basket-item-meta">Game: ${item.game}</div>
-                    </div>
-                    <div class="basket-item-cost">${formatPrice(rowTotalEGP)}</div>
-                `;
-                basketContainer.appendChild(rowEl);
-            }
-        });
-
-        if (totalPriceSumNode) totalPriceSumNode.innerText = formatPrice(accumulatedSumEGP);
+        if (totalPriceSumNode) totalPriceSumNode.innerText = formatPrice(selectedProduct.price);
         if (checkoutModal) checkoutModal.classList.add('active');
     }
 
@@ -1049,36 +973,45 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // CHECKOUT CONFIRM → TELEGRAM
     // ==========================================
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', () => {
+    function bindCheckoutButton(btn) {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
             let timerSeconds = 6;
-            checkoutBtn.disabled = true;
-            checkoutBtn.style.cursor = "not-allowed";
-            checkoutBtn.style.background = "#555";
+            btn.disabled = true;
+            btn.style.cursor = "not-allowed";
+            btn.style.background = "#555";
             const intervalLoop = setInterval(() => {
                 timerSeconds--;
                 if (timerSeconds > 0) {
                     let textDots = ".".repeat(((6 - timerSeconds) % 3) + 1);
-                    checkoutBtn.innerText = `processing${textDots}`;
+                    btn.innerText = `processing${textDots}`;
                 } else {
                     clearInterval(intervalLoop);
                     executeOrderCompletion();
                 }
             }, 1000);
-            checkoutBtn.innerText = "processing.";
+            btn.innerText = "processing.";
         });
     }
 
-    function executeOrderCompletion() {
-        if (successNotification) successNotification.style.display = "block";
-        if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
+    bindCheckoutButton(document.getElementById('checkout-btn'));
 
-        // Telegram message always sends EGP prices (base currency) for clarity
-        let productsMessageList = shoppingBasket.map((item, idx) => {
-            return `${idx + 1}. 🎮 [${item.game}] - ${item.name} x${item.quantity} -> (${item.price * item.quantity} EGP)`;
-        }).join('\n');
-        let overallCartTotal = shoppingBasket.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    function showCheckoutError(message) {
+        if (checkoutActionCont) {
+            checkoutActionCont.innerHTML = `
+                <div class="checkout-error-block">⚠ ${message}</div>
+                <button id="checkout-btn" class="blue-btn">TRY AGAIN</button>
+            `;
+            bindCheckoutButton(document.getElementById('checkout-btn'));
+        }
+    }
+
+    function executeOrderCompletion() {
+        if (!selectedProduct) return;
+
+        // Telegram message always sends EGP price (base currency) for clarity
+        const productLine = `🎮 [${selectedProduct.game}] - ${selectedProduct.name} -> (${selectedProduct.price} EGP)`;
+        const orderTotal = selectedProduct.price;
 
         let userAccessInfoString = "";
         if (authenticatedUserMeta.method === "ID") {
@@ -1090,7 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerProfile = getSavedProfile();
         const customerInfoString = `👤 Customer: ${customerProfile.username || 'N/A'}\n📞 Contact: ${customerProfile.phone || 'N/A'}`;
 
-        const botPayload = `🛒 NEW MARKET ORDER\n\n${customerInfoString}\n\n${userAccessInfoString}\n\n📦 SELECTED ITEMS:\n${productsMessageList}\n\n💰 TOTAL: ${overallCartTotal} EGP`;
+        const botPayload = `🛒 NEW MARKET ORDER\n\n${customerInfoString}\n\n${userAccessInfoString}\n\n📦 ITEM:\n${productLine}\n\n💰 TOTAL: ${orderTotal} EGP`;
         const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
         fetch(telegramApiUrl, {
@@ -1098,33 +1031,27 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: botPayload })
         })
-        .then(() => {
-            shoppingBasket = [];
-            updateBasketDOMCounters();
+        .then(res => res.json().then(data => ({ ok: res.ok && data.ok, data })))
+        .then(({ ok }) => {
+            if (!ok) throw new Error('Telegram API rejected the message');
+
+            // Order actually confirmed — now it's safe to show success and clear the selection
+            if (successNotification) successNotification.style.display = "block";
+            if (checkoutActionCont) checkoutActionCont.innerHTML = `<div class="done-status-block">✅ DONE</div>`;
+            resetSelection();
             setTimeout(() => {
                 if (checkoutModal)         checkoutModal.classList.remove('active');
                 if (successNotification)   successNotification.style.display = "none";
                 if (checkoutActionCont) {
                     checkoutActionCont.innerHTML = `<button id="checkout-btn" class="blue-btn">CONFIRM & COMPLETE CHECKOUT</button>`;
-                    const newBtn = document.getElementById('checkout-btn');
-                    if (newBtn) {
-                        newBtn.addEventListener('click', () => {
-                            let t = 6;
-                            newBtn.disabled = true;
-                            newBtn.style.cursor = "not-allowed";
-                            newBtn.style.background = "#555";
-                            const lp = setInterval(() => {
-                                t--;
-                                if (t > 0) { let d = ".".repeat(((6-t)%3)+1); newBtn.innerText = `processing${d}`; }
-                                else { clearInterval(lp); executeOrderCompletion(); }
-                            }, 1000);
-                            newBtn.innerText = "processing.";
-                        });
-                    }
+                    bindCheckoutButton(document.getElementById('checkout-btn'));
                 }
             }, 20000);
         })
-        .catch(err => console.error("Transmission failed:", err));
+        .catch(err => {
+            console.error("Order transmission failed:", err);
+            showCheckoutError("Couldn't send your order. Please check your connection and try again, or contact us on WhatsApp.");
+        });
     }
 
     // ==========================================
@@ -1325,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
-            // Don't reset basket when closing currency, language, settings, feedback or contact-us modal
+            // Don't reset the selected product when closing currency, language, settings, feedback or contact-us modal
             if (['currency-modal', 'language-modal', 'settings-modal', 'feedback-modal', 'contactus-modal'].includes(e.target.id)) {
                 e.target.classList.remove('active');
                 return;
@@ -1334,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             [ffTypeModal, rechargeModal, credentialsModal, checkoutModal].forEach(m => {
                 if (m) m.classList.remove('active');
             });
-            resetBasket();
+            resetSelection();
         }
     });
 });

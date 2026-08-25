@@ -11,6 +11,8 @@
     <meta name="apple-mobile-web-app-title" content="Shetos Store">
     <meta name="description" content="Shetos Store - fast and reliable game top-ups for Free Fire, PUBG, Call of Duty, FIFA, PES and Blood Strike.">
     <title>Shetos Store</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -284,11 +286,6 @@
                     <span class="ff-type-label">ID RECHARGE</span>
                     <span class="ff-type-desc">شحن من خلال اي دي</span>
                 </button>
-                <button class="ff-type-rect" id="ff-choose-acc">
-                    <span class="ff-type-icon">📧</span>
-                    <span class="ff-type-label">LOGIN ACCOUNT</span>
-                    <span class="ff-type-desc">شحن من خلال الحساب</span>
-                </button>
             </div>
         </div>
     </div>
@@ -300,9 +297,8 @@
         <div class="modal-box recharge-box">
             <div class="modal-nav-header">
                 <button id="back-to-id" class="back-btn">← Back</button>
-               <button id="open-basket-from-products" class="view-cart-btn">Basket (<span>0</span>) 🛒</button>
             </div>
-            <h3 class="recharge-title">SELECT PRODUCTS</h3>
+            <h3 class="recharge-title">SELECT A PRODUCT</h3>
             <div class="recharge-list"></div>
         </div>
     </div>
@@ -352,7 +348,7 @@
             <div class="input-section order-summary-section">
                 <div class="input-header summary-header">
                     <span class="user-icon">📋</span>
-                    <p>SHOPPING BASKET MARKET</p>
+                    <p>ORDER SUMMARY</p>
                 </div>
                 <div id="basket-items-wrapper"></div>
                 <div class="basket-total-row">
@@ -367,11 +363,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="floating-basket-trigger" class="floating-basket" style="display: none;">
-        <span class="basket-badge-count">0</span>
-        <span class="basket-icon-view">🛒</span>
     </div>
 
     <script src="script.js"></script>

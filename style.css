@@ -267,11 +267,27 @@
 /* ==========================================
    YOUR ORIGINAL WEBSITE STYLES (CONTINUED)
    ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3,
+.brand-text,
+.about-main-title,
+.selection-title,
+.game-label,
+.setting-btn-title,
+.currency-modal-title,
+.language-modal-title,
+.recharge-title,
+.profile-setup-heading {
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    letter-spacing: 0.01em;
 }
 
 html {
@@ -300,65 +316,12 @@ input, textarea, select {
 body {
     background-color: #000;
     color: white;
-    overflow: hidden; /* Modified: Hidden initially to lock scrolling during intro splash */
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    position: relative;
-}
-
-body {
-    background-color: #000;
-    color: white;
-    overflow-x: hidden;
+    overflow: hidden; /* locked during the intro splash; script.js switches this to auto/overflow-x once the intro finishes */
     min-height: 100vh;
     min-height: -webkit-fill-available;
     max-width: 100%;
     position: relative;
 }
-
-/* --- LIVE F1 RACE BACKGROUND ADDITION --- */
-body::before {
-    content: '';
-    position: fixed;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
-    /* High-quality cinematic F1 racing night track background */
-    background: url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
-    z-index: -2;
-    
-    /* Dynamic tracking panning/zoom effect to mimic a broadcast camera following cars */
-    animation: f1RaceTracking 28s ease-in-out infinite alternate;
-    will-change: transform;
-}
-
-/* Original dark layout overlay tint safely layered above the live image movement */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: -1; 
-    pointer-events: none;
-}
-
-/* High-speed cinematic tracking keyframes */
-@keyframes f1RaceTracking {
-    0% {
-        transform: scale(1.02) translate(0, 0);
-    }
-    50% {
-        transform: scale(1.07) translate(-2%, 1%);
-    }
-    100% {
-        transform: scale(1.12) translate(1%, -1%);
-    }
-}
-/* ---------------------------------------- */
 
 .page {
     min-height: 100vh;
@@ -598,11 +561,11 @@ body::after {
     scroll-snap-align: start;
     width: clamp(150px, 38vw, 190px);
     height: clamp(220px, 36vh, 260px);
-    border-radius: 15px;
+    border-radius: 20px;
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    transition: 0.3s;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
     border: 3px solid transparent;
     display: flex;
     align-items: center;     
@@ -617,6 +580,12 @@ body::after {
 .bs-card { border-color: #ff3333; }
 
 .game-card:hover { transform: translateY(-8px); }
+.ff-card:hover   { box-shadow: 0 12px 30px -8px rgba(255,102,0,0.55); }
+.pubg-card:hover { box-shadow: 0 12px 30px -8px rgba(0,162,255,0.55); }
+.cod-card:hover  { box-shadow: 0 12px 30px -8px rgba(229,193,88,0.5); }
+.fifa-card:hover { box-shadow: 0 12px 30px -8px rgba(0,255,204,0.5); }
+.pes-card:hover  { box-shadow: 0 12px 30px -8px rgba(0,204,68,0.5); }
+.bs-card:hover   { box-shadow: 0 12px 30px -8px rgba(255,51,51,0.55); }
 
 .card-bg {
     width: 100%;
@@ -682,7 +651,7 @@ body::after {
     left: 12px;
     width: clamp(45px, 12vw, 55px);
     height: clamp(45px, 12vw, 55px);
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     background-color: #111;
@@ -702,17 +671,19 @@ body::after {
 .bs-card:hover .icon-badge { border-color: #ff3333; box-shadow: 0 0 15px #ff3333; }
 
 .game-label {
-    position: relative;       
-    width: auto;              
-    max-width: 90%;           
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
     text-align: center;
-    font-weight: bold;
-    background: rgba(0, 0, 0, 0.75); 
-    padding: 8px 16px;        
-    font-size: clamp(0.85rem, 2vw, 1.05rem); 
+    font-weight: 700;
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.72) 65%, transparent 100%);
+    padding: 26px 10px 14px;
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
     letter-spacing: 1px;
     z-index: 3;
-    border-radius: 8px;       
+    color: #fff;
 }
 
 /* Modals Refactored for small views */
@@ -838,6 +809,7 @@ body::after {
     gap: 10px;
 }
 .recharge-item:hover { background: rgba(255,102,0,0.15); transform: scale(1.02); }
+.recharge-item:active { transform: scale(0.97); }
 .item-name { font-weight: 500; font-size: 0.9rem; text-align: left; }
 .item-price { color: #ffcc80; font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
 
@@ -901,115 +873,18 @@ body::after {
     box-shadow: 0 0 15px rgba(0, 204, 102, 0.4);
 }
 
-/* Navigation System with safe standard multi-device fallbacks */
-@layer properties {
-  @property --after-bg-position { syntax: "<number>"; inherits: true; initial-value: 0; }
-  @property --after-radial-bg-position { syntax: "<number>"; inherits: true; initial-value: 0; }
-  @property --after-bg-width { syntax: "<number>"; inherits: true; initial-value: 100; }
-  @property --after-bg-opacity { syntax: "<number>"; inherits: true; initial-value: 20; }
-  @property --after-shadow-offset { syntax: "<number>"; inherits: true; initial-value: 15; }
-  @property --after-scale { syntax: "<number>"; inherits: true; initial-value: 0.85; }
-  @property --li-before-opacity { syntax: "<number>"; inherits: true; initial-value: 0; }
-}
-
-.nav {
+.checkout-error-block {
+    display: block;
     width: 100%;
-    position: relative;
-    background: #000;
-    display: block;
-    z-index: 10;
-    transition: --after-bg-position 300ms cubic-bezier(.41, -0.09, .55, 1.09) 0.2s, 
-                --after-radial-bg-position 300ms cubic-bezier(.41, -0.09, .55, 1.09) 0.2s, 
-                --after-bg-width 300ms cubic-bezier(.41, -0.09, .55, 1.09) 0.2s;
-}
-
-.nav:before {
-    content: "";
-    display: block;
-    position: absolute;
-    width: calc(calc(var(--after-bg-width) * 1px) - 8px);
-    height: 100%;
-    background: rgb(255 255 255 / calc(var(--after-shadow-offset) * 1%));
-    filter: blur(20px);
-    left: 0; top: 0;
-    transform: translateX(calc(var(--after-bg-position) * 1px)) scale(1.1);
-    pointer-events: none;
-}
-
-.nav ul {
-    position: relative;
-    padding: 0; margin: 0;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    height: 60px;
-    background-image: radial-gradient(ellipse 150px 100px at calc(var(--after-radial-bg-position)*1px) bottom, white 0%, rgba(255, 255, 255, 0.15) 100%);
-    border-bottom: 1px solid #222;
-}
-
-.nav ul:active { --after-scale: 0.75; }
-.nav ul:before { content: ""; display: block; position: absolute; width: 100%; height: calc(100% - 1px); background: #0d0d0d; top: 0; left: 0; }
-
-.nav ul:after {
-    content: "";
-    display: block;
-    position: absolute;
-    z-index: 1;
-    width: calc(var(--after-bg-width) * 1px);
-    height: 100%;
-    background: linear-gradient(to bottom, rgb(255 255 255 / calc(calc(var(--after-bg-opacity, 0)/10)*1%)), rgba(255, 255, 255, 0.04));
-    box-shadow: inset 0 -6px calc(var(--after-shadow-offset, 0)*1px) rgb(255 255 255 / calc(var(--after-bg-opacity)*1%));
-    left: 0; top: 0;
-    transform: translate(calc(var(--after-bg-position) * 1px), 0);
-    transition: --after-bg-opacity 300ms, --after-shadow-offset 300ms;
-    pointer-events: none;
-    border-bottom: 2px solid #ff6600;
-}
-
-.nav ul li {
-    flex: 1;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    perspective: 800px;
-}
-
-.nav ul li:not(.active):hover { --li-before-opacity: 0.2; }
-
-.nav ul li:before {
-    content: "";
-    display: block;
-    position: absolute;
-    z-index: 1;
-    width: 100%; height: 100%;
-    top: 0; left: 0;
-    pointer-events: none;
-    user-select: none;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.15));
-    opacity: var(--li-before-opacity);
-    transform: scale(var(--after-scale)) rotateY(calc(var(--tilt-bg-y) * 3 * -1deg)) rotateX(calc(var(--tilt-bg-x) * 3 * 1deg)) translateZ(15px);
-    transition: --li-before-opacity 300ms;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.6);
-    width: 100%; height: 100%;
-    text-decoration: none;
+    background: #2a0f0f;
+    color: #ff6b6b;
+    border: 1px solid #ff3333;
+    padding: 12px;
+    font-size: 0.95rem;
     font-weight: 600;
-    font-size: clamp(0.75rem, 2.5vw, 0.95rem);
-    position: relative;
-    z-index: 10;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: color 0.2s;
-}
-
-.nav ul li.active .nav-link {
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 /* Search Framework & Panels adjustments */
@@ -1244,106 +1119,6 @@ body::after {
     align-items: center;
     width: 100%;
     margin-bottom: 15px;
-}
-
-.view-cart-btn {
-    background: #ff6600;
-    color: #fff;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.view-cart-btn:hover {
-    background: #e64a19;
-    transform: scale(1.05);
-}
-
-/* Floating Action Cart Circle Trigger */
-.floating-basket {
-    position: fixed;
-    bottom: calc(25px + env(safe-area-inset-bottom, 0px));
-    right: calc(25px + env(safe-area-inset-right, 0px));
-    width: clamp(56px, 14vw, 65px);
-    height: clamp(56px, 14vw, 65px);
-    background: #ff6600;
-    border-radius: 50%;
-    box-shadow: 0 4px 20px rgba(255,102,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 9999;
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.floating-basket:hover {
-    transform: scale(1.1) rotate(-5deg);
-    background: #e64a19;
-}
-
-.basket-badge-count {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ffffff;
-    color: #ff6600;
-    font-weight: 900;
-    font-size: 0.85rem;
-    min-width: 22px;
-    height: 22px;
-    padding: 2px;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 18px;
-    border: 2px solid #ff6600;
-}
-
-.basket-icon-view {
-    font-size: 1.6rem;
-}
-
-/* Product Row Selection Modifier - Quantity Controls Grid */
-.product-quantity-selector {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.08);
-    padding: 4px 8px;
-    border-radius: 20px;
-    border: 1px solid #3f3f46;
-}
-
-.qty-mod-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    border: none;
-    background: #ff6600;
-    color: white;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.2s;
-}
-
-.qty-mod-btn:hover {
-    background: #fff;
-    color: #ff6600;
-}
-
-.qty-current-val {
-    font-weight: bold;
-    font-size: 0.95rem;
-    min-width: 18px;
-    text-align: center;
 }
 
 /* Checkout Modal List Architecture */
@@ -1964,13 +1739,13 @@ body.lang-ar .back-btn {
 /* Coarse pointers (touch): guarantee comfortably tappable targets */
 @media (pointer: coarse) {
     .top-settings-icon-btn,
-    .qty-mod-btn,
     .back-btn,
     .setting-big-rect-btn,
     .currency-choice-btn,
     .language-choice-btn {
         min-height: 44px;
     }
+    .recharge-item { min-height: 44px; }
     .scroll-arrow-btn { display: none; } /* rely on native touch swipe instead */
 }
 
@@ -1990,9 +1765,9 @@ body.lang-ar .back-btn {
     body::before { animation: none; }
 }
 
-/* Print fallback (in case a receipt/basket view is ever printed) */
+/* Print fallback */
 @media print {
-    .top-bar, .floating-basket, .scroll-arrow-btn, body::before, body::after {
+    .top-bar, .scroll-arrow-btn, body::before, body::after {
         display: none !important;
     }
 }
