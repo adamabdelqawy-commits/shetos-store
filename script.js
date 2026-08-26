@@ -1199,9 +1199,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js').catch(() => {
-                // Fails silently on file:// or unsupported hosts — app still works fully online
-            });
+            navigator.serviceWorker.register('service-worker.js')
+                .then((registration) => {
+                    // Force an immediate check for a newer service worker / cached assets,
+                    // so phones don't keep showing an old cached version of the site.
+                    registration.update();
+                })
+                .catch(() => {
+                    // Fails silently on file:// or unsupported hosts — app still works fully online
+                });
         });
     }
 

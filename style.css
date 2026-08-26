@@ -1,4 +1,27 @@
 /* ==========================================
+   MOBILE-SAFETY RESET
+   Belt-and-suspenders: guarantees nothing can ever
+   force horizontal scroll / desktop-width rendering,
+   even if a future change adds a wide element.
+   ========================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Any element that would otherwise overflow gets clipped to viewport width,
+   long unbroken text (long IDs, links, etc.) wraps instead of pushing width */
+p, span, a, h1, h2, h3, h4, input, textarea, button {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ==========================================
    THEME SYSTEM: LIGHT / DARK (data-theme on <html>)
    ========================================== */
 :root,
