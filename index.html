@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="color-scheme" content="dark">
     <meta name="mobile-web-app-capable" content="yes">
@@ -12,9 +12,9 @@
     <meta name="description" content="Shetos Store - fast and reliable game top-ups for Free Fire, PUBG, Call of Duty, FIFA, PES and Blood Strike.">
     <title>Shetos Store</title>
     <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=4">
     <script>
         /* Applied before first paint so there's no light/dark flash on load */
         (function () {
@@ -70,7 +70,34 @@
             <button id="top-settings-btn" class="top-settings-icon-btn" aria-label="Settings">⚙️</button>
         </div>
 
-        <div id="home-content-section" class="store-container">
+        <!-- ===== HUB: 2 large boxes (shown right after the intro animation) ===== -->
+        <div id="hub-section" class="store-container hub-section">
+            <h2 class="selection-title" data-i18n="hubTitle">WHAT DO YOU NEED?</h2>
+            <div class="hub-grid">
+                <button type="button" id="hub-games-box" class="hub-box hub-box-games">
+                    <span class="hub-box-icon">🎮</span>
+                    <span class="hub-box-title" data-i18n="hubGames">GAMES CHARGE</span>
+                    <span class="hub-box-sub" data-i18n="hubGamesSub">Game cards &amp; top-ups</span>
+                </button>
+                <button type="button" id="hub-accounts-box" class="hub-box hub-box-accounts">
+                    <span class="hub-box-icon">🧾</span>
+                    <span class="hub-box-title" data-i18n="hubAccounts">SELLING ACCOUNTS</span>
+                    <span class="hub-box-sub" data-i18n="hubAccountsSub">Buy &amp; sell game accounts</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== ACCOUNTS MARKET (list of accounts for sale) ===== -->
+        <div id="accounts-section" class="store-container accounts-section" style="display:none;">
+            <button type="button" class="back-btn hub-back-btn" data-hub-back>← <span data-i18n="back">Back</span></button>
+            <h2 class="selection-title" data-i18n="hubAccounts">SELLING ACCOUNTS</h2>
+            <button type="button" id="open-sell-page-btn" class="blue-btn sell-new-btn">➕ <span data-i18n="sellMyAccount">Sell your account</span></button>
+            <div id="accounts-status" class="accounts-status" style="display:none;"></div>
+            <div id="accounts-grid" class="accounts-grid"></div>
+        </div>
+
+        <div id="home-content-section" class="store-container" style="display:none;">
+            <button type="button" class="back-btn hub-back-btn" data-hub-back>← <span data-i18n="back">Back</span></button>
             <h2 class="selection-title" data-i18n="chooseGame">CHOOSE YOUR GAME</h2>
             <div class="game-grid-wrapper">
                 <button type="button" id="game-scroll-left" class="scroll-arrow-btn scroll-arrow-left" aria-label="Scroll left">&#10094;</button>
@@ -375,6 +402,75 @@
         </div>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <!-- =====================================================
+         SELL ACCOUNT PAGE (receipt style) - full page
+         ===================================================== -->
+    <div id="sell-page" class="sub-page" style="display:none;">
+        <div class="sub-page-inner">
+            <button type="button" id="close-sell-page" class="back-btn">← <span data-i18n="back">Back</span></button>
+            <div class="receipt-box">
+                <h2 class="receipt-title" data-i18n="sellTitle">Selling Accounts</h2>
+                <div class="receipt-cut"></div>
+
+                <div class="camera-box" id="camera-box">
+                    <input type="file" id="sell-photo-input" accept="image/*" multiple hidden>
+                    <button type="button" id="camera-add-btn" class="camera-add-btn" aria-label="Add photos">
+                        <svg viewBox="0 0 64 64" class="camera-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M22 14l-3 6H10a4 4 0 0 0-4 4v26a4 4 0 0 0 4 4h44a4 4 0 0 0 4-4V24a4 4 0 0 0-4-4h-9l-3-6H22z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="32" cy="36" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+                            <circle cx="50" cy="28" r="1.8" fill="currentColor"/>
+                        </svg>
+                        <span class="camera-hint" data-i18n="addPhotos">Tap to add photos</span>
+                    </button>
+                    <div id="sell-thumbs" class="sell-thumbs"></div>
+                    <div class="camera-counter"><span id="sell-photo-count">0</span>/10</div>
+                </div>
+
+                <div class="receipt-fields">
+                    <label class="receipt-label" data-i18n="fPhone">Phone number</label>
+                    <input type="tel" id="sell-phone" class="game-input" maxlength="11" inputmode="numeric" autocomplete="off" data-i18n-placeholder="phPhone" placeholder="01xxxxxxxxx">
+
+                    <label class="receipt-label" data-i18n="fPrice">Account price (EGP)</label>
+                    <input type="number" id="sell-price" class="game-input" min="1" inputmode="decimal" data-i18n-placeholder="phPrice" placeholder="Price">
+
+                    <label class="receipt-label" data-i18n="fInfo">Account information</label>
+                    <textarea id="sell-info" class="game-input receipt-textarea" maxlength="1500" data-i18n-placeholder="phInfo" placeholder="Level, skins, rank, anything you want to say..."></textarea>
+
+                    <label class="receipt-label" data-i18n="fGame">Game name</label>
+                    <input type="text" id="sell-game" class="game-input" maxlength="40" autocomplete="off" data-i18n-placeholder="phGame" placeholder="Free Fire, PUBG...">
+                </div>
+
+                <div id="sell-error" class="profile-setup-error sell-error"></div>
+                <div class="receipt-cut"></div>
+                <button type="button" id="sell-save-btn" class="blue-btn" data-i18n="save">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         ACCOUNT DETAILS MODAL
+         ===================================================== -->
+    <div id="account-modal" class="modal-overlay">
+        <div class="modal-box account-detail-box">
+            <button type="button" id="close-account-modal" class="back-btn">← <span data-i18n="back">Back</span></button>
+            <div class="acc-gallery">
+                <img id="acc-main-photo" class="acc-main-photo" alt="">
+                <button type="button" id="acc-prev" class="acc-nav acc-prev" aria-label="Previous">&#10094;</button>
+                <button type="button" id="acc-next" class="acc-nav acc-next" aria-label="Next">&#10095;</button>
+                <span id="acc-photo-counter" class="acc-photo-counter"></span>
+            </div>
+            <div id="acc-thumbs" class="acc-thumbs"></div>
+            <div class="acc-info-list">
+                <div class="acc-info-row"><span class="acc-info-key" data-i18n="fGame">Game name</span><span id="acc-game" class="acc-info-val"></span></div>
+                <div class="acc-info-row"><span class="acc-info-key" data-i18n="fPriceShort">Price</span><span id="acc-price" class="acc-info-val acc-price-val"></span></div>
+                <div class="acc-info-block"><span class="acc-info-key" data-i18n="fInfo">Account information</span><p id="acc-info" class="acc-info-text"></p></div>
+                <div class="acc-info-row"><span class="acc-info-key" data-i18n="fPhoneShort">Seller phone</span><a id="acc-phone" class="acc-phone-link" href="#" target="_blank" rel="noopener"></a></div>
+                <div class="acc-wa-hint" data-i18n="waHint">Tap the number to chat on WhatsApp</div>
+            </div>
+            <button type="button" id="acc-delete-btn" class="acc-delete-btn" style="display:none;" data-i18n="deleteAccount">🗑 Delete my account listing</button>
+        </div>
+    </div>
+
+    <script src="script.js?v=4"></script>
 </body>
 </html>

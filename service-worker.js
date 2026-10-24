@@ -1,18 +1,22 @@
-const CACHE_NAME = 'shetos-store-v1';
+const CACHE_NAME = 'shetos-store-v3';
 const CORE_ASSETS = [
     './',
     './index.html',
-    './style.css',
-    './script.js',
+    './style.css?v=3',
+    './script.js?v=3',
     './manifest.json',
     './icon.svg',
     './icon-192.png',
-    './icon-512.png'
+    './icon-512.png',
+    './icon-maskable-512.png'
 ];
 
+// Cache each asset on its own so one missing file can never block the whole install.
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).catch(() => {})
+        caches.open(CACHE_NAME).then((cache) =>
+            Promise.allSettled(CORE_ASSETS.map((asset) => cache.add(asset)))
+        )
     );
     self.skipWaiting();
 });
@@ -26,24 +30,40 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Network-first for the Telegram API (never serve stale order responses),
-// cache-first for everything else (app shell).
 self.addEventListener('fetch', (event) => {
-    const url = event.request.url;
-    if (url.includes('api.telegram.org')) return; // let orders always hit the network
+    const req = event.request;
 
+    // Only handle GET requests; orders (POST to Telegram) always go straight to the network.
+    if (req.method !== 'GET') return;
+    if (req.url.includes('api.telegram.org')) return;
+
+    // Pages: network-first so users always get the newest layout, cache as offline fallback.
+    if (req.mode === 'navigate') {
+        event.respondWith(
+            fetch(req)
+                .then((res) => {
+                    const copy = res.clone();
+                    caches.open(CACHE_NAME).then((c) => c.put('./index.html', copy)).catch(() => {});
+                    return res;
+                })
+                .catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+        );
+        return;
+    }
+
+    // Static assets: stale-while-revalidate (fast + self-updating).
     event.respondWith(
-        caches.match(event.request).then((cached) => {
-            return (
-                cached ||
-                fetch(event.request)
-                    .then((response) => {
-                        const copy = response.clone();
-                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
-                        return response;
-                    })
-                    .catch(() => cached)
-            );
+        caches.match(req).then((cached) => {
+            const network = fetch(req)
+                .then((res) => {
+                    if (res && (res.ok || res.type === 'opaque')) {
+                        const copy = res.clone();
+                        caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
+                    }
+                    return res;
+                })
+                .catch(() => cached);
+            return cached || network;
         })
     );
 });

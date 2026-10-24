@@ -1955,3 +1955,364 @@ body.lang-ar .back-btn {
 @media (min-width: 1024px) {
     .modal-box { max-height: 90vh; overflow-y: auto; }
 }
+
+
+/* ==========================================================================
+   UNIVERSAL DEVICE SCALING LAYER (v3)
+   Works for every phone / foldable / tablet / desktop. Placed last on purpose
+   so it overrides the fixed-size breakpoint rules above.
+   Strategy: fluid sizes from one root scale, dynamic viewport units, safe
+   areas (notch / gesture bar), scrollable modals, no fixed pixel widths.
+   ========================================================================== */
+:root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+
+    /* One fluid unit: ~15px on tiny phones, 16px normal, up to 18px on large screens */
+    --u: clamp(14px, 0.9vw + 11.5px, 18px);
+
+    /* Card size is derived from the screen, never fixed. Aspect ratio stays 3:4 */
+    --card-w: clamp(132px, 42vw, 230px);
+    --card-gap: clamp(10px, 3vw, 20px);
+    --page-pad: clamp(10px, 3.5vw, 24px);
+}
+
+html {
+    font-size: 100%;                      /* respect user font-size settings */
+    height: auto;                         /* drop the -webkit-fill-available hack */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+}
+body {
+    min-height: 100vh;
+    min-height: 100dvh;                   /* correct height when mobile URL bar shows/hides */
+    overscroll-behavior-y: none;
+    padding-left: var(--sal);
+    padding-right: var(--sar);
+    touch-action: manipulation;           /* removes 300ms tap delay, keeps pinch-zoom */
+}
+img, svg, video, canvas { max-width: 100%; }
+
+/* ---------- Pages / splash / profile setup ---------- */
+.page { min-height: 100vh; min-height: 100dvh; padding: var(--page-pad); }
+#store-page { padding: 0 0 calc(32px + var(--sab)) 0; }
+
+#profile-setup-page {
+    min-height: 100vh; min-height: 100dvh;
+    padding: calc(var(--page-pad) + var(--sat)) var(--page-pad) calc(var(--page-pad) + var(--sab));
+    overflow-y: auto;
+}
+.profile-setup-box { width: 100%; max-width: min(460px, 100%); }
+.profile-setup-heading { font-size: clamp(1.05rem, 4.6vw, 1.6rem); line-height: 1.35; }
+.profile-setup-field, .profile-setup-enter-btn { width: 100%; max-width: 100%; min-height: 48px; }
+
+#animation-container { padding: var(--page-pad); }
+.brand-text { font-size: clamp(1.4rem, 8vw, 3.2rem); text-align: center; max-width: 100%; }
+.intro-energy-sphere { max-width: 70vw; max-height: 70vw; }
+
+/* ---------- Top bar ---------- */
+.top-bar {
+    gap: clamp(6px, 2vw, 12px);
+    padding: calc(clamp(8px, 2.5vw, 14px) + var(--sat)) max(clamp(10px, 3vw, 16px), var(--sar)) clamp(8px, 2.5vw, 14px) max(clamp(10px, 3vw, 16px), var(--sal));
+}
+.top-search-wrap { min-width: 0; }
+.top-search-rect { min-width: 0; width: 100%; }
+.top-settings-icon-btn, .theme-toggle-btn {
+    flex-shrink: 0;
+    width: clamp(40px, 11vw, 48px);
+    height: clamp(40px, 11vw, 48px);
+}
+
+/* ---------- Store / game cards ---------- */
+.store-container { width: 100%; max-width: 1500px; margin-left: auto; margin-right: auto; padding: 0 clamp(4px, 1.5vw, 12px); }
+.selection-title { font-size: clamp(1.15rem, 4.8vw, 2rem); letter-spacing: clamp(0.5px, 0.4vw, 2px); }
+
+.game-grid {
+    gap: var(--card-gap);
+    padding: 8px var(--page-pad) 22px;
+    scroll-padding-inline: var(--page-pad);
+    overscroll-behavior-x: contain;
+}
+.game-card {
+    width: var(--card-w) !important;
+    height: auto !important;
+    aspect-ratio: 3 / 4;
+    border-width: clamp(2px, 0.6vw, 3px);
+    border-radius: clamp(14px, 4vw, 22px);
+}
+.icon-badge {
+    top: 8%; left: 8%;
+    width: clamp(40px, 26%, 58px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    border-radius: clamp(10px, 3vw, 14px);
+}
+.game-label { font-size: clamp(0.78rem, 0.35vw + 0.7rem, 1.05rem); padding: 22px 8px 12px; }
+
+/* Wide screens: show every card in a centered wrapping grid instead of a long strip */
+@media (min-width: 900px) {
+    .game-grid { flex-wrap: wrap; justify-content: center; overflow-x: visible; cursor: default; }
+    .game-grid-wrapper .scroll-arrow-btn { display: none !important; }
+    :root { --card-w: clamp(190px, 17vw, 240px); }
+}
+/* Phones in portrait: two cards visible plus a peek of the third so users know it scrolls */
+@media (max-width: 599px) { :root { --card-w: clamp(132px, 42vw, 190px); } }
+/* Tablets: three-ish cards in view */
+@media (min-width: 600px) and (max-width: 899px) { :root { --card-w: clamp(170px, 28vw, 220px); } }
+/* Tiny / folded devices */
+@media (max-width: 340px) {
+    :root { --card-w: clamp(118px, 62vw, 150px); }
+    .selection-title { letter-spacing: 0; }
+}
+
+/* Phones in landscape / very short screens: cards sized by height so they never overflow */
+@media (max-height: 520px) and (orientation: landscape) {
+    :root { --card-w: clamp(120px, 24vh, 170px); }
+    .game-grid { padding-bottom: 10px; }
+    .selection-title { margin-bottom: 10px; }
+    .store-container { margin-top: 10px; }
+}
+
+/* ---------- Modals: always fit the screen and scroll inside ---------- */
+.modal-overlay {
+    height: 100vh; height: 100dvh;
+    padding: calc(var(--page-pad) + var(--sat)) max(var(--page-pad), var(--sar)) calc(var(--page-pad) + var(--sab)) max(var(--page-pad), var(--sal));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    align-items: center;
+}
+.modal-box {
+    width: 100%;
+    max-width: min(460px, 100%);
+    max-height: calc(100dvh - 2 * var(--page-pad) - var(--sat) - var(--sab));
+    margin: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+.recharge-box, .checkout-large-box { max-width: min(560px, 100%); max-height: calc(100dvh - 2 * var(--page-pad) - var(--sat) - var(--sab)); }
+.setting-container { max-width: min(520px, 100%); }
+
+/* Phones: modals become near full-screen sheets so content has room */
+@media (max-width: 480px) {
+    .modal-overlay { padding: var(--sat) 0 0 0; align-items: flex-end; }
+    .modal-box, .recharge-box, .checkout-large-box, .setting-container {
+        max-width: 100%;
+        max-height: calc(100dvh - var(--sat) - 8px);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding-bottom: calc(clamp(15px, 5vw, 25px) + var(--sab));
+        margin: 0;
+    }
+}
+
+/* ---------- Forms: no iOS zoom, thumb-friendly ---------- */
+input, textarea, select { font-size: max(16px, 1rem); max-width: 100%; }
+.game-input, .feedback-input-rectangle, .profile-row-value-input { width: 100%; min-height: 46px; }
+.confirm-btn, .blue-btn, .feedback-submit-button, .profile-save-btn { width: 100%; min-height: 48px; }
+.recharge-item, .setting-big-rect-btn, .currency-choice-btn, .language-choice-btn { min-height: 48px; }
+
+/* Long text / Arabic / IDs never push the layout wider than the screen */
+.recharge-item, .basket-total-row, .setting-btn-text, .currency-choice-btn, .language-choice-btn { min-width: 0; }
+.recharge-item > *, .setting-btn-text > * { min-width: 0; overflow-wrap: anywhere; }
+table { display: block; max-width: 100%; overflow-x: auto; }
+
+/* ---------- Large screens / TVs ---------- */
+@media (min-width: 1440px) { .store-container { max-width: 1400px; } }
+@media (min-width: 2200px) { html { font-size: 115%; } }
+
+/* ---------- Print stays clean ---------- */
+@media print { .modal-overlay { position: static; height: auto; } }
+
+/* ==========================================================
+   HUB (2 large boxes) + SELLING ACCOUNTS  — added in v4
+   Uses the same theme variables as the rest of the site.
+   ========================================================== */
+.top-search-wrap.is-hidden { visibility: hidden; pointer-events: none; }
+
+.hub-section { width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; }
+.hub-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(14px, 3vw, 24px);
+    padding: 6px 12px 20px;
+}
+@media (min-width: 700px) { .hub-grid { grid-template-columns: 1fr 1fr; } }
+
+.hub-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: clamp(190px, 32vh, 280px);
+    padding: 24px 16px;
+    border-radius: 24px;
+    border: 3px solid #ff6600;
+    background: var(--bg-surface);
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.hub-box:hover { transform: translateY(-6px); box-shadow: 0 14px 34px -10px rgba(255, 102, 0, 0.55); }
+.hub-box:active { transform: scale(0.98); }
+.hub-box-accounts { border-color: #00a2ff; }
+.hub-box-accounts:hover { box-shadow: 0 14px 34px -10px rgba(0, 162, 255, 0.55); }
+.hub-box-icon { font-size: clamp(2.6rem, 9vw, 3.6rem); line-height: 1; }
+.hub-box-title { font-family: 'Space Grotesk', 'Segoe UI', sans-serif; font-weight: 700; font-size: clamp(1.15rem, 4.6vw, 1.6rem); letter-spacing: 1px; }
+.hub-box-sub { color: var(--text-muted); font-size: 0.95rem; }
+
+.hub-back-btn { display: block; margin: 0 0 10px 10px; }
+
+/* ---- accounts list ---- */
+.accounts-section { width: 100%; max-width: 1100px; margin-left: auto; margin-right: auto; }
+.sell-new-btn { display: block; width: calc(100% - 20px); max-width: 420px; margin: 0 auto 18px; }
+.accounts-status { text-align: center; color: var(--text-muted); padding: 24px 12px; }
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+    padding: 6px 12px 28px;
+}
+.account-card {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+    border: 2px solid #ff6600;
+    background-color: var(--bg-surface-alt);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    color: #fff;
+    text-align: start;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.account-card:hover { transform: translateY(-5px); box-shadow: 0 12px 28px -8px rgba(255, 102, 0, 0.55); }
+.account-card-shade {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.1) 55%, transparent 100%);
+}
+.account-card-title { font-family: 'Space Grotesk', 'Segoe UI', sans-serif; font-weight: 700; font-size: 1rem; }
+.account-card-meta { display: flex; justify-content: space-between; gap: 6px; font-size: 0.78rem; opacity: 0.95; }
+.account-card-meta span:last-child { color: #ffb067; font-weight: 700; white-space: nowrap; }
+.account-card-mine {
+    position: absolute; top: 8px; inset-inline-start: 8px;
+    background: #ff6600; color: #fff; font-size: 0.7rem; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px;
+}
+
+/* ---- sell page (full page) ---- */
+.sub-page {
+    position: fixed; inset: 0;
+    z-index: 150;
+    background: var(--bg-page);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: calc(14px + var(--sat, 0px)) 14px calc(30px + var(--sab, 0px));
+}
+.sub-page-inner { max-width: 520px; margin: 0 auto; }
+
+.receipt-box {
+    position: relative;
+    background: var(--bg-surface);
+    color: var(--text-main);
+    border: 2px solid #ff6600;
+    border-radius: 18px;
+    padding: clamp(16px, 5vw, 26px);
+    box-shadow: 0 10px 30px var(--shadow-ambient);
+}
+.receipt-title {
+    text-align: center;
+    font-size: clamp(1.3rem, 5.5vw, 1.8rem);
+    color: #ff6600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.receipt-cut { border-top: 2px dashed var(--border-input); margin: 16px -4px; }
+
+.camera-box {
+    border: 2px dashed #ff6600;
+    border-radius: 16px;
+    background: var(--bg-surface-alt);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+.camera-add-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    background: none; border: none; cursor: pointer;
+    color: #ff6600; padding: 14px 10px; width: 100%;
+}
+.camera-box.has-photos .camera-add-btn { padding: 6px; }
+.camera-svg { width: clamp(64px, 20vw, 96px); height: auto; }
+.camera-box.has-photos .camera-svg { width: 44px; }
+.camera-hint { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+.camera-counter { align-self: flex-end; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+
+.sell-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; width: 100%; }
+.sell-thumbs:empty { display: none; }
+.sell-thumb { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-input); }
+.sell-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sell-thumb-remove {
+    position: absolute; top: 3px; inset-inline-end: 3px;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: none; background: rgba(0, 0, 0, 0.7); color: #fff;
+    font-size: 1rem; line-height: 1; cursor: pointer;
+}
+.sell-thumb-cover {
+    position: absolute; bottom: 0; left: 0; right: 0; text-align: center;
+    background: rgba(255, 102, 0, 0.9); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 0;
+}
+
+.receipt-fields { margin-top: 18px; display: flex; flex-direction: column; }
+.receipt-label { font-size: 0.82rem; font-weight: 700; color: #ff6600; margin: 6px 0 6px; text-align: start; }
+.receipt-textarea { min-height: 110px; resize: vertical; }
+.sell-error { text-align: center; margin: 6px 0 0; }
+
+/* ---- account details ---- */
+.account-detail-box { max-width: min(520px, 100%); }
+.acc-gallery { position: relative; border-radius: 14px; overflow: hidden; background: #000; }
+.acc-main-photo { width: 100%; max-height: 52vh; object-fit: contain; display: block; margin: 0 auto; }
+.acc-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 38px; height: 38px; border-radius: 50%; border: none;
+    background: rgba(0, 0, 0, 0.6); color: #fff; cursor: pointer; font-size: 1rem;
+}
+.acc-prev { left: 8px; } .acc-next { right: 8px; }
+.acc-photo-counter {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0, 0, 0, 0.65); color: #fff; font-size: 0.75rem; padding: 2px 9px; border-radius: 999px;
+}
+.acc-thumbs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
+.acc-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 2px solid transparent; cursor: pointer; flex: 0 0 auto; opacity: 0.7; }
+.acc-thumb.active { border-color: #ff6600; opacity: 1; }
+.acc-info-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.acc-info-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-input); }
+.acc-info-key { color: var(--text-muted); font-size: 0.82rem; font-weight: 700; }
+.acc-info-val { font-weight: 700; text-align: end; }
+.acc-price-val { color: #ff6600; }
+.acc-info-block { display: flex; flex-direction: column; gap: 6px; }
+.acc-info-text { white-space: pre-wrap; text-align: start; line-height: 1.5; }
+.acc-phone-link {
+    color: #25D366; font-weight: 800; text-decoration: none;
+    border: 1.5px solid #25D366; border-radius: 999px; padding: 6px 14px; direction: ltr;
+}
+.acc-phone-link:hover { background: rgba(37, 211, 102, 0.12); }
+.acc-wa-hint { color: var(--text-muted); font-size: 0.75rem; text-align: center; }
+.acc-delete-btn {
+    width: 100%; min-height: 46px; margin-top: 14px;
+    background: transparent; color: #ff4d4d; border: 1.5px solid #ff4d4d;
+    border-radius: 10px; font-weight: 700; cursor: pointer;
+}
+.acc-delete-btn:hover { background: rgba(255, 77, 77, 0.12); }
+.acc-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
