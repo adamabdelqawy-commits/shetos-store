@@ -3,18 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // PROFILE (STEP 1) + INTRO ANIMATION GATE
     // ==========================================
-    const PHONE_REGEX = /^01[0-9]{9}$/; // exactly 11 digits, starts with 01
+    // Egyptian mobile numbers only: 010 / 011 / 012 / 015 + 8 digits (11 digits total)
+    const PHONE_REGEX = /^01[0125][0-9]{8}$/;
 
     function getSavedProfile() {
         return {
             username: localStorage.getItem('shetos_username') || '',
-            phone: localStorage.getItem('shetos_phone') || ''
+            phone: localStorage.getItem('shetos_phone') || '',
+            email: localStorage.getItem('shetos_email') || ''
         };
     }
 
-    function saveProfile(username, phone) {
+    function saveProfile(username, phone, email) {
         localStorage.setItem('shetos_username', username);
-        localStorage.setItem('shetos_phone', phone);
+        localStorage.setItem('shetos_phone', phone || '');
+        localStorage.setItem('shetos_email', email || '');
     }
 
     function runIntroThenStore() {
@@ -32,61 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const profileSetupPage = document.getElementById('profile-setup-page');
-    const setupUsernameInput = document.getElementById('setup-username-input');
-    const setupPhoneInput = document.getElementById('setup-phone-input');
-    const setupPhoneError = document.getElementById('setup-phone-error');
-    const setupEnterBtn = document.getElementById('setup-enter-btn');
-
-    function validateSetupForm() {
-        const uname = setupUsernameInput.value.trim();
-        const phone = setupPhoneInput.value.trim();
-        const phoneValid = PHONE_REGEX.test(phone);
-
-        if (phone.length > 0 && !phoneValid) {
-            setupPhoneInput.classList.add('field-invalid');
-            setupPhoneError.classList.add('show');
-        } else {
-            setupPhoneInput.classList.remove('field-invalid');
-            setupPhoneError.classList.remove('show');
-        }
-
-        const ready = uname.length > 0 && phoneValid;
-        setupEnterBtn.disabled = !ready;
-        setupEnterBtn.classList.toggle('ready', ready);
-        return ready;
-    }
-
-    if (setupPhoneInput) {
-        setupPhoneInput.addEventListener('input', () => {
-            // Only allow digits
-            setupPhoneInput.value = setupPhoneInput.value.replace(/[^0-9]/g, '').slice(0, 11);
-            validateSetupForm();
-        });
-    }
-    if (setupUsernameInput) {
-        setupUsernameInput.addEventListener('input', validateSetupForm);
-    }
-
-    if (setupEnterBtn) {
-        setupEnterBtn.addEventListener('click', () => {
-            if (!validateSetupForm()) return;
-            const uname = setupUsernameInput.value.trim();
-            const phone = setupPhoneInput.value.trim();
-            saveProfile(uname, phone);
-            if (profileSetupPage) profileSetupPage.remove();
-            runIntroThenStore();
-        });
-    }
-
-    // Entry point: skip setup if a profile already exists, otherwise show it
-    const existingProfile = getSavedProfile();
-    if (existingProfile.username && PHONE_REGEX.test(existingProfile.phone)) {
-        if (profileSetupPage) profileSetupPage.remove();
-        runIntroThenStore();
-    }
-    // else: profile-setup-page stays visible (animation-container is display:none until then)
-
     // ==========================================
     // SETTINGS: PROFILE VIEW / EDIT (combined single button, auto-save)
     // ==========================================
@@ -96,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const profilePhoneDisplay    = document.getElementById('profile-phone-display');
     const profileEditToggleBtn = document.getElementById('profile-edit-toggle-btn');
     const profileUsernameField = document.getElementById('profile-username-field');
-    const profilePhoneField    = document.getElementById('profile-phone-field');
     const profileEditError     = document.getElementById('profile-edit-error');
     const profileSaveBtn       = document.getElementById('profile-save-btn');
     const profileSaveStatus    = document.getElementById('profile-save-status');
@@ -111,9 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadProfileIntoSettings() {
         const p = getSavedProfile();
         if (profileUsernameDisplay) profileUsernameDisplay.textContent = p.username || '-';
-        if (profilePhoneDisplay) profilePhoneDisplay.textContent = p.phone || '-';
+        const icon = document.getElementById('profile-contact-icon');
+        if (icon) icon.textContent = p.phone ? '📱' : '✉️';
+        if (profilePhoneDisplay) profilePhoneDisplay.textContent = p.phone || p.email || '-';
         if (profileUsernameField) profileUsernameField.value = p.username;
-        if (profilePhoneField) profilePhoneField.value = p.phone;
     }
     loadProfileIntoSettings();
 
@@ -121,44 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
         profileEditToggleBtn.addEventListener('click', () => {
             const p = getSavedProfile();
             if (profileUsernameField) profileUsernameField.value = p.username;
-            if (profilePhoneField) profilePhoneField.value = p.phone;
             if (profileEditError) profileEditError.classList.remove('show');
             if (profileDisplayView) profileDisplayView.style.display = 'none';
             if (profileEditView) profileEditView.style.display = 'flex';
             if (profileUsernameField) profileUsernameField.focus();
         });
     }
-
-    if (profilePhoneField) {
-        profilePhoneField.addEventListener('input', () => {
-            profilePhoneField.value = profilePhoneField.value.replace(/[^0-9]/g, '').slice(0, 11);
-        });
-    }
-
-    if (profileSaveBtn) {
-        profileSaveBtn.addEventListener('click', () => {
-            const uname = (profileUsernameField.value || '').trim();
-            const phone = (profilePhoneField.value || '').trim();
-
-            if (uname.length === 0) {
-                profileEditError.textContent = 'Username cannot be empty';
-                profileEditError.classList.add('show');
-                return;
-            }
-            if (!PHONE_REGEX.test(phone)) {
-                profileEditError.textContent = 'Phone must be 11 digits and start with 01';
-                profileEditError.classList.add('show');
-                return;
-            }
-
-            saveProfile(uname, phone);
-            loadProfileIntoSettings();
-            if (profileEditError) profileEditError.classList.remove('show');
-            if (profileEditView) profileEditView.style.display = 'none';
-            if (profileDisplayView) profileDisplayView.style.display = 'flex';
-            flashSaveStatus('✔ Profile saved');
-        });
-    }
+    // (saving the new name and logging out are handled in the ACCOUNTS section below)
 
     // ==========================================
     // TELEGRAM CONFIG
@@ -409,9 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteAccount: "🗑 Delete my account listing", confirmDelete: "Delete this account listing?",
             deleteError: "Couldn't delete. Please try again.",
             maxPhotos: "Maximum 10 photos.",
-            errPhotos: "Please add at least one photo.", errPhone: "Phone must be 11 digits and start with 01",
+            errPhotos: "Please add at least one photo.",
             errPrice: "Please enter a valid price.", errGame: "Please enter the game name.",
-            errSave: "Couldn't save the account. Please try again."
+            errSave: "Couldn't save the account. Please try again.",
+            editName: "Edit name", logout: "Logout",
+            errPhone: "Sorry, this is a wrong phone number.",
+            errNotWA: "Sorry, this is a wrong phone number (it is not on WhatsApp)."
         },
         ar: {
             back: "رجوع", hubTitle: "ماذا تحتاج؟",
@@ -430,9 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteAccount: "🗑 حذف حسابي من القائمة", confirmDelete: "هل تريد حذف هذا الحساب؟",
             deleteError: "تعذر الحذف. حاول مرة أخرى.",
             maxPhotos: "الحد الأقصى 10 صور.",
-            errPhotos: "من فضلك أضف صورة واحدة على الأقل.", errPhone: "رقم الهاتف لازم يكون 11 رقم ويبدأ بـ 01",
+            errPhotos: "من فضلك أضف صورة واحدة على الأقل.",
             errPrice: "من فضلك اكتب سعرا صحيحا.", errGame: "من فضلك اكتب اسم اللعبة.",
-            errSave: "تعذر حفظ الحساب. حاول مرة أخرى."
+            errSave: "تعذر حفظ الحساب. حاول مرة أخرى.",
+            editName: "تعديل الاسم", logout: "تسجيل الخروج",
+            errPhone: "عذرًا، رقم الهاتف غير صحيح.",
+            errNotWA: "عذرًا، رقم الهاتف غير صحيح (غير موجود على واتساب)."
         }
     };
     Object.assign(TRANSLATIONS.default, ACC_T.en);
@@ -993,7 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const userAccessInfoString = `🆔 Target Player ID: ${authenticatedUserMeta.rawId}`;
 
         const customerProfile = getSavedProfile();
-        const customerInfoString = `👤 Customer: ${customerProfile.username || 'N/A'}\n📞 Contact: ${customerProfile.phone || 'N/A'}`;
+        const customerInfoString = `👤 Customer: ${customerProfile.username || 'N/A'}\n📞 Contact: ${customerProfile.phone || customerProfile.email || 'N/A'}`;
 
         const botPayload = `🛒 NEW MARKET ORDER\n\n${customerInfoString}\n\n${userAccessInfoString}\n\n📦 ITEM:\n${productLine}\n\n💰 TOTAL: ${orderTotal} EGP`;
         const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -1284,6 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dbBase = ACCOUNTS_DB_URL.replace(/\/+$/, '');
 
+    const isMine = (acc) => !!acc && !!acc.owner && acc.owner === (localStorage.getItem('shetos_session') || '');
     function getMyAccounts() {
         try { return JSON.parse(localStorage.getItem(MY_ACCOUNTS_KEY)) || {}; } catch (e) { return {}; }
     }
@@ -1380,7 +1304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!accountsGrid) return;
         accountsGrid.innerHTML = '';
         setAccountsStatus(accountsCache.length ? '' : t('noAccounts'));
-        const mine = getMyAccounts();
         accountsCache.forEach(acc => {
             const card = document.createElement('button');
             card.type = 'button';
@@ -1403,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shade.append(title, meta);
             card.appendChild(shade);
 
-            if (mine[acc.id]) {
+            if (isMine(acc)) {
                 const badge = document.createElement('span');
                 badge.className = 'account-card-mine';
                 badge.textContent = t('yours');
@@ -1445,7 +1368,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const phoneLink = document.getElementById('acc-phone');
         phoneLink.textContent = acc.phone || '';
         phoneLink.href = PHONE_REGEX.test(acc.phone || '') ? `https://wa.me/20${acc.phone.slice(1)}` : '#';
-        accDeleteBtn.style.display = getMyAccounts()[acc.id] ? '' : 'none';
+        accDeleteBtn.style.display = isMine(acc) ? '' : 'none';
 
         // show the cover instantly, then load every photo
         accPhotos = isSafeImg(acc.cover) ? [acc.cover] : [];
@@ -1480,7 +1403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     accDeleteBtn?.addEventListener('click', async () => {
-        if (!accOpenId || !getMyAccounts()[accOpenId]) return;
+        if (!accOpenId || !isMine(accOpenData)) return;
         if (!confirm(t('confirmDelete'))) return;
         accDeleteBtn.disabled = true;
         try {
@@ -1521,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function customerLine() {
         const c = getSavedProfile();
-        return `👤 ${c.username || 'N/A'}\n📞 ${c.phone || 'N/A'}`;
+        return `👤 ${c.username || 'N/A'}\n📞 ${c.phone || c.email || 'N/A'}`;
     }
 
     function notifyAccountAdded(meta, photoCount) {
@@ -1643,7 +1566,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const cover = await resizeImageFile(sellPhotos[0], 420, 0.6); // light thumbnail for the list
             const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-            const meta = { id, phone, price, game, info, cover, createdAt: Date.now() };
+            const meta = { id, phone, price, game, info, cover, owner: localStorage.getItem('shetos_session') || '', createdAt: Date.now() };
             await dbSaveAccount(meta, sellPhotos);
 
             const mine = getMyAccounts(); mine[id] = true; setMyAccounts(mine);
@@ -1660,6 +1583,626 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderSellThumbs();
+
+    // ==========================================================
+    // ACCOUNTS: LOGIN / SIGN UP  (name+phone  or  name+email)
+    // ----------------------------------------------------------
+    // Accounts live in Firebase under  /users/<key>
+    //   phone account key : p_01xxxxxxxxx
+    //   email account key : e_<hex of the lower-cased email>
+    // ==========================================================
+
+    // ---- WhatsApp verification code (OTP) -------------------------------
+    // The code is created, sent on WhatsApp and checked by a small SERVER
+    // (see otp-worker.js). The code never reaches this page, so nobody can read it here.
+    const OTP_API_URL  = 'https://calm-voice-d016.adam-abdelqawy.workers.dev';    // e.g. 'https://shetos-otp.YOURNAME.workers.dev'  (empty = verification is skipped)
+    const OTP_DEMO     = false; // true = PREVIEW ONLY: the code is shown on screen instead of WhatsApp
+    const OTP_ON_LOGIN = true;  // ask for a code when logging in too (false = only when signing up)
+    const otpEnabled   = () => !!OTP_API_URL || OTP_DEMO;
+
+    const SESSION_KEY = 'shetos_session';
+    const getSession  = () => localStorage.getItem(SESSION_KEY) || '';
+
+    const AUTH_T = {
+        en: {
+            headLogin: "Login to your account", headSignup: "Create your account", headBack: "Welcome back",
+            tabLogin: "Login", tabSignup: "Sign up",
+            byPhone: "📱 Name + Phone", byEmail: "✉️ Name + Email",
+            phName: "Enter your name", phPhone: "Phone number (01xxxxxxxxx)", phEmail: "Email",
+            btnLogin: "Login", btnSignup: "Sign up", checking: "Checking...",
+            errName: "Please enter your name.",
+            errPhoneFmt: "Sorry, this is a wrong phone number.",
+            errNotWA: "Sorry, this is a wrong phone number (it is not on WhatsApp).",
+            errEmail: "Sorry, this is not an email.",
+            errExists: "Sorry, but this account is already logged in. Sign up with another one.",
+            errNoAccount: "No account found with this data. Please sign up first.",
+            errWrong: "Wrong name or phone/email. Please try again.",
+            errNet: "Connection problem. Please try again.",
+            welcomeBack: "Welcome back", welcomeNew: "Welcome", loggedOut: "You have been logged out",
+            nameSaved: "✔ Name saved", nameEmpty: "Name cannot be empty",
+            vTitle: "Check your WhatsApp", vSub: "We sent a 6-digit code to the WhatsApp number {n}",
+            vSending: "Sending the code...", vResend: "Resend code", vResendIn: "Resend in {s}s", vChange: "Change number",
+            vWrong: "Wrong code, try again.", vExpired: "The code expired. Request a new one.",
+            vTooMany: "Too many wrong tries. Request a new code.",
+            vSendFail: "Couldn't send the code. Check the number and try again.",
+            vWait: "Please wait {s}s before asking for a new code.",
+            vDemo: "PREVIEW MODE - your code is {c}"
+        },
+        ar: {
+            headLogin: "سجّل الدخول إلى حسابك", headSignup: "أنشئ حسابك", headBack: "مرحبًا بعودتك",
+            tabLogin: "تسجيل الدخول", tabSignup: "إنشاء حساب",
+            byPhone: "📱 الاسم + الهاتف", byEmail: "✉️ الاسم + الإيميل",
+            phName: "اكتب اسمك", phPhone: "رقم الهاتف (01xxxxxxxxx)", phEmail: "الإيميل",
+            btnLogin: "دخول", btnSignup: "إنشاء حساب", checking: "جاري التحقق...",
+            errName: "من فضلك اكتب اسمك.",
+            errPhoneFmt: "عذرًا، رقم الهاتف غير صحيح.",
+            errNotWA: "عذرًا، رقم الهاتف غير صحيح (غير موجود على واتساب).",
+            errEmail: "عذرًا، هذا ليس إيميلًا.",
+            errExists: "عذرًا، هذا الحساب مسجّل دخول بالفعل. سجّل بحساب آخر.",
+            errNoAccount: "لا يوجد حساب بهذه البيانات. أنشئ حسابًا أولًا.",
+            errWrong: "الاسم أو الهاتف/الإيميل غير صحيح. حاول مرة أخرى.",
+            errNet: "مشكلة في الاتصال. حاول مرة أخرى.",
+            welcomeBack: "مرحبًا بعودتك", welcomeNew: "أهلًا بك", loggedOut: "تم تسجيل الخروج",
+            nameSaved: "✔ تم حفظ الاسم", nameEmpty: "الاسم لا يمكن أن يكون فارغًا",
+            vTitle: "افحص الواتساب", vSub: "أرسلنا كودًا من 6 أرقام إلى رقم الواتساب {n}",
+            vSending: "جاري إرسال الكود...", vResend: "إعادة إرسال الكود", vResendIn: "إعادة الإرسال بعد {s} ث", vChange: "تغيير الرقم",
+            vWrong: "الكود غير صحيح، حاول مرة أخرى.", vExpired: "انتهت صلاحية الكود. اطلب كودًا جديدًا.",
+            vTooMany: "محاولات خاطئة كثيرة. اطلب كودًا جديدًا.",
+            vSendFail: "تعذر إرسال الكود. تأكد من الرقم وحاول مرة أخرى.",
+            vWait: "من فضلك انتظر {s} ثانية قبل طلب كود جديد.",
+            vDemo: "وضع المعاينة - الكود هو {c}"
+        }
+    };
+    function at(key) {
+        const lang = localStorage.getItem('shetos_language') === 'ar' ? 'ar' : 'en';
+        return AUTH_T[lang][key] ?? AUTH_T.en[key];
+    }
+
+    // ---- validation helpers ----
+    const normName  = (s) => s.trim().replace(/\s+/g, ' ').toLowerCase();
+    function isValidEmail(e) {
+        // must contain exactly one "@" with text before and after it, and no spaces
+        return /^[^\s@]+@[^\s@]+$/.test(e);
+    }
+    const hexOf = (str) => Array.from(new TextEncoder().encode(str)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const keyForPhone = (phone) => 'p_' + phone;
+    const keyForEmail = (email) => 'e_' + hexOf(email.toLowerCase());
+
+    // ---- users database (Firebase, with a local fallback) ----
+    const LOCAL_USERS_KEY = 'shetos_local_users';
+    const localUsers = () => { try { return JSON.parse(localStorage.getItem(LOCAL_USERS_KEY)) || {}; } catch (e) { return {}; } };
+
+    async function userGet(key) {
+        if (dbBase) {
+            const res = await fetch(`${dbBase}/users/${key}.json`);
+            if (!res.ok) throw new Error('get user failed');
+            return res.json();
+        }
+        return localUsers()[key] || null;
+    }
+    async function userCreate(key, record) {
+        if (dbBase) {
+            const res = await fetch(`${dbBase}/users/${key}.json`, { method: 'PUT', body: JSON.stringify(record) });
+            if (!res.ok) throw new Error('create user failed');
+            return;
+        }
+        const all = localUsers(); all[key] = record;
+        localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(all));
+    }
+    async function userPatch(key, fields) {
+        if (dbBase) {
+            const res = await fetch(`${dbBase}/users/${key}.json`, { method: 'PATCH', body: JSON.stringify(fields) });
+            if (!res.ok) throw new Error('update user failed');
+            return;
+        }
+        const all = localUsers(); all[key] = Object.assign(all[key] || {}, fields);
+        localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(all));
+    }
+
+    // ---- session ----
+    function startSession(key, rec) {
+        localStorage.setItem(SESSION_KEY, key);
+        saveProfile(rec.name, rec.phone || '', rec.email || '');
+    }
+    function endSession() {
+        localStorage.removeItem(SESSION_KEY);
+        ['shetos_username', 'shetos_phone', 'shetos_email'].forEach(k => localStorage.removeItem(k));
+    }
+
+    // ---- confetti / welcome effect ----
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function launchConfetti(canvas, durationMs) {
+        const ctx = canvas.getContext && canvas.getContext('2d');
+        if (!ctx || reduceMotion) return;
+        const W = canvas.width = window.innerWidth;
+        const H = canvas.height = window.innerHeight;
+        const colors = ['#ff6600', '#ffb067', '#00a2ff', '#ffffff', '#25D366', '#ffd700'];
+        const parts = Array.from({ length: 140 }, () => ({
+            x: W / 2 + (Math.random() - 0.5) * 120, y: H * 0.45,
+            vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 13 - 4,
+            size: 5 + Math.random() * 6, rot: Math.random() * 6,
+            vr: (Math.random() - 0.5) * 0.4, color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        const t0 = performance.now();
+        (function frame(now) {
+            const elapsed = now - t0;
+            ctx.clearRect(0, 0, W, H);
+            parts.forEach(p => {
+                p.vy += 0.35; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                ctx.globalAlpha = Math.max(0, 1 - elapsed / durationMs);
+                ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                ctx.restore();
+            });
+            if (elapsed < durationMs) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
+        })(t0);
+    }
+
+    function playWelcome(title, name) {
+        return new Promise(resolve => {
+            const fx = document.createElement('div');
+            fx.className = 'welcome-fx';
+            const canvas = document.createElement('canvas');
+            canvas.className = 'welcome-fx-canvas';
+            const h = document.createElement('div'); h.className = 'welcome-fx-title'; h.textContent = title;
+            const n = document.createElement('div'); n.className = 'welcome-fx-name';  n.textContent = name;
+            fx.append(canvas, h, n);
+            document.body.appendChild(fx);
+            launchConfetti(canvas, 2200);
+            setTimeout(() => { fx.classList.add('out'); }, 2100);
+            setTimeout(() => { fx.remove(); resolve(); }, 2600);
+        });
+    }
+
+    // ---- auth screen ----
+    const authPage    = document.getElementById('profile-setup-page');
+    const authHeading = document.getElementById('auth-heading');
+    const authTabLogin  = document.getElementById('auth-tab-login');
+    const authTabSignup = document.getElementById('auth-tab-signup');
+    const authMethodPhone = document.getElementById('auth-method-phone');
+    const authMethodEmail = document.getElementById('auth-method-email');
+    const authName  = document.getElementById('auth-name');
+    const authPhone = document.getElementById('auth-phone');
+    const authEmail = document.getElementById('auth-email');
+    const authError = document.getElementById('auth-error');
+    const authSubmit = document.getElementById('auth-submit');
+    let authMode = 'login';    // 'login' | 'signup'
+    let authMethod = 'phone';  // 'phone' | 'email'
+    let authBusy = false;
+    let cameBackFromLogout = false;
+
+    function showAuthError(msg) {
+        authError.textContent = msg || '';
+        authError.classList.toggle('show', !!msg);
+        const field = authMethod === 'phone' ? authPhone : authEmail;
+        [authName, authPhone, authEmail].forEach(f => f.classList.remove('field-invalid'));
+        if (msg) field.classList.add('field-invalid');
+    }
+
+    function renderAuth() {
+        authHeading.textContent = cameBackFromLogout && authMode === 'login'
+            ? at('headBack') + ' 👋' : (authMode === 'login' ? at('headLogin') : at('headSignup'));
+        authHeading.classList.toggle('welcome-back-heading', cameBackFromLogout && authMode === 'login');
+        authTabLogin.textContent  = at('tabLogin');
+        authTabSignup.textContent = at('tabSignup');
+        authTabLogin.classList.toggle('active',  authMode === 'login');
+        authTabSignup.classList.toggle('active', authMode === 'signup');
+        authMethodPhone.textContent = at('byPhone');
+        authMethodEmail.textContent = at('byEmail');
+        authMethodPhone.classList.toggle('active', authMethod === 'phone');
+        authMethodEmail.classList.toggle('active', authMethod === 'email');
+        authName.placeholder  = at('phName');
+        authPhone.placeholder = at('phPhone');
+        authEmail.placeholder = at('phEmail');
+        authPhone.style.display = authMethod === 'phone' ? '' : 'none';
+        authEmail.style.display = authMethod === 'email' ? '' : 'none';
+        authSubmit.textContent = authMode === 'login' ? at('btnLogin') : at('btnSignup');
+        showAuthError('');
+    }
+
+    async function submitAuth() {
+        if (authBusy) return;
+        const name  = authName.value.trim().replace(/\s+/g, ' ');
+        const phone = authPhone.value.trim();
+        const email = authEmail.value.trim();
+
+        // 1) local checks first (fast, no network)
+        if (!name) { showAuthError(at('errName')); authName.classList.add('field-invalid'); return; }
+        if (authMethod === 'phone' && !PHONE_REGEX.test(phone)) return showAuthError(at('errPhoneFmt'));
+        if (authMethod === 'email' && !isValidEmail(email))     return showAuthError(at('errEmail'));
+
+        authBusy = true; authSubmit.disabled = true; authSubmit.textContent = at('checking');
+        showAuthError('');
+        try {
+            // 2) look the account up BEFORE sending any code (no code is wasted on a wrong login)
+            const key = authMethod === 'phone' ? keyForPhone(phone) : keyForEmail(email);
+            const existing = await userGet(key);
+            if (authMode === 'signup' && existing) return showAuthError(at('errExists'));
+            if (authMode === 'login') {
+                if (!existing) return showAuthError(at('errNoAccount'));
+                if (normName(existing.name || '') !== normName(name)) return showAuthError(at('errWrong'));
+            }
+            const ctx = { mode: authMode, method: authMethod, key, name, phone, email, existing };
+
+            // 3) phone accounts: confirm the number with a code sent on WhatsApp
+            if (authMethod === 'phone' && otpEnabled() && (authMode === 'signup' || OTP_ON_LOGIN)) {
+                await beginPhoneVerification(ctx);
+                return;
+            }
+            await completeAuth(ctx);
+        } catch (e) {
+            console.error('Auth failed:', e);
+            showAuthError(at('errNet'));
+        } finally {
+            authBusy = false; authSubmit.disabled = false;
+            authSubmit.textContent = authMode === 'login' ? at('btnLogin') : at('btnSignup');
+        }
+    }
+
+    // creates the account (sign up) or just opens the session (login)
+    async function completeAuth(ctx) {
+        if (ctx.mode === 'signup') {
+            const record = { name: ctx.name, method: ctx.method, createdAt: Date.now() };
+            if (ctx.method === 'phone') record.phone = ctx.phone; else record.email = ctx.email.toLowerCase();
+            await userCreate(ctx.key, record);
+            startSession(ctx.key, record);
+            await finishAuth(at('welcomeNew'), ctx.name);
+        } else {
+            startSession(ctx.key, ctx.existing);
+            await finishAuth(at('welcomeBack'), ctx.existing.name);
+        }
+    }
+
+    async function finishAuth(title, name) {
+        await playWelcome(title + ',', name);
+        if (authPage) authPage.remove();
+        runIntroThenStore();
+    }
+
+    function bindAuthScreen() {
+        authTabLogin.addEventListener('click',  () => { authMode = 'login';  renderAuth(); });
+        authTabSignup.addEventListener('click', () => { authMode = 'signup'; renderAuth(); });
+        authMethodPhone.addEventListener('click', () => { authMethod = 'phone'; renderAuth(); });
+        authMethodEmail.addEventListener('click', () => { authMethod = 'email'; renderAuth(); });
+        authPhone.addEventListener('input', () => {
+            authPhone.value = authPhone.value.replace(/[^0-9]/g, '').slice(0, 11);
+            if (authError.classList.contains('show')) showAuthError('');
+        });
+        [authName, authEmail].forEach(f => f.addEventListener('input', () => {
+            if (authError.classList.contains('show')) showAuthError('');
+        }));
+        [authName, authPhone, authEmail].forEach(f => f.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitAuth();
+        }));
+        authSubmit.addEventListener('click', submitAuth);
+    }
+
+    // ==========================================================
+    // WHATSAPP CODE SCREEN (6 digits + animations)
+    // ==========================================================
+    const demoCodes = {};
+    const waNumber = (phone) => '20' + phone.slice(1); // 01012345678 -> 201012345678
+    const maskPhone = (phone) => phone.slice(0, 3) + '****' + phone.slice(-4);
+    const toWesternDigits = (s) => s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+    function showDemoToast(code) {
+        const el = document.createElement('div');
+        el.className = 'demo-toast';
+        el.textContent = at('vDemo').replace('{c}', code);
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 20000);
+    }
+
+    async function otpSend(phone) {
+        if (!OTP_API_URL) { // preview mode
+            const code = String(Math.floor(100000 + Math.random() * 900000));
+            demoCodes[phone] = { code, tries: 0, exp: Date.now() + 300000 };
+            showDemoToast(code);
+            return { ok: true };
+        }
+        try {
+            const res = await fetch(OTP_API_URL.replace(/\/+$/, '') + '/send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: waNumber(phone) })
+            });
+            return await res.json();
+        } catch (e) { return { ok: false, error: 'network' }; }
+    }
+
+    async function otpVerify(phone, code) {
+        if (!OTP_API_URL) { // preview mode
+            const d = demoCodes[phone];
+            if (!d || Date.now() > d.exp) return { ok: false, error: 'expired' };
+            if (d.tries >= 5) return { ok: false, error: 'too_many' };
+            if (d.code !== code) { d.tries++; return { ok: false, error: 'wrong' }; }
+            delete demoCodes[phone];
+            return { ok: true };
+        }
+        try {
+            const res = await fetch(OTP_API_URL.replace(/\/+$/, '') + '/verify', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: waNumber(phone), code })
+            });
+            return await res.json();
+        } catch (e) { return { ok: false, error: 'network' }; }
+    }
+
+    const authForm      = document.getElementById('auth-form');
+    const verifyPanel   = document.getElementById('auth-verify');
+    const verifySub     = document.getElementById('verify-sub');
+    const verifyBoxes   = document.getElementById('verify-boxes');
+    const verifyError   = document.getElementById('verify-error');
+    const verifyStatus  = document.getElementById('verify-status');
+    const verifyResend  = document.getElementById('verify-resend');
+    const verifyBack    = document.getElementById('verify-back');
+    const verifySuccess = document.getElementById('verify-success');
+    const digitEls = [];
+    let pendingAuth = null;   // { mode, key, name, phone, existing }
+    let resendTimer = null;
+    let verifying = false;
+
+    // build the 6 boxes
+    for (let i = 0; i < 6; i++) {
+        const inp = document.createElement('input');
+        inp.type = 'tel';
+        inp.setAttribute('inputmode', 'numeric');
+        inp.setAttribute('autocomplete', i === 0 ? 'one-time-code' : 'off');
+        inp.setAttribute('aria-label', 'Digit ' + (i + 1));
+        inp.className = 'verify-digit';
+        inp.style.animationDelay = (i * 70) + 'ms';
+        verifyBoxes.appendChild(inp);
+        digitEls.push(inp);
+    }
+
+    const getCode = () => digitEls.map(e => e.value).join('');
+    function clearDigits() { digitEls.forEach(e => { e.value = ''; e.classList.remove('filled'); }); }
+    function setDigitsDisabled(v) { digitEls.forEach(e => { e.disabled = v; }); }
+    function setVerifyError(msg) { verifyError.textContent = msg || ''; verifyError.classList.toggle('show', !!msg); }
+    function setVerifyStatus(msg, sending) {
+        verifyStatus.textContent = msg || '';
+        verifyStatus.classList.toggle('sending', !!sending);
+    }
+
+    function otpErrorText(code, retryAfter) {
+        switch (code) {
+            case 'wrong':           return at('vWrong');
+            case 'expired':         return at('vExpired');
+            case 'too_many':        return at('vTooMany');
+            case 'not_on_whatsapp': return at('errNotWA');
+            case 'wait':            return at('vWait').replace('{s}', retryAfter || 60);
+            default:                return at('vSendFail');
+        }
+    }
+
+    function startResendCountdown(sec) {
+        clearInterval(resendTimer);
+        let left = sec;
+        const tick = () => {
+            if (left > 0) { verifyResend.disabled = true; verifyResend.textContent = at('vResendIn').replace('{s}', left); }
+            else { verifyResend.disabled = false; verifyResend.textContent = at('vResend'); clearInterval(resendTimer); }
+        };
+        tick();
+        resendTimer = setInterval(() => { left--; tick(); }, 1000);
+    }
+
+    function showVerifyScreen() {
+        authForm.style.display = 'none';
+        verifyPanel.style.display = '';
+        verifyPanel.classList.remove('is-success');
+        authHeading.classList.remove('welcome-back-heading');
+        authHeading.textContent = at('vTitle');
+        verifySub.textContent = at('vSub').replace('{n}', maskPhone(pendingAuth.phone));
+        verifyBack.textContent = at('vChange');
+        verifyResend.textContent = at('vResend');
+        clearDigits(); setDigitsDisabled(false); setVerifyError('');
+    }
+
+    function leaveVerifyScreen() {
+        clearInterval(resendTimer);
+        pendingAuth = null; verifying = false;
+        verifyPanel.style.display = 'none';
+        authForm.style.display = '';
+        renderAuth();
+    }
+
+    // sends the code, then waits for the customer to type it
+    async function beginPhoneVerification(ctx) {
+        pendingAuth = ctx;
+        showVerifyScreen();
+        setVerifyStatus(at('vSending'), true);
+        setDigitsDisabled(true);
+        const r = await otpSend(ctx.phone);
+        setVerifyStatus('', false);
+        if (!pendingAuth) return; // the customer went back meanwhile
+        if (r.ok) {
+            setDigitsDisabled(false);
+            startResendCountdown(60);
+            digitEls[0].focus();
+        } else if (r.error === 'wait') { // a code was sent a few seconds ago, it is still valid
+            setDigitsDisabled(false);
+            setVerifyError(otpErrorText('wait', r.retryAfter));
+            startResendCountdown(Number(r.retryAfter) || 60);
+            digitEls[0].focus();
+        } else { // could not send: go back to the form and tell why
+            const msg = otpErrorText(r.error);
+            leaveVerifyScreen();
+            showAuthError(msg);
+        }
+    }
+
+    async function submitVerifyCode() {
+        const code = getCode();
+        if (verifying || code.length !== 6 || !pendingAuth) return;
+        verifying = true; setDigitsDisabled(true); setVerifyError(''); setVerifyStatus(at('checking'), true);
+        const r = await otpVerify(pendingAuth.phone, code);
+        setVerifyStatus('', false);
+        if (!pendingAuth) { verifying = false; return; }
+        if (r.ok) {
+            verifyPanel.classList.add('is-success'); // green check animation
+            const ctx = pendingAuth;
+            await new Promise(res => setTimeout(res, 1000));
+            clearInterval(resendTimer);
+            verifying = false;
+            try { await completeAuth(ctx); }
+            catch (e) { console.error(e); leaveVerifyScreen(); showAuthError(at('errNet')); }
+            return;
+        }
+        // wrong code: shake the boxes
+        verifying = false;
+        setVerifyError(otpErrorText(r.error));
+        verifyBoxes.classList.remove('shake'); void verifyBoxes.offsetWidth; verifyBoxes.classList.add('shake');
+        clearDigits(); setDigitsDisabled(false);
+        if (r.error === 'expired' || r.error === 'too_many') { clearInterval(resendTimer); verifyResend.disabled = false; verifyResend.textContent = at('vResend'); }
+        digitEls[0].focus();
+    }
+
+    function fillDigitsFrom(index, raw) {
+        const digits = toWesternDigits(raw).replace(/\D/g, '');
+        if (!digits) { digitEls[index].value = ''; digitEls[index].classList.remove('filled'); return; }
+        let i = index;
+        for (const ch of digits) {
+            if (i > 5) break;
+            digitEls[i].value = ch; digitEls[i].classList.add('filled'); i++;
+        }
+        if (i > 5) { digitEls[5].focus(); submitVerifyCode(); }
+        else digitEls[i].focus();
+    }
+
+    digitEls.forEach((el, i) => {
+        el.addEventListener('input', () => { setVerifyError(''); fillDigitsFrom(i, el.value); });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && el.value === '' && i > 0) {
+                digitEls[i - 1].value = ''; digitEls[i - 1].classList.remove('filled'); digitEls[i - 1].focus(); e.preventDefault();
+            } else if (e.key === 'ArrowLeft' && i > 0) { digitEls[i - 1].focus(); }
+            else if (e.key === 'ArrowRight' && i < 5) { digitEls[i + 1].focus(); }
+            else if (e.key === 'Enter') { submitVerifyCode(); }
+        });
+        el.addEventListener('focus', () => el.select());
+        el.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            fillDigitsFrom(0, text);
+        });
+    });
+
+    verifyBack.addEventListener('click', leaveVerifyScreen);
+    verifyResend.addEventListener('click', async () => {
+        if (!pendingAuth || verifyResend.disabled) return;
+        verifyResend.disabled = true; clearDigits(); setVerifyError('');
+        setVerifyStatus(at('vSending'), true); setDigitsDisabled(true);
+        const r = await otpSend(pendingAuth.phone);
+        setVerifyStatus('', false); setDigitsDisabled(false);
+        if (r.ok) { startResendCountdown(60); }
+        else {
+            setVerifyError(otpErrorText(r.error, r.retryAfter));
+            startResendCountdown(r.error === 'wait' ? (Number(r.retryAfter) || 60) : 10);
+        }
+        digitEls[0].focus();
+    });
+
+    // ---- entry point: already logged in → go on, otherwise show the auth screen ----
+    function startAuthGate() {
+        const key = getSession();
+        const p = getSavedProfile();
+        if (key && p.username) {
+            if (authPage) authPage.remove();
+            runIntroThenStore();
+            // quietly make sure the account still exists in the database
+            userGet(key).then(rec => {
+                if (rec === null) { endSession(); location.reload(); }
+                else if (rec && rec.name && rec.name !== p.username) { saveProfile(rec.name, rec.phone || '', rec.email || ''); loadProfileIntoSettings(); }
+            }).catch(() => { /* offline: keep going */ });
+            return;
+        }
+        if (localStorage.getItem('shetos_after_logout') === '1') {
+            localStorage.removeItem('shetos_after_logout');
+            cameBackFromLogout = true;
+        }
+        bindAuthScreen();
+        renderAuth();
+        if (cameBackFromLogout) {
+            const canvas = document.createElement('canvas');
+            canvas.className = 'welcome-fx-canvas auth-confetti';
+            authPage.appendChild(canvas);
+            launchConfetti(canvas, 2400);
+            setTimeout(() => canvas.remove(), 2600);
+        }
+    }
+
+    // ---- settings: edit NAME only + logout ----
+    profileSaveBtn?.addEventListener('click', async () => {
+        const name = (profileUsernameField.value || '').trim().replace(/\s+/g, ' ');
+        if (!name) {
+            profileEditError.textContent = at('nameEmpty');
+            profileEditError.classList.add('show');
+            return;
+        }
+        profileSaveBtn.disabled = true;
+        try {
+            const key = getSession();
+            if (key) await userPatch(key, { name });
+            const p = getSavedProfile();
+            saveProfile(name, p.phone, p.email);
+            loadProfileIntoSettings();
+            profileEditError.classList.remove('show');
+            profileEditView.style.display = 'none';
+            profileDisplayView.style.display = 'flex';
+            flashSaveStatus(at('nameSaved'));
+        } catch (e) {
+            profileEditError.textContent = at('errNet');
+            profileEditError.classList.add('show');
+        }
+        profileSaveBtn.disabled = false;
+    });
+
+    document.getElementById('profile-logout-btn')?.addEventListener('click', () => {
+        endSession();
+        localStorage.setItem('shetos_after_logout', '1'); // shows "Welcome back" + effects after the reload
+        location.reload();
+    });
+
+    startAuthGate();
+
+    // ==========================================================
+    // VISITOR COUNTER: tells the stats server about each visit
+    // (once per browser session, so refreshing the page does not spam you)
+    // ==========================================================
+    const STATS_API_URL = 'https://shetos-stats.adam-abdelqawy.workers.dev'; // e.g. 'https://shetos-stats.YOURNAME.workers.dev'  (empty = counter is off)
+
+    function trackVisit() {
+        try {
+            if (!STATS_API_URL) return;
+            // Open  yoursite/?notrack=1  once on your own devices so YOUR visits are not counted
+            // (and ?notrack=0 to count them again).
+            const q = new URLSearchParams(location.search);
+            if (q.get('notrack') === '1') localStorage.setItem('shetos_notrack', '1');
+            if (q.get('notrack') === '0') localStorage.removeItem('shetos_notrack');
+            if (localStorage.getItem('shetos_notrack') === '1') return;
+
+            if (sessionStorage.getItem('shetos_visit_sent') === '1') return;
+            sessionStorage.setItem('shetos_visit_sent', '1');
+
+            let vid = localStorage.getItem('shetos_vid');
+            if (!vid) {
+                vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+                    : Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+                localStorage.setItem('shetos_vid', vid);
+            }
+            fetch(STATS_API_URL.replace(/\/+$/, '') + '/visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true,
+                body: JSON.stringify({
+                    vid,
+                    lang: navigator.language || '',
+                    ref: document.referrer || '',
+                    name: getSavedProfile().username || ''
+                })
+            }).catch(() => {});
+        } catch (e) { /* never break the site because of the counter */ }
+    }
+    trackVisit();
 
     // ==========================================
     // PWA: SERVICE WORKER REGISTRATION

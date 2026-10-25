@@ -1,9 +1,9 @@
-const CACHE_NAME = 'shetos-store-v3';
+const CACHE_NAME = 'shetos-store-v4.1';
 const CORE_ASSETS = [
     './',
     './index.html',
-    './style.css?v=3',
-    './script.js?v=3',
+    './style.css?v=4',
+    './script.js?v=4',
     './manifest.json',
     './icon.svg',
     './icon-192.png',

@@ -14,7 +14,7 @@
     <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=6">
     <script>
         /* Applied before first paint so there's no light/dark flash on load */
         (function () {
@@ -37,16 +37,49 @@
          PROFILE SETUP SCREEN (STEP 1)
          ===================================================== -->
     <div id="profile-setup-page">
-        <div class="profile-setup-box">
-            <h1 class="profile-setup-heading">Hello, please enter to create your profile</h1>
+        <div class="profile-setup-box auth-box">
+            <h1 id="auth-heading" class="profile-setup-heading">Login to your account</h1>
 
-            <input type="text" id="setup-username-input" class="profile-setup-field" placeholder="Enter your username" maxlength="30" autocomplete="off">
+            <div id="auth-form">
+            <!-- Login / Sign up -->
+            <div class="auth-tabs" role="tablist">
+                <button type="button" id="auth-tab-login" class="auth-tab active" role="tab">Login</button>
+                <button type="button" id="auth-tab-signup" class="auth-tab" role="tab">Sign up</button>
+            </div>
 
-            <input type="tel" id="setup-phone-input" class="profile-setup-field" placeholder="Enter your phone number (01xxxxxxxxx)" maxlength="11" autocomplete="off" inputmode="numeric">
-            <span id="setup-phone-error" class="profile-setup-error">Phone must be 11 digits and start with 01</span>
+            <!-- Way: phone or email -->
+            <div class="auth-methods">
+                <button type="button" id="auth-method-phone" class="auth-method active">📱 Name + Phone</button>
+                <button type="button" id="auth-method-email" class="auth-method">✉️ Name + Email</button>
+            </div>
+
+            <input type="text" id="auth-name" class="profile-setup-field" placeholder="Enter your name" maxlength="30" autocomplete="off">
+            <input type="tel" id="auth-phone" class="profile-setup-field" placeholder="Phone number (01xxxxxxxxx)" maxlength="11" autocomplete="off" inputmode="numeric">
+            <input type="text" id="auth-email" class="profile-setup-field" placeholder="Email" maxlength="80" autocomplete="off" inputmode="email" autocapitalize="off" style="display:none;">
+            <span id="auth-error" class="profile-setup-error"></span>
 
             <div class="profile-setup-btn-row">
-                <button id="setup-enter-btn" class="profile-setup-enter-btn" disabled>Enter to Shetos Store</button>
+                <button type="button" id="auth-submit" class="profile-setup-enter-btn ready">Login</button>
+            </div>
+            </div>
+
+            <!-- WhatsApp verification code screen (shown after the form is accepted) -->
+            <div id="auth-verify" class="verify-panel" style="display:none;">
+                <div class="verify-icon" aria-hidden="true">
+                    <span class="verify-ring"></span><span class="verify-ring verify-ring-2"></span>
+                    <span class="verify-bubble">💬</span>
+                </div>
+                <p id="verify-sub" class="verify-sub"></p>
+                <div id="verify-boxes" class="verify-boxes" dir="ltr"></div>
+                <span id="verify-error" class="profile-setup-error verify-error"></span>
+                <div id="verify-status" class="verify-status"></div>
+                <div class="verify-actions">
+                    <button type="button" id="verify-resend" class="verify-link-btn" disabled>Resend code</button>
+                    <button type="button" id="verify-back" class="verify-link-btn">Change number</button>
+                </div>
+                <div id="verify-success" class="verify-success" aria-hidden="true">
+                    <svg viewBox="0 0 52 52" class="verify-check"><circle class="verify-check-circle" cx="26" cy="26" r="24" fill="none"/><path class="verify-check-mark" fill="none" d="M14 27l8 8 16-17"/></svg>
+                </div>
             </div>
         </div>
     </div>
@@ -160,18 +193,20 @@
             <button id="close-settings-modal" class="back-btn">← Back</button>
             <h2 class="about-main-title" style="margin-bottom:28px;">⚙️ <span data-i18n="settingsTitle">Settings</span></h2>
 
-            <!-- Profile Section: single Edit button -->
+            <!-- Profile Section: view, edit NAME only, logout -->
             <div class="profile-section">
                 <div id="profile-display-view" class="profile-display-view">
                     <div class="profile-display-line"><span class="profile-row-icon">👤</span><span id="profile-username-display">-</span></div>
-                    <div class="profile-display-line"><span class="profile-row-icon">📱</span><span id="profile-phone-display">-</span></div>
-                    <button id="profile-edit-toggle-btn" class="profile-edit-toggle-btn">✏️ Edit Profile</button>
+                    <div class="profile-display-line"><span id="profile-contact-icon" class="profile-row-icon">📱</span><span id="profile-phone-display">-</span></div>
+                    <div class="profile-actions-row">
+                        <button id="profile-edit-toggle-btn" class="profile-edit-toggle-btn">✏️ <span data-i18n="editName">Edit name</span></button>
+                        <button id="profile-logout-btn" class="profile-logout-btn">🚪 <span data-i18n="logout">Logout</span></button>
+                    </div>
                 </div>
                 <div id="profile-edit-view" class="profile-edit-view" style="display:none;">
-                    <input type="text" id="profile-username-field" class="profile-row-value-input" maxlength="30" placeholder="Username">
-                    <input type="tel" id="profile-phone-field" class="profile-row-value-input" maxlength="11" inputmode="numeric" placeholder="Phone (01xxxxxxxxx)">
+                    <input type="text" id="profile-username-field" class="profile-row-value-input" maxlength="30" placeholder="Name">
                     <span id="profile-edit-error" class="profile-setup-error"></span>
-                    <button id="profile-save-btn" class="profile-save-btn">Save</button>
+                    <button id="profile-save-btn" class="profile-save-btn" data-i18n="save">Save</button>
                 </div>
                 <span id="profile-save-status" class="profile-save-status"></span>
             </div>
@@ -471,6 +506,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
