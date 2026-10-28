@@ -42,6 +42,26 @@
         document.documentElement.addEventListener('mouseleave', function () { if (cur) { reset(cur); cur = null; } });
     }
 
+
+    /* 2b) Light that follows the cursor inside glass panels (position only; glass.css paints it) */
+    var GLASS = '.top-bar,.modal-box,.profile-setup-box,.setting-big-rect-btn,.ff-type-rect,.currency-choice-btn,.language-choice-btn,.recharge-item,.top-search-wrap,.top-settings-icon-btn,.theme-toggle-btn,.scroll-arrow-btn,.auth-tab,.auth-method,.profile-display-view,.feedback-form-box', gcur = null, gq = 0, gev = null;
+    if (FINE && !RM) {
+        document.addEventListener('pointermove', function (e) {
+            if (e.pointerType !== 'mouse') return;
+            gev = e;
+            if (gq) return;
+            gq = requestAnimationFrame(function () {
+                gq = 0;
+                var el = gev.target.closest && gev.target.closest(GLASS);
+                if (el !== gcur) { if (gcur) { gcur.style.removeProperty('--gx'); gcur.style.removeProperty('--gy'); } gcur = el; }
+                if (!el) return;
+                var r = el.getBoundingClientRect();
+                el.style.setProperty('--gx', (gev.clientX - r.left).toFixed(0) + 'px');
+                el.style.setProperty('--gy', (gev.clientY - r.top).toFixed(0) + 'px');
+            });
+        }, { passive: true });
+    }
+
     /* 3) Stagger index for entrance animations (also for lists built later) */
     function stagger(box) {
         Array.prototype.forEach.call(box.children, function (c, i) { c.style.setProperty('--i', Math.min(i, 12)); });
@@ -86,4 +106,62 @@
         h.classList.add('fx-theme');
         setTimeout(function () { h.classList.remove('fx-theme'); }, 650);
     });
+})();
+
+/* Safety: never leave the page locked when the sell page is closed */
+(function () {
+    function unlock() {
+        var sp = document.getElementById('sell-page');
+        var sellOpen = sp && getComputedStyle(sp).display !== 'none';
+        var intro = document.getElementById('animation-container');
+        if (!sellOpen && !intro) { document.body.style.overflow = ''; document.body.style.overflowY = 'auto'; document.body.style.overflowX = 'hidden'; }
+    }
+    document.addEventListener('click', function () { setTimeout(unlock, 50); });
+    setInterval(unlock, 1500);
+})();
+/* Selling accounts: horizontal strip with drag, wheel and arrow buttons (same feel as the game cards) */
+(function () {
+    var grid = document.getElementById('accounts-grid');
+    if (!grid) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'game-grid-wrapper accounts-strip';
+    grid.parentNode.insertBefore(wrap, grid);
+    function arrow(dir) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'scroll-arrow-btn scroll-arrow-' + dir;
+        b.setAttribute('aria-label', 'Scroll ' + dir);
+        b.innerHTML = dir === 'left' ? '&#10094;' : '&#10095;';
+        return b;
+    }
+    var L = arrow('left'), R = arrow('right');
+    wrap.appendChild(L); wrap.appendChild(grid); wrap.appendChild(R);
+
+    function step() {
+        var c = grid.querySelector('.account-card');
+        var w = c ? c.getBoundingClientRect().width : 200;
+        return (w + (parseFloat(getComputedStyle(grid).columnGap) || 16)) * 2;
+    }
+    L.addEventListener('click', function () { grid.scrollBy({ left: -step(), behavior: 'smooth' }); });
+    R.addEventListener('click', function () { grid.scrollBy({ left: step(), behavior: 'smooth' }); });
+
+    /* mouse drag (touch uses native swipe) */
+    var down = false, moved = false, sx = 0, sl = 0;
+    grid.addEventListener('mousedown', function (e) { down = true; moved = false; sx = e.pageX; sl = grid.scrollLeft; grid.classList.add('is-dragging'); });
+    window.addEventListener('mousemove', function (e) {
+        if (!down) return;
+        var d = e.pageX - sx;
+        if (Math.abs(d) > 4) moved = true;
+        grid.scrollLeft = sl - d;
+    });
+    window.addEventListener('mouseup', function () { down = false; grid.classList.remove('is-dragging'); });
+    grid.addEventListener('click', function (e) { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+
+    /* mouse wheel: vertical wheel moves the strip sideways, but only while it can still move */
+    grid.addEventListener('wheel', function (e) {
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+        var max = grid.scrollWidth - grid.clientWidth;
+        var can = (e.deltaY > 0 && grid.scrollLeft < max - 1) || (e.deltaY < 0 && grid.scrollLeft > 1);
+        if (can) { e.preventDefault(); grid.scrollBy({ left: e.deltaY, behavior: 'auto' }); }
+    }, { passive: false });
 })();

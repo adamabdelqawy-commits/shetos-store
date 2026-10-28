@@ -15,7 +15,8 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css?v=6">
-    <link rel="stylesheet" href="effects.css?v=1">
+    <link rel="stylesheet" href="effects.css?v=7">
+    <link rel="stylesheet" href="glass.css?v=1">
     <script>
         /* Applied before first paint so there's no light/dark flash on load */
         (function () {
@@ -64,24 +65,6 @@
             </div>
             </div>
 
-            <!-- WhatsApp verification code screen (shown after the form is accepted) -->
-            <div id="auth-verify" class="verify-panel" style="display:none;">
-                <div class="verify-icon" aria-hidden="true">
-                    <span class="verify-ring"></span><span class="verify-ring verify-ring-2"></span>
-                    <span class="verify-bubble">💬</span>
-                </div>
-                <p id="verify-sub" class="verify-sub"></p>
-                <div id="verify-boxes" class="verify-boxes" dir="ltr"></div>
-                <span id="verify-error" class="profile-setup-error verify-error"></span>
-                <div id="verify-status" class="verify-status"></div>
-                <div class="verify-actions">
-                    <button type="button" id="verify-resend" class="verify-link-btn" disabled>Resend code</button>
-                    <button type="button" id="verify-back" class="verify-link-btn">Change number</button>
-                </div>
-                <div id="verify-success" class="verify-success" aria-hidden="true">
-                    <svg viewBox="0 0 52 52" class="verify-check"><circle class="verify-check-circle" cx="26" cy="26" r="24" fill="none"/><path class="verify-check-mark" fill="none" d="M14 27l8 8 16-17"/></svg>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -507,7 +490,7 @@
         </div>
     </div>
 
-    <script src="script.js?v=7"></script>
-    <script src="effects.js?v=1" defer></script>
+    <script src="script.js?v=8"></script>
+    <script src="effects.js?v=7" defer></script>
 </body>
 </html>

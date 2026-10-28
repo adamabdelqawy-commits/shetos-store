@@ -1592,13 +1592,13 @@ document.addEventListener('DOMContentLoaded', () => {
     //   email account key : e_<hex of the lower-cased email>
     // ==========================================================
 
-    // ---- WhatsApp verification code (OTP) -------------------------------
-    // The code is created, sent on WhatsApp and checked by a small SERVER
-    // (see otp-worker.js). The code never reaches this page, so nobody can read it here.
-    const OTP_API_URL  = 'https://calm-voice-d016.adam-abdelqawy.workers.dev';    // e.g. 'https://shetos-otp.YOURNAME.workers.dev'  (empty = verification is skipped)
-    const OTP_DEMO     = false; // true = PREVIEW ONLY: the code is shown on screen instead of WhatsApp
-    const OTP_ON_LOGIN = true;  // ask for a code when logging in too (false = only when signing up)
-    const otpEnabled   = () => !!OTP_API_URL || OTP_DEMO;
+    // ---- WhatsApp number check (no code is sent any more) ------------
+    // On sign up we only ask a small SERVER whether the phone number has a WhatsApp account.
+    // The server must answer  POST <WA_CHECK_URL>/check  { phone: "201012345678" }
+    //   ->  { ok: true, exists: true | false }
+    const WA_CHECK_URL      = 'https://calm-voice-d016.adam-abdelqawy.workers.dev'; // empty = check is skipped
+    const WA_CHECK_ON_LOGIN = false; // login already matches an existing account, so only sign up is checked
+    const waCheckEnabled    = () => !!WA_CHECK_URL;
 
     const SESSION_KEY = 'shetos_session';
     const getSession  = () => localStorage.getItem(SESSION_KEY) || '';
@@ -1619,14 +1619,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errWrong: "Wrong name or phone/email. Please try again.",
             errNet: "Connection problem. Please try again.",
             welcomeBack: "Welcome back", welcomeNew: "Welcome", loggedOut: "You have been logged out",
-            nameSaved: "✔ Name saved", nameEmpty: "Name cannot be empty",
-            vTitle: "Check your WhatsApp", vSub: "We sent a 6-digit code to the WhatsApp number {n}",
-            vSending: "Sending the code...", vResend: "Resend code", vResendIn: "Resend in {s}s", vChange: "Change number",
-            vWrong: "Wrong code, try again.", vExpired: "The code expired. Request a new one.",
-            vTooMany: "Too many wrong tries. Request a new code.",
-            vSendFail: "Couldn't send the code. Check the number and try again.",
-            vWait: "Please wait {s}s before asking for a new code.",
-            vDemo: "PREVIEW MODE - your code is {c}"
+            nameSaved: "✔ Name saved", nameEmpty: "Name cannot be empty"
         },
         ar: {
             headLogin: "سجّل الدخول إلى حسابك", headSignup: "أنشئ حسابك", headBack: "مرحبًا بعودتك",
@@ -1643,14 +1636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errWrong: "الاسم أو الهاتف/الإيميل غير صحيح. حاول مرة أخرى.",
             errNet: "مشكلة في الاتصال. حاول مرة أخرى.",
             welcomeBack: "مرحبًا بعودتك", welcomeNew: "أهلًا بك", loggedOut: "تم تسجيل الخروج",
-            nameSaved: "✔ تم حفظ الاسم", nameEmpty: "الاسم لا يمكن أن يكون فارغًا",
-            vTitle: "افحص الواتساب", vSub: "أرسلنا كودًا من 6 أرقام إلى رقم الواتساب {n}",
-            vSending: "جاري إرسال الكود...", vResend: "إعادة إرسال الكود", vResendIn: "إعادة الإرسال بعد {s} ث", vChange: "تغيير الرقم",
-            vWrong: "الكود غير صحيح، حاول مرة أخرى.", vExpired: "انتهت صلاحية الكود. اطلب كودًا جديدًا.",
-            vTooMany: "محاولات خاطئة كثيرة. اطلب كودًا جديدًا.",
-            vSendFail: "تعذر إرسال الكود. تأكد من الرقم وحاول مرة أخرى.",
-            vWait: "من فضلك انتظر {s} ثانية قبل طلب كود جديد.",
-            vDemo: "وضع المعاينة - الكود هو {c}"
+            nameSaved: "✔ تم حفظ الاسم", nameEmpty: "الاسم لا يمكن أن يكون فارغًا"
         }
     };
     function at(key) {
@@ -1825,10 +1811,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const ctx = { mode: authMode, method: authMethod, key, name, phone, email, existing };
 
-            // 3) phone accounts: confirm the number with a code sent on WhatsApp
-            if (authMethod === 'phone' && otpEnabled() && (authMode === 'signup' || OTP_ON_LOGIN)) {
-                await beginPhoneVerification(ctx);
-                return;
+            // 3) phone accounts: make sure the number is on WhatsApp (no code, just a check)
+            if (authMethod === 'phone' && waCheckEnabled() && (authMode === 'signup' || WA_CHECK_ON_LOGIN)) {
+                const r = await waCheck(phone);
+                if (!r.ok) return showAuthError(r.error === 'not_on_whatsapp' ? at('errNotWA') : at('errNet'));
             }
             await completeAuth(ctx);
         } catch (e) {
@@ -1879,227 +1865,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    // WHATSAPP CODE SCREEN (6 digits + animations)
+    // WHATSAPP NUMBER CHECK
     // ==========================================================
-    const demoCodes = {};
     const waNumber = (phone) => '20' + phone.slice(1); // 01012345678 -> 201012345678
-    const maskPhone = (phone) => phone.slice(0, 3) + '****' + phone.slice(-4);
-    const toWesternDigits = (s) => s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
-    function showDemoToast(code) {
-        const el = document.createElement('div');
-        el.className = 'demo-toast';
-        el.textContent = at('vDemo').replace('{c}', code);
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 20000);
-    }
-
-    async function otpSend(phone) {
-        if (!OTP_API_URL) { // preview mode
-            const code = String(Math.floor(100000 + Math.random() * 900000));
-            demoCodes[phone] = { code, tries: 0, exp: Date.now() + 300000 };
-            showDemoToast(code);
-            return { ok: true };
-        }
+    async function waCheck(phone) {
         try {
-            const res = await fetch(OTP_API_URL.replace(/\/+$/, '') + '/send', {
+            const res = await fetch(WA_CHECK_URL.replace(/\/+$/, '') + '/check', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: waNumber(phone) })
             });
-            return await res.json();
+            const d = await res.json();
+            if (d && d.exists === true) return { ok: true };
+            if (d && (d.exists === false || d.error === 'not_on_whatsapp')) return { ok: false, error: 'not_on_whatsapp' };
+            return { ok: false, error: 'network' };
         } catch (e) { return { ok: false, error: 'network' }; }
     }
-
-    async function otpVerify(phone, code) {
-        if (!OTP_API_URL) { // preview mode
-            const d = demoCodes[phone];
-            if (!d || Date.now() > d.exp) return { ok: false, error: 'expired' };
-            if (d.tries >= 5) return { ok: false, error: 'too_many' };
-            if (d.code !== code) { d.tries++; return { ok: false, error: 'wrong' }; }
-            delete demoCodes[phone];
-            return { ok: true };
-        }
-        try {
-            const res = await fetch(OTP_API_URL.replace(/\/+$/, '') + '/verify', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: waNumber(phone), code })
-            });
-            return await res.json();
-        } catch (e) { return { ok: false, error: 'network' }; }
-    }
-
-    const authForm      = document.getElementById('auth-form');
-    const verifyPanel   = document.getElementById('auth-verify');
-    const verifySub     = document.getElementById('verify-sub');
-    const verifyBoxes   = document.getElementById('verify-boxes');
-    const verifyError   = document.getElementById('verify-error');
-    const verifyStatus  = document.getElementById('verify-status');
-    const verifyResend  = document.getElementById('verify-resend');
-    const verifyBack    = document.getElementById('verify-back');
-    const verifySuccess = document.getElementById('verify-success');
-    const digitEls = [];
-    let pendingAuth = null;   // { mode, key, name, phone, existing }
-    let resendTimer = null;
-    let verifying = false;
-
-    // build the 6 boxes
-    for (let i = 0; i < 6; i++) {
-        const inp = document.createElement('input');
-        inp.type = 'tel';
-        inp.setAttribute('inputmode', 'numeric');
-        inp.setAttribute('autocomplete', i === 0 ? 'one-time-code' : 'off');
-        inp.setAttribute('aria-label', 'Digit ' + (i + 1));
-        inp.className = 'verify-digit';
-        inp.style.animationDelay = (i * 70) + 'ms';
-        verifyBoxes.appendChild(inp);
-        digitEls.push(inp);
-    }
-
-    const getCode = () => digitEls.map(e => e.value).join('');
-    function clearDigits() { digitEls.forEach(e => { e.value = ''; e.classList.remove('filled'); }); }
-    function setDigitsDisabled(v) { digitEls.forEach(e => { e.disabled = v; }); }
-    function setVerifyError(msg) { verifyError.textContent = msg || ''; verifyError.classList.toggle('show', !!msg); }
-    function setVerifyStatus(msg, sending) {
-        verifyStatus.textContent = msg || '';
-        verifyStatus.classList.toggle('sending', !!sending);
-    }
-
-    function otpErrorText(code, retryAfter) {
-        switch (code) {
-            case 'wrong':           return at('vWrong');
-            case 'expired':         return at('vExpired');
-            case 'too_many':        return at('vTooMany');
-            case 'not_on_whatsapp': return at('errNotWA');
-            case 'wait':            return at('vWait').replace('{s}', retryAfter || 60);
-            default:                return at('vSendFail');
-        }
-    }
-
-    function startResendCountdown(sec) {
-        clearInterval(resendTimer);
-        let left = sec;
-        const tick = () => {
-            if (left > 0) { verifyResend.disabled = true; verifyResend.textContent = at('vResendIn').replace('{s}', left); }
-            else { verifyResend.disabled = false; verifyResend.textContent = at('vResend'); clearInterval(resendTimer); }
-        };
-        tick();
-        resendTimer = setInterval(() => { left--; tick(); }, 1000);
-    }
-
-    function showVerifyScreen() {
-        authForm.style.display = 'none';
-        verifyPanel.style.display = '';
-        verifyPanel.classList.remove('is-success');
-        authHeading.classList.remove('welcome-back-heading');
-        authHeading.textContent = at('vTitle');
-        verifySub.textContent = at('vSub').replace('{n}', maskPhone(pendingAuth.phone));
-        verifyBack.textContent = at('vChange');
-        verifyResend.textContent = at('vResend');
-        clearDigits(); setDigitsDisabled(false); setVerifyError('');
-    }
-
-    function leaveVerifyScreen() {
-        clearInterval(resendTimer);
-        pendingAuth = null; verifying = false;
-        verifyPanel.style.display = 'none';
-        authForm.style.display = '';
-        renderAuth();
-    }
-
-    // sends the code, then waits for the customer to type it
-    async function beginPhoneVerification(ctx) {
-        pendingAuth = ctx;
-        showVerifyScreen();
-        setVerifyStatus(at('vSending'), true);
-        setDigitsDisabled(true);
-        const r = await otpSend(ctx.phone);
-        setVerifyStatus('', false);
-        if (!pendingAuth) return; // the customer went back meanwhile
-        if (r.ok) {
-            setDigitsDisabled(false);
-            startResendCountdown(60);
-            digitEls[0].focus();
-        } else if (r.error === 'wait') { // a code was sent a few seconds ago, it is still valid
-            setDigitsDisabled(false);
-            setVerifyError(otpErrorText('wait', r.retryAfter));
-            startResendCountdown(Number(r.retryAfter) || 60);
-            digitEls[0].focus();
-        } else { // could not send: go back to the form and tell why
-            const msg = otpErrorText(r.error);
-            leaveVerifyScreen();
-            showAuthError(msg);
-        }
-    }
-
-    async function submitVerifyCode() {
-        const code = getCode();
-        if (verifying || code.length !== 6 || !pendingAuth) return;
-        verifying = true; setDigitsDisabled(true); setVerifyError(''); setVerifyStatus(at('checking'), true);
-        const r = await otpVerify(pendingAuth.phone, code);
-        setVerifyStatus('', false);
-        if (!pendingAuth) { verifying = false; return; }
-        if (r.ok) {
-            verifyPanel.classList.add('is-success'); // green check animation
-            const ctx = pendingAuth;
-            await new Promise(res => setTimeout(res, 1000));
-            clearInterval(resendTimer);
-            verifying = false;
-            try { await completeAuth(ctx); }
-            catch (e) { console.error(e); leaveVerifyScreen(); showAuthError(at('errNet')); }
-            return;
-        }
-        // wrong code: shake the boxes
-        verifying = false;
-        setVerifyError(otpErrorText(r.error));
-        verifyBoxes.classList.remove('shake'); void verifyBoxes.offsetWidth; verifyBoxes.classList.add('shake');
-        clearDigits(); setDigitsDisabled(false);
-        if (r.error === 'expired' || r.error === 'too_many') { clearInterval(resendTimer); verifyResend.disabled = false; verifyResend.textContent = at('vResend'); }
-        digitEls[0].focus();
-    }
-
-    function fillDigitsFrom(index, raw) {
-        const digits = toWesternDigits(raw).replace(/\D/g, '');
-        if (!digits) { digitEls[index].value = ''; digitEls[index].classList.remove('filled'); return; }
-        let i = index;
-        for (const ch of digits) {
-            if (i > 5) break;
-            digitEls[i].value = ch; digitEls[i].classList.add('filled'); i++;
-        }
-        if (i > 5) { digitEls[5].focus(); submitVerifyCode(); }
-        else digitEls[i].focus();
-    }
-
-    digitEls.forEach((el, i) => {
-        el.addEventListener('input', () => { setVerifyError(''); fillDigitsFrom(i, el.value); });
-        el.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && el.value === '' && i > 0) {
-                digitEls[i - 1].value = ''; digitEls[i - 1].classList.remove('filled'); digitEls[i - 1].focus(); e.preventDefault();
-            } else if (e.key === 'ArrowLeft' && i > 0) { digitEls[i - 1].focus(); }
-            else if (e.key === 'ArrowRight' && i < 5) { digitEls[i + 1].focus(); }
-            else if (e.key === 'Enter') { submitVerifyCode(); }
-        });
-        el.addEventListener('focus', () => el.select());
-        el.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text');
-            fillDigitsFrom(0, text);
-        });
-    });
-
-    verifyBack.addEventListener('click', leaveVerifyScreen);
-    verifyResend.addEventListener('click', async () => {
-        if (!pendingAuth || verifyResend.disabled) return;
-        verifyResend.disabled = true; clearDigits(); setVerifyError('');
-        setVerifyStatus(at('vSending'), true); setDigitsDisabled(true);
-        const r = await otpSend(pendingAuth.phone);
-        setVerifyStatus('', false); setDigitsDisabled(false);
-        if (r.ok) { startResendCountdown(60); }
-        else {
-            setVerifyError(otpErrorText(r.error, r.retryAfter));
-            startResendCountdown(r.error === 'wait' ? (Number(r.retryAfter) || 60) : 10);
-        }
-        digitEls[0].focus();
-    });
 
     // ---- entry point: already logged in → go on, otherwise show the auth screen ----
     function startAuthGate() {

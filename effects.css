@@ -21,7 +21,7 @@ html.fx-theme *{transition:background-color .45s,color .45s,border-color .45s,bo
 @keyframes fxShimmer{to{background-position:250% center}}
 
 /* ---------- top bar ---------- */
-.top-bar{-webkit-backdrop-filter:blur(16px) saturate(1.5);backdrop-filter:blur(16px) saturate(1.5);box-shadow:0 10px 30px -20px rgba(0,0,0,.7)}
+.top-bar{box-shadow:0 10px 30px -20px rgba(0,0,0,.7)}
 .top-bar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#ff6600,#00a2ff,#ff6600,transparent);background-size:200% 100%;animation:fxLine 6s linear infinite;opacity:.85;pointer-events:none}
 @keyframes fxLine{to{background-position:200% 0}}
 .top-search-wrap{transition:border-color .25s,box-shadow .3s,transform .3s var(--fx-ease)}
@@ -55,7 +55,7 @@ html.fx-theme *{transition:background-color .45s,color .45s,border-color .45s,bo
 
 /* glare that follows the cursor + diagonal shine sweep */
 .game-card::after,.hub-box::after,.account-card::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .3s;
-  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),var(--fx-glare),transparent 55%);mix-blend-mode:overlay}
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),var(--fx-glare),transparent 55%);mix-blend-mode:normal}
 .game-card:hover::after,.hub-box:hover::after,.account-card:hover::after{opacity:1}
 .game-card::before{content:"";position:absolute;top:-20%;left:-60%;width:40%;height:140%;z-index:4;pointer-events:none;
   background:linear-gradient(100deg,transparent,rgba(255,255,255,.38),transparent);transform:skewX(-20deg)}
@@ -153,3 +153,41 @@ body.lang-ar .setting-big-rect-btn:hover .setting-btn-arrow{translate:-7px 0}
   .fx-cursor{display:none}
 }
 @media (hover:none){.fx-cursor{display:none}.game-card:hover,.hub-box:hover,.account-card:hover{--ty:0px;--sc:1}}
+
+/* ---------- mobile scroll fix (selling accounts / sell page) ---------- */
+html,body{overflow-y:auto}
+.sub-page{height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;animation:none}
+.sub-page *{touch-action:pan-y}
+.sub-page input,.sub-page textarea{touch-action:manipulation}
+.sub-page-inner{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.accounts-section{touch-action:auto}
+/* ---------- v4: phone-safe layout for the accounts list ---------- */
+/* one single page scroller (html). body must not be a second scroll box (iOS / Android WebView bug) */
+body{overflow:visible!important}
+html{overflow-x:hidden;overflow-y:auto}
+/* card height without aspect-ratio (older Safari / WebViews collapse it and cards stack on top of each other) */
+.accounts-grid{display:grid;grid-auto-rows:auto;align-items:start}
+.account-card{aspect-ratio:auto;height:auto;min-height:0;display:block;contain:none}
+.account-card::before{content:"";display:block;width:100%;padding-top:125%}
+.account-card-shade{position:absolute;inset:0}
+/* touch phones: no 3D / will-change on cards (they can freeze swipe scrolling) */
+@media (hover:none),(pointer:coarse){
+  .game-card,.hub-box,.account-card{transform:none!important;transform-style:flat;will-change:auto}
+  .accounts-section{touch-action:auto}
+}
+
+/* ---------- v5: selling accounts = horizontal card strip (like the games) ---------- */
+.accounts-section{max-width:1300px}
+.accounts-strip{margin-bottom:10px}
+.accounts-grid{display:flex!important;flex-direction:row;flex-wrap:nowrap;align-items:flex-start;gap:var(--card-gap,16px);
+  overflow-x:auto;overflow-y:visible;width:100%;padding:20px var(--page-pad,12px) 26px;
+  scroll-snap-type:x proximity;scroll-padding-inline:var(--page-pad,12px);scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;cursor:grab;user-select:none}
+.accounts-grid.is-dragging{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none}
+.accounts-grid::-webkit-scrollbar{height:8px}
+.accounts-grid::-webkit-scrollbar-track{background:var(--bg-surface-alt);border-radius:10px}
+.accounts-grid::-webkit-scrollbar-thumb{background:#ff6600;border-radius:10px}
+.accounts-grid .account-card{flex:0 0 auto;width:var(--card-w,clamp(140px,42vw,220px));scroll-snap-align:start}
+@media (hover:hover) and (pointer:fine){.game-grid-wrapper.accounts-strip .scroll-arrow-btn{display:flex!important}}
+/* v6: accounts row must allow horizontal swipes on every device */
+.accounts-grid,.accounts-grid .account-card{touch-action:pan-x pan-y!important}

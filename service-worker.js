@@ -1,9 +1,12 @@
-const CACHE_NAME = 'shetos-store-v4.1';
+const CACHE_NAME = 'shetos-store-v6-glass';
 const CORE_ASSETS = [
     './',
     './index.html',
-    './style.css?v=4',
-    './script.js?v=4',
+    './style.css?v=6',
+    './effects.css?v=7',
+    './glass.css?v=1',
+    './script.js?v=8',
+    './effects.js?v=7',
     './manifest.json',
     './icon.svg',
     './icon-192.png',
